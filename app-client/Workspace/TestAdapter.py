@@ -272,7 +272,11 @@ class WTestAdapter(Document.WDocument):
         """
         encoded = ""
         try:
-            encoded = base64.b64encode( unicode(self.srcEditor.text()).encode('utf-8') )
+            raw = unicode(self.srcEditor.text()).encode('utf-8') 
+            encoded = base64.b64encode( raw )
+            
+            if sys.version_info > (3,):
+                encoded = encoded.decode("utf-8") 
         except Exception as e:
             self.error( "unable to encode: %s" % e )
         return encoded

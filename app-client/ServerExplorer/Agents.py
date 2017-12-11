@@ -45,7 +45,8 @@ except ImportError:
 import time
 
 from Libs import QtHelper, Logger
-import UserClientInterface as UCI
+# import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 
 COL_RUNNING_AGENTID         = 0
@@ -333,12 +334,18 @@ class WAgents(QWidget, Logger.ClassLogger):
          * refresh running agents
          * refresh default agents 
         """
-        self.stopAction = QtHelper.createAction(self, "&Stop", self.stopAgent, tip = 'Stop agent', icon = QIcon(":/act-stop.png"))
-        self.startAction = QtHelper.createAction(self, "&Add / Start", self.startAgent, tip = 'Add default agent', icon = QIcon(":/probe-add.png"))
-        self.delAgentAction = QtHelper.createAction(self, "&Delete", self.delAgent, tip = 'Delete default agent', icon = QIcon(":/probe-del.png"))
-        self.cancelAction = QtHelper.createAction(self, "&Clear", self.resetAgent, tip = 'Clear fields', icon = QIcon(":/clear.png") )
-        self.refreshRunningAction = QtHelper.createAction(self, "&Refresh", self.refreshRunningAgent, tip = 'Refresh running agents', icon = QIcon(":/act-refresh.png") )
-        self.refreshDefaultAction = QtHelper.createAction(self, "&Refresh", self.refreshDefaultAgent, tip = 'Refresh default agents', icon = QIcon(":/act-refresh.png") )
+        self.stopAction = QtHelper.createAction(self, "&Stop", self.stopAgent, 
+                                                tip = 'Stop agent', icon = QIcon(":/act-stop.png"))
+        self.startAction = QtHelper.createAction(self, "&Add / Start", self.startAgent, 
+                                                 tip = 'Add default agent', icon = QIcon(":/probe-add.png"))
+        self.delAgentAction = QtHelper.createAction(self, "&Delete", self.delAgent, 
+                                                    tip = 'Delete default agent', icon = QIcon(":/probe-del.png"))
+        self.cancelAction = QtHelper.createAction(self, "&Clear", self.resetAgent, 
+                                                  tip = 'Clear fields', icon = QIcon(":/clear.png") )
+        self.refreshRunningAction = QtHelper.createAction(self, "&Refresh", self.refreshRunningAgent, 
+                                                          tip = 'Refresh running agents', icon = QIcon(":/act-refresh.png") )
+        self.refreshDefaultAction = QtHelper.createAction(self, "&Refresh", self.refreshDefaultAgent, 
+                                                          tip = 'Refresh default agents', icon = QIcon(":/act-refresh.png") )
 
     def createToolbar(self):
         """
@@ -439,13 +446,13 @@ class WAgents(QWidget, Logger.ClassLogger):
         """
         Refresh the default list of Agents
         """
-        UCI.instance().refreshDefaultAgents()
-
+        RCI.instance().defaultAgents()
+        
     def refreshRunningAgent(self):
         """
         Refresh the running list of Agents
         """
-        UCI.instance().refreshRunningAgents()
+        RCI.instance().runningAgents()
 
     def delAgent(self):
         """
@@ -457,7 +464,9 @@ class WAgents(QWidget, Logger.ClassLogger):
             if reply == QMessageBox.Yes:
                 agentName = self.itemCurrentDefault.dataAgent['name']
                 self.delAgentAction.setEnabled(False)
-                UCI.instance().delAgent(agentName=agentName)
+                
+                # rest call
+                RCI.instance().removeAgent(agentName=agentName)
 
     def stopAgent(self):
         """
@@ -470,8 +479,10 @@ class WAgents(QWidget, Logger.ClassLogger):
                 agentName = self.itemCurrentRunning.dataAgent['id']
                 self.itemCurrentRunning = None
                 self.stopAction.setEnabled(False)
-                UCI.instance().stopAgent(agentName=agentName)
-
+                
+                # rest call
+                RCI.instance().disconnectAgent(agentName=agentName)
+                
     def startAgent(self):
         """
         Start a new Agent
@@ -493,10 +504,13 @@ class WAgents(QWidget, Logger.ClassLogger):
         agentAutoStart = self.checkAutoStartOption.isChecked()
 
         if not self.checkStartNowOption.isChecked():
-            UCI.instance().addAgent(agentType=agentType, agentName=agentName, agentDescription=agentDescription)
+            RCI.instance().addAgent(agentName=agentName, agentType=agentType, 
+                                    agentDescription=agentDescription)
         else:
-            UCI.instance().startAgent(agentType=agentType, agentName=agentName, agentDescription=agentDescription, agentAutoStart=agentAutoStart )
-
+            RCI.instance().connectAgent(agentName=agentName, agentType=agentType, 
+                                        agentDescription=agentDescription, 
+                                        agentBoot=agentAutoStart)
+                                        
     def resetAgent(self):
         """
         Clear Agent field
@@ -667,7 +681,6 @@ class WAgents(QWidget, Logger.ClassLogger):
                 for k,v in running.items():
                     runningList.append( '%s: %s' % (k.title(), v) )
                 self.nbAgtLabel.setText( '\n'.join(runningList) )
-
 
     def resetNbAgents(self, data=None):
         """

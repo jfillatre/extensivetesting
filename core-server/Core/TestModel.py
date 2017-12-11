@@ -31,13 +31,22 @@ import base64
 
 from Libs import Settings
 import Libs.FileModels.TestData as TestData
-import RepoManager
-import RepoTests
-import RepoAdapters
-import RepoLibraries
-import ProjectsManager
-import Common 
 
+try:
+    import RepoManager
+    import RepoTests
+    import RepoAdapters
+    import RepoLibraries
+    import ProjectsManager
+    import Common 
+except ImportError: # support python 3
+    from . import RepoManager
+    from . import RepoTests
+    from . import RepoAdapters
+    from . import RepoLibraries
+    from . import ProjectsManager
+    from . import Common 
+    
 TS_ENABLED				= "2"
 TS_DISABLED				= "0"
 
@@ -516,7 +525,7 @@ def loadDataset(parameters, inputs=True, user=''):
 
 def createTestDesign(   dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                         projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                         testLocation='' ):
+                         testLocation='', taskUuid='' ):
     """
     Creates and returns the test executable for design only
 
@@ -529,29 +538,29 @@ def createTestDesign(   dataTest, userName, testName, trPath, logFilename, witho
     if 'testglobal' in dataTest:
         return createTestDesignForTg( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
                                         defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, testLocation)
+                                            runningAgents, runningProbes, testLocation, taskUuid)
     else:
         if 'testplan' in dataTest:
             return createTestDesignForTp( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
                                             defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                runningAgents, runningProbes, testLocation)
+                                                runningAgents, runningProbes, testLocation, taskUuid)
         else:
             if 'testunit' in dataTest:
                 return createTestDesignForTu( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                                 defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation)
+                                                    runningAgents, runningProbes, testLocation, taskUuid)
             elif 'testabstract' in dataTest:
                 return createTestDesignForTa( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                                 defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation)
+                                                    runningAgents, runningProbes, testLocation, taskUuid)
             else:
                 return createTestDesignForTs( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                                 defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation)
+                                                    runningAgents, runningProbes, testLocation, taskUuid)
 
 def createTestDesignForTg(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            testLocation='' ):
+                            testLocation='', taskUuid=''  ):
     """
     """
     properties = dataTest['properties']
@@ -871,7 +880,7 @@ sys.exit(return_code)
 
 def createTestDesignForTp(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            testLocation='' ):
+                            testLocation='' , taskUuid='' ):
     """
     """
     properties = dataTest['properties']
@@ -1192,7 +1201,7 @@ sys.exit(return_code)
 
 def createTestDesignForTs(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            testLocation='' ):
+                            testLocation='', taskUuid=''  ):
     """
     """
     properties = dataTest['properties']
@@ -1443,7 +1452,7 @@ sys.exit(return_code)
 
 def createTestDesignForTu(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            testLocation='' ):
+                            testLocation='', taskUuid=''  ):
     """
     """
     properties = dataTest['properties']
@@ -1685,7 +1694,7 @@ sys.exit(return_code)
 
 def createTestDesignForTa(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            testLocation='' ):
+                            testLocation='', taskUuid=''  ):
     """
     """
     properties = dataTest['properties']
@@ -1928,7 +1937,7 @@ sys.exit(return_code)
 
 def createTestExecutable( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, subTEs=1, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            channelId=False, testLocation=''):
+                            channelId=False, testLocation='', taskUuid=''):
     """
     Creates and returns the test executable: testplan or testsuite
 
@@ -1941,25 +1950,25 @@ def createTestExecutable( dataTest, userName, testName, trPath, logFilename, wit
     if 'testglobal' in dataTest:
         return createTestGlobal( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                     defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                        runningAgents, runningProbes, channelId, testLocation)
+                                        runningAgents, runningProbes, channelId, testLocation, taskUuid)
     else:
         if 'testplan' in dataTest:
             return createTestPlan( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                     defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                        runningAgents, runningProbes, channelId, testLocation)
+                                        runningAgents, runningProbes, channelId, testLocation, taskUuid)
         else:
             if 'testunit' in dataTest:
                 return createTestUnit( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                         defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation)
+                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
             elif 'testabstract' in dataTest:
                 return createTestAbstract( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
                                         defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation)
+                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
             else:
                 return createTestSuite( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
                                         defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation)
+                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
 
 # -------- Events test global -----------
 
@@ -2032,7 +2041,7 @@ def createTestExecutable( dataTest, userName, testName, trPath, logFilename, wit
 
 def createTestGlobal ( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', 
                         defaultAdapter='', userId=0, projectId=0, subTEs=1, parametersShared=[], stepByStep=False, breakpoint=False, testId=0,
-                        runningAgents=[], runningProbes=[], channelId=False, testLocation=''):
+                        runningAgents=[], runningProbes=[], channelId=False, testLocation='', taskUuid=''):
     """
     Creates and returns a test global executable 
 
@@ -2084,7 +2093,7 @@ def createTestGlobal ( dataTest, userName, testName, trPath, logFilename, withou
 
     # import static arguments
     te.append( getStaticArgs() )
-
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """channelid_ = %s\n""" % channelId )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
@@ -2141,7 +2150,7 @@ return_message = None
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_=userid_, channelid_=channelid_)
 
 def initialize_te():
@@ -2715,7 +2724,8 @@ sys.exit(return_code)
 
 def createTestPlan ( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='',
                         defaultAdapter='', userId=0, projectId=0, subTEs=1, parametersShared=[], stepByStep=False,
-                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, testLocation='' ):
+                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, 
+                        testLocation='', taskUuid='' ):
     """
     Creates and returns a test suite executable 
 
@@ -2767,7 +2777,7 @@ def createTestPlan ( dataTest, userName, testName, trPath, logFilename, withoutP
 
     # import static arguments
     te.append( getStaticArgs() )
-
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """channelid_ = %s\n""" % channelId )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
@@ -2824,7 +2834,7 @@ return_message = None
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_=userid_, channelid_=channelid_)
 
 def initialize_te():
@@ -3349,7 +3359,8 @@ sys.exit(return_code)
 
 def createTestSuite (	dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='',
                             defaultAdapter='', userId=0, projectId=0, subTEs=1, parametersShared=[], stepByStep=False,
-                            breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, testLocation='' ):
+                            breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, 
+                            testLocation='', taskUuid='' ):
     """
     Creates and returns a test suite executable 
 
@@ -3408,7 +3419,7 @@ def createTestSuite (	dataTest, userName, testName, trPath, logFilename, without
 
     # import static arguments
     te.append( getStaticArgs() )
-
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """channelid_ = %s\n""" % channelId )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
@@ -3465,7 +3476,7 @@ return_message = None
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_, channelid_=channelid_)
 
 def initialize_te():
@@ -3742,7 +3753,8 @@ sys.exit(return_code)
 
 def createTestUnit (	dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='',
                         defaultAdapter='', userId=0, projectId=0, subTEs=1, parametersShared=[], stepByStep=False, 
-                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, testLocation=''):
+                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, 
+                        testLocation='', taskUuid=''):
     """
     Creates and returns a test suite executable 
 
@@ -3795,6 +3807,7 @@ def createTestUnit (	dataTest, userName, testName, trPath, logFilename, withoutP
 
     # import static arguments
     te.append( getStaticArgs() )
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """channelid_ = %s\n""" % channelId )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
@@ -3850,7 +3863,7 @@ return_message = None
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_, channelid_=channelid_)
 
 def initialize_te():
@@ -4119,7 +4132,8 @@ sys.exit(return_code)
 
 def createTestAbstract (	dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='',
                         defaultAdapter='', userId=0, projectId=0, subTEs=1, parametersShared=[], stepByStep=False, 
-                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, testLocation=''):
+                        breakpoint=False, testId=0, runningAgents=[], runningProbes=[], channelId=False, 
+                        testLocation='', taskUuid=''):
     """
     Creates and returns a test abstract executable 
 
@@ -4172,7 +4186,8 @@ def createTestAbstract (	dataTest, userName, testName, trPath, logFilename, with
 
     # import static arguments
     te.append( getStaticArgs() )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """channelid_ = %s\n""" % channelId )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
@@ -4228,7 +4243,7 @@ return_message = None
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_, channelid_=channelid_)
 
 def initialize_te():

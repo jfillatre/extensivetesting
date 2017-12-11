@@ -61,6 +61,7 @@ import pickle
 import time
 
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 import TestResults
 
@@ -652,8 +653,6 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         self.filenameLabel.hide()
         self.filenameLineEdit.hide()
 
-################################################################
-
 class Item(QTreeWidgetItem, Logger.ClassLogger):
     """
     Item tree widget item
@@ -1053,6 +1052,7 @@ class RenameDialog(QtHelper.EnhancedQDialog, Logger.ClassLogger):
 
     def onUppercaseChanged(self, state):
         """
+        on uppercase changed
         """
         if state == 2:
             filename = self.newnameEdit.text()
@@ -1376,6 +1376,7 @@ class EventFilterComboBox(QObject):
     """
     def eventFilter(self, filteredObj, event):
         """
+        On event filter
         """
         if event.type() == QEvent.Wheel:
             event.ignore()
@@ -1437,7 +1438,6 @@ class Repository(QWidget, Logger.ClassLogger):
         self.trashIcon = QIcon()
         self.trashIcon.addPixmap( style.standardPixmap(QStyle.SP_TrashIcon) )
         self.sandboxIcon = QIcon(":/folder_add.png")
-        # self.sandboxIcon.addPixmap( style.standardPixmap(QStyle.SP_DialogDiscardButton) )
         self.reservedItems = []
         # end of new
         
@@ -1484,7 +1484,6 @@ class Repository(QWidget, Logger.ClassLogger):
         for i in xrange( self.wrepository.topLevelItemCount() ):
             itm = self.wrepository.topLevelItem( i )
             if itm.isExpanded():
-            # if self.wrepository.isItemExpanded( itm ):
                 subRet = self.__itemEventExpandedCollapsed(itm)
                 self.treeIndexes.append( (i,subRet) )
 
@@ -1732,13 +1731,6 @@ class Repository(QWidget, Logger.ClassLogger):
                 self.menu.addAction( self.expandSubtreeAction )
                 self.menu.addSeparator()
                 self.menu.addAction( self.addDirAction )
-                # self.menu.addSeparator()
-                # self.menu.addAction( self.delDirAction )
-                # self.menu.addAction( self.delAllDirAction ) # only for admin
-                # self.menu.addSeparator()
-                # self.menu.addAction( self.renameAction )
-                # self.menu.addAction( self.duplicateDirAction )
-                # self.menu.addAction( self.moveFolderAction )
                 self.menu.addSeparator()
                 self.menu.addAction( self.openPropertiesAction )
                 
@@ -1858,6 +1850,12 @@ class Repository(QWidget, Logger.ClassLogger):
                 break
         if pid == 0:
             self.error( 'project not found: %s' % project )
+            
+            # added in v18
+            # Force to return the default project common (1)
+            pid = 1
+            # end of add
+            
         return pid
 
     def getProjectName(self, project):
@@ -1885,7 +1883,6 @@ class Repository(QWidget, Logger.ClassLogger):
         projectName = self.projectCombobox.itemText(comboIndex)
 
         if self.projectClicked and self.projectInitialized:
-        # if self.projectInitialized:
             self.refresh(project=self.getProjectId(project=str(projectName)) )
             self.projectClicked = False
     
@@ -1949,7 +1946,6 @@ class Repository(QWidget, Logger.ClassLogger):
         @type listing: list
         """
         self.initializeCalled = True
-        # if len(self.reservedItems): self.reservedItems.pop()
         self.refreshRemoteAction.setEnabled(True)
         self.wrepository.clear()
 
@@ -1960,9 +1956,6 @@ class Repository(QWidget, Logger.ClassLogger):
         self.wrepository.sortItems(0, Qt.AscendingOrder)
         self.expandAuto()
 
-        # for r in self.reservedItems:
-            # self.wrepository.removeItemWidget(r, 0)
-            
         self.initializeSaveAs(listing=listing)
 
         self.initializeCalled = False
@@ -2081,9 +2074,13 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Delete all snapshots"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            UCI.instance().deleteAllSnapshots(path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName,
-                                               extension=self.itemCurrent.fileExtension,  projectId=self.itemCurrent.projectId)
-    
+            # UCI.instance().deleteAllSnapshots(path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName,
+                                               # extension=self.itemCurrent.fileExtension,  projectId=self.itemCurrent.projectId)
+            RCI.instance().removeAllSnapshotTests(projectId=int(self.itemCurrent.projectId), 
+                                                  testPath=self.itemCurrent.getPath(), 
+                                                  testName=self.itemCurrent.fileName, 
+                                                  testExtension=self.itemCurrent.fileExtension)
+            
     def __deleteSnapshot(self):
         """
         Delete snapshot
@@ -2094,11 +2091,14 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Delete snapshot"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            UCI.instance().deleteSnapshot(snapshotName=self.itemCurrent.snapRealname,
-                                          snapshotPath=self.itemCurrent.getPath(withFileName=False),
-                                          projectId=self.itemCurrent.projectId
-                                          )
-        
+            # UCI.instance().deleteSnapshot(snapshotName=self.itemCurrent.snapRealname,
+                                          # snapshotPath=self.itemCurrent.getPath(withFileName=False),
+                                          # projectId=self.itemCurrent.projectId
+                                          # )
+            RCI.instance().removeSnapshotTests(projectId=int(self.itemCurrent.projectId), 
+                                               snapshotPath=self.itemCurrent.getPath(withFileName=False), 
+                                               snapshotName=self.itemCurrent.snapRealname)
+            
     def __restoreSnapshot(self):
         """
         Restore snapshot
@@ -2108,11 +2108,14 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Restore snapshot"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            UCI.instance().restoreSnapshot(snapshotName=self.itemCurrent.snapRealname,
-                                          snapshotPath=self.itemCurrent.getPath(withFileName=False),
-                                          projectId=self.itemCurrent.projectId
-                                          )
-     
+            # UCI.instance().restoreSnapshot(snapshotName=self.itemCurrent.snapRealname,
+                                          # snapshotPath=self.itemCurrent.getPath(withFileName=False),
+                                          # projectId=self.itemCurrent.projectId
+                                          # )
+            RCI.instance().restoreSnapshotTests(projectId=int(self.itemCurrent.projectId), 
+                                                snapshotPath=self.itemCurrent.getPath(withFileName=False), 
+                                                snapshotName=self.itemCurrent.snapRealname)
+            
     def __addSnapshot(self):
         """
         Add snapshot
@@ -2121,7 +2124,7 @@ class Repository(QWidget, Logger.ClassLogger):
             return
             
         txt, ok = QInputDialog.getText(self, "Create snapshot", "Enter snapshot name:",
-                                                QLineEdit.Normal, self.itemCurrent.fileName)
+                                       QLineEdit.Normal, self.itemCurrent.fileName)
         if ok and txt:
             try:
                 # workaround to detect special characters, same limitation as with python2 because of the server
@@ -2129,12 +2132,17 @@ class Repository(QWidget, Logger.ClassLogger):
                 if sys.version_info > (3,): # python3 support only 
                     txt.encode("ascii") 
 
-                UCI.instance().createSnapshot( path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName, 
-                                               extension=self.itemCurrent.fileExtension, projectId=self.itemCurrent.projectId, 
-                                               snapshotName=txt, snapshotTimestamp="%s" % time.time() )
+                # UCI.instance().createSnapshot( path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName, 
+                                               # extension=self.itemCurrent.fileExtension, projectId=self.itemCurrent.projectId, 
+                                               # snapshotName=txt, snapshotTimestamp="%s" % time.time() )
+                RCI.instance().addSnapshotTests(projectId=int(self.itemCurrent.projectId), 
+                                                testPath=self.itemCurrent.getPath(), 
+                                                snapshotName=txt, 
+                                                snapshotTimestamp="%s" % time.time())
             except UnicodeEncodeError as e:
                 self.error(e)
-                QMessageBox.warning(self, "Create snapshot" , "Bad snapshot name!\nPerhaps one day, but not today, sorry for this limitation.")
+                QMessageBox.warning(self, "Create snapshot" , 
+                                    "Bad snapshot name!\nPerhaps one day, but not today, sorry for this limitation.")
  
     def __openProperties(self):
         """
@@ -2196,7 +2204,8 @@ class Repository(QWidget, Logger.ClassLogger):
                                             newPath=newPath, project=projectid, newProject=newprojectid
                                         )
                 else:
-                    self.moveRemoteFile(currentName=currentName, currentPath=pathFolder, currentExtension=self.itemCurrent.fileExtension, 
+                    self.moveRemoteFile(currentName=currentName, currentPath=pathFolder, 
+                                        currentExtension=self.itemCurrent.fileExtension, 
                                         newPath=newPath)
         elif self.itemCurrent.type() == QTreeWidgetItem.UserType+1: # folder
             currentName = self.itemCurrent.folderName
@@ -2228,7 +2237,7 @@ class Repository(QWidget, Logger.ClassLogger):
                 else:
                     self.moveRemoteFolder(currentName=currentName, currentPath=pathFolder, newPath=newPath)
 
-    def moveRemoteFile(self, currentName, currentPath, currentExtension, newPath, project=0):
+    def moveRemoteFile(self, currentName, currentPath, currentExtension, newPath, project=0, newProject=0):
         """
         Move remote file
 
@@ -2246,7 +2255,7 @@ class Repository(QWidget, Logger.ClassLogger):
         """
         raise NotReimplemented("moveRemoteFile")
 
-    def moveRemoteFolder(self, currentName, currentPath, newPath, project=0):
+    def moveRemoteFolder(self, currentName, currentPath, newPath, project=0, newProject=0):
         """
         Move remote folder
 
@@ -2671,13 +2680,14 @@ class Repository(QWidget, Logger.ClassLogger):
                 self.expandSubtreeAction.setEnabled(False)
                 self.expandAllAction.setEnabled(False)
                 self.collapseAllAction.setEnabled(False)
-                if self.itemCurrent.fileExtension.lower() in [ EXTENSION_TUX, EXTENSION_TAX, EXTENSION_TPX, EXTENSION_TSX, EXTENSION_TGX ]:
+                if self.itemCurrent.fileExtension.lower() in [ EXTENSION_TUX, EXTENSION_TAX, 
+                                                               EXTENSION_TPX, EXTENSION_TSX, EXTENSION_TGX ]:
                     self.runAction.setEnabled(True)
                 else:
                     self.runAction.setEnabled(False)
                     
                 if self.itemCurrent.fileExtension.lower() in [ EXTENSION_TUX, EXTENSION_TAX, EXTENSION_TPX, EXTENSION_TSX,
-                                                        EXTENSION_TGX, EXTENSION_TDX, EXTENSION_TCX ]:
+                                                               EXTENSION_TGX, EXTENSION_TDX, EXTENSION_TCX ]:
                     self.snapshotAction.setEnabled(True)
                 else:
                     self.snapshotAction.setEnabled(False)
@@ -2701,7 +2711,7 @@ class Repository(QWidget, Logger.ClassLogger):
             elif self.itemCurrent.type() == QTreeWidgetItem.UserType+1: # folder
                 self.addDirAction.setEnabled(True)
                 self.delDirAction.setEnabled(True)
-                if UCI.RIGHTS_ADMIN in UCI.instance().userRights :
+                if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
                     self.delAllDirAction.setEnabled(True)
                 else:
                     self.delAllDirAction.setEnabled(False)

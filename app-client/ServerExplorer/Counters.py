@@ -44,7 +44,8 @@ from Libs import QtHelper, Logger
 import Settings
 import zlib
 
-import UserClientInterface as UCI
+# import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 FONT_NAME="SansSerif"
 FONT_SIZE=30
@@ -475,10 +476,10 @@ class WCounters(QWidget, Logger.ClassLogger):
         Reset statistic manually
         """
         reply = QMessageBox.question(self, "Reset statistics", "Are you sure ?",
-                        QMessageBox.Yes | QMessageBox.No )
+                                     QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().resetTestsStatistics()
-
+            RCI.instance().resetTestsMetrics()
+            
     def active (self):
         """
         Enables

@@ -54,6 +54,7 @@ except ImportError: # support python3
     
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 import os.path
 import base64
@@ -207,6 +208,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
     
     def hideWidgetsHeader(self):
         """
+        Hide the widget header
         """
         self.line.hide()
         self.title.hide()
@@ -214,6 +216,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
         
     def showWidgetsHeader(self):
         """
+        Show the widget header
         """
         self.line.show()
         self.title.show()
@@ -311,7 +314,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
         """
         self.mainTab.setEnabled(True)
         self.labelHelp.setEnabled(True)
-        if UCI.RIGHTS_TESTER in UCI.instance().userRights:
+        if UCI.RIGHTS_TESTER in RCI.instance().userRights:
             self.remoteRepository.setConnected() 
             self.remoteRepository.setEnabled(True)
             self.localRepository.setEnabled(True)
@@ -336,11 +339,11 @@ class WRepositories(QWidget, Logger.ClassLogger):
             self.remoteRepository.initialize(listing= self.decodeData(data['repo'])  )
             self.remoteRepository.initializeProjects( projects=self.decodeData(data['projects']), defaultProject=data['default-project'] )
         
-        if UCI.RIGHTS_DEVELOPER in UCI.instance().userRights:
+        if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
             self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
             self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, True )
 
-            if UCI.RIGHTS_TESTER in UCI.instance().userRights: # exception if the developer if also a tester
+            if UCI.RIGHTS_TESTER in RCI.instance().userRights: # exception if the developer if also a tester
                 defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
                 if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
                     self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
@@ -367,7 +370,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
             self.librariesRemoteRepository.defaultActions()
             self.librariesRemoteRepository.initialize( listing=self.decodeData(data['repo-lib-adp']) )
 
-        if UCI.RIGHTS_ADMIN in UCI.instance().userRights:
+        if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
             self.remoteRepository.setConnected() 
             self.remoteRepository.setEnabled(True)
             self.localRepository.setEnabled(True)
@@ -389,7 +392,8 @@ class WRepositories(QWidget, Logger.ClassLogger):
                 self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
                     
             self.remoteRepository.defaultActions()
-            if self.remoteRepository.initializeProjects( projects= self.decodeData(data['projects']), defaultProject=data['default-project']  ) :
+            if self.remoteRepository.initializeProjects( projects= self.decodeData(data['projects']), 
+                                                         defaultProject=data['default-project']  ) :
                 self.remoteRepository.initialize(listing= self.decodeData(data['repo']))
 
             self.adaptersRemoteRepository.setConnected() 
@@ -459,6 +463,32 @@ class WRepositories(QWidget, Logger.ClassLogger):
         else:
             self.error( 'repo type unknown: %s' % repoType )
 
+    def onRefreshRemoteTests(self, data, projectId, forSaveAs=False):
+        """
+        """
+        self.remoteRepository.defaultActions()
+        
+        if forSaveAs:
+            self.remoteRepository.initializeSaveAs(listing=self.decodeData(data), reloadItems=True )
+        else:
+            # update default project
+            projectName = self.remoteRepository.getProjectName(projectId)
+            self.remoteRepository.setDefaultProject(projectName=projectName)
+            # reconstruct
+            self.remoteRepository.initialize(listing=self.decodeData(data) )
+
+    def onRefreshRemoteAdapters(self, data):
+        """
+        """
+        self.adaptersRemoteRepository.defaultActions()
+        self.adaptersRemoteRepository.initialize(listing=self.decodeData(data) )
+
+    def onRefreshRemoteLibraries(self, data):
+        """
+        """
+        self.librariesRemoteRepository.defaultActions()
+        self.librariesRemoteRepository.initialize(listing=self.decodeData(data) )
+            
 WR = None # Singleton
 def instance ():
     """

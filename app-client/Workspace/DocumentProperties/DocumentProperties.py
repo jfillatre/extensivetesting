@@ -201,12 +201,14 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
     
     def hideWidgetsHeader(self):
         """
+        Hide the title of the widget
         """
         self.title.hide()
         self.labelHelp.hide()
         
     def showWidgetsHeader(self):
         """
+        Show widget header
         """
         self.title.show()
         self.labelHelp.show()
@@ -260,11 +262,13 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
 
     def onUpdateInputsNumber(self, nbParams):
         """
+        On update the number of inputs in the tabulation name
         """
         self.paramsTab.setTabText(0, "Inputs (%s)" % nbParams )
 
     def onUpdateOutputsNumber(self, nbParams):
         """
+        On update the number of outputs in the tabulation name
         """
         self.paramsTab.setTabText(1, "Outputs (%s)" % nbParams )
         
@@ -292,18 +296,21 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         
     def enableMarkUnused(self):
         """
+        Active the button mark inputs as unused
         """
         self.markUnusedAction.setEnabled(True)
         self.markUnusedOutputsAction.setEnabled(True)
         
     def disableMarkUnused(self):
         """
+        Disable the mark button
         """
         self.markUnusedAction.setEnabled(False)
         self.markUnusedOutputsAction.setEnabled(False)
  
     def markUnusedInputs(self):
         """
+        Mark all inputs unused
         """
         if self.wdoc is None: return
         
@@ -321,6 +328,7 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         
     def markUnusedOutputs(self):
         """
+        Mark all outputs unused
         """
         if self.wdoc is None: return
         
@@ -529,17 +537,24 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         """
         if pathFilename is None:
             fileName = QFileDialog.getOpenFileName(self, self.tr("Import File"), "", "Tcx Config Files (*.%s)" % self.rRepo.EXTENSION_TCX )
-            if fileName.isEmpty():
+            # new in v18 to support qt5
+            if QtHelper.IS_QT5:
+                _fileName, _type = fileName
+            else:
+                _fileName = fileName
+            # end of new
+            
+            if _fileName.isEmpty():
                 return
 
-            if not ( str(fileName).endswith( self.rRepo.EXTENSION_TCX ) ):
+            if not ( str(_fileName).endswith( self.rRepo.EXTENSION_TCX ) ):
                 QMessageBox.critical(self, "Open Failed" , "File not supported")
                 return
         else:
-            fileName=pathFilename
+            _fileName=pathFilename
         
         config = FileModelTestConfig.DataModel()
-        res = config.load( absPath = fileName )
+        res = config.load( absPath = _fileName )
         if not res:
             QMessageBox.critical(self, "Open Failed" , "Corrupted file")
             return  

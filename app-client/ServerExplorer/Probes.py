@@ -45,7 +45,8 @@ except ImportError:
 import time
 
 from Libs import QtHelper, Logger
-import UserClientInterface as UCI
+# import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 COL_RUNNING_PROBEID         = 0
 COL_RUNNING_ADDRESS         = 1
@@ -234,7 +235,8 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.availDockToolbar = QToolBar(self)
         self.availDockToolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-        self.labels = [ self.tr("Name"), self.tr("Running on address"), self.tr("Started at"), self.tr("Type"), self.tr("Auto Startup"), self.tr("Description") ]        
+        self.labels = [ self.tr("Name"), self.tr("Running on address"), self.tr("Started at"), 
+                        self.tr("Type"), self.tr("Auto Startup"), self.tr("Description") ]        
         self.probesRegistered.setHeaderLabels(self.labels)
         self.probesRegistered.setColumnWidth(0, 180)
         self.probesRegistered.setColumnWidth(1, 120)
@@ -446,14 +448,14 @@ class WProbes(QWidget, Logger.ClassLogger):
         """
         Refresh the default list of probes
         """
-        UCI.instance().refreshDefaultProbes()
-
+        RCI.instance().defaultProbes()
+        
     def refreshRunningProbe(self):
         """
         Refresh the running list of probes
         """
-        UCI.instance().refreshRunningProbes()
-
+        RCI.instance().runningProbes()
+        
     def delProbe(self):
         """
         Delete probe
@@ -464,8 +466,10 @@ class WProbes(QWidget, Logger.ClassLogger):
             if reply == QMessageBox.Yes:
                 probeName = self.itemCurrentDefault.dataProbe['name']
                 self.delProbeAction.setEnabled(False)
-                UCI.instance().delProbe(probeName=probeName)
-
+                
+                # rest call
+                RCI.instance().removeProbe(probeName=probeName)
+                
     def stopProbe(self):
         """
         Stop the selected probe
@@ -477,8 +481,10 @@ class WProbes(QWidget, Logger.ClassLogger):
                 probeName = self.itemCurrentRunning.dataProbe['id']
                 self.itemCurrentRunning = None
                 self.stopAction.setEnabled(False)
-                UCI.instance().stopProbe(probeName=probeName)
-
+                
+                # rest call
+                RCI.instance().disconnectProbe(probeName=probeName)
+                
     def startProbe(self):
         """
         Start a new probe
@@ -493,6 +499,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         if not self.checkAutoStartOption.isChecked() and not self.checkStartNowOption.isChecked():
             QMessageBox.information(self, "Add Default Probe" , "Select startup option.")
             return
+            
         # call web services
         probeType = str( self.probeTypeEdit.text() )
         probeName = str( self.probeNameEdit.text() )
@@ -500,10 +507,13 @@ class WProbes(QWidget, Logger.ClassLogger):
         probeAutoStart = self.checkAutoStartOption.isChecked()
 
         if not self.checkStartNowOption.isChecked():
-            UCI.instance().addProbe(probeType=probeType, probeName=probeName, probeDescription=probeDescription)
+            RCI.instance().addProbe(probeName=probeName, probeType=probeType, 
+                                    probeDescription=probeDescription)
         else:
-            UCI.instance().startProbe(probeType=probeType, probeName=probeName, probeDescription=probeDescription, probeAutoStart=probeAutoStart )
-
+            RCI.instance().connectProbe(probeName=probeName, probeType=probeType, 
+                                        probeDescription=probeDescription, 
+                                        probeBoot=probeAutoStart)
+                                        
     def resetProbe(self):
         """
         Clear probe field

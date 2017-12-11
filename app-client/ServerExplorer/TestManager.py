@@ -55,6 +55,7 @@ except NameError: # support python3
     xrange = range
     
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 from Libs import QtHelper, Logger
 from Workspace import ScheduleDialog
 
@@ -546,7 +547,8 @@ class WTestManager(QWidget, Logger.ClassLogger):
         self.testManager = QTreeWidget(self)
         self.testManager.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.dockToolbar = QToolBar(self)
-        self.labels  = [ self.tr("No."), self.tr("Project"), self.tr("Name"), self.tr("Started at"), self.tr("Author"), self.tr("Recursive") ]
+        self.labels  = [ self.tr("No."), self.tr("Project"), self.tr("Name"), self.tr("Started at"),
+                         self.tr("Author"), self.tr("Recursive") ]
         self.testManager.setHeaderLabels(self.labels)
         self.testManager.setIndentation(10)
         self.testManager.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -564,8 +566,9 @@ class WTestManager(QWidget, Logger.ClassLogger):
         self.historyBox = QGroupBox("History")
         self.testHistory = QTreeWidget(self)
         self.historyToolbar = QToolBar(self)
-        self.labels2 = [ self.tr("Id"),  self.tr("Schedulation Type"),  self.tr("Project") , self.tr("Name"), self.tr("Sched at"), self.tr("Run start") \
-           , self.tr("Run end"), self.tr("Author"),  self.tr("Duration (in sec.)"), self.tr("Run Result") ]
+        self.labels2 = [ self.tr("Id"),  self.tr("Schedulation Type"),  self.tr("Project") , self.tr("Name"), 
+                         self.tr("Sched at"), self.tr("Run start"), self.tr("Run end"), self.tr("Author"), 
+                         self.tr("Duration (in sec.)"), self.tr("Run Result") ]
         self.testHistory.setHeaderLabels(self.labels2)
         
         self.statsBox = QGroupBox("Summary")
@@ -744,26 +747,26 @@ class WTestManager(QWidget, Logger.ClassLogger):
         """
         Refresh the waiting task list
         """
-        UCI.instance().refreshWaitingTasks()
-
+        RCI.instance().waitingTasks()
+        
     def refreshRunningList(self):
         """
         Refresh the running task list
         """
-        UCI.instance().refreshRunningTasks()
-
+        RCI.instance().runningTasks()
+        
     def partialRefreshHistoryList(self):
         """
         Partial refresh of the history task list
         """
-        UCI.instance().refreshHistoryTasks(Full=False)
-
+        RCI.instance().historyTasks()
+        
     def refreshHistoryList(self):
         """
         Refresh the history task list
         """
-        UCI.instance().refreshHistoryTasks()
-
+        RCI.instance().historyTasksAll()
+        
     def onCurrentItemChanged(self, witem1, witem2):
         """
         On current item changed 
@@ -775,7 +778,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         @type witem2:
         """
         # kill task available just for admin and tester
-        if UCI.RIGHTS_ADMIN in UCI.instance().userRights  or UCI.RIGHTS_TESTER in UCI.instance().userRights :
+        if UCI.RIGHTS_ADMIN in RCI.instance().userRights  or UCI.RIGHTS_TESTER in RCI.instance().userRights :
             if witem1 is not None:
                 if witem1.taskState == STATE_RUNNING :
                     self.itemCurrent = witem1
@@ -794,7 +797,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         @type witem2:
         """
         # kill task available just for admin and tester
-        if UCI.RIGHTS_ADMIN in UCI.instance().userRights or UCI.RIGHTS_TESTER in UCI.instance().userRights :
+        if UCI.RIGHTS_ADMIN in RCI.instance().userRights or UCI.RIGHTS_TESTER in RCI.instance().userRights :
             if witem1 is not None:
                 self.itemCurrent = witem1
                 self.cancelAction.setEnabled(True)
@@ -811,34 +814,24 @@ class WTestManager(QWidget, Logger.ClassLogger):
         """
         # if self.itemCurrent is not None:
         for currentItem in self.testWaiting.selectedItems():
-            UCI.instance().rescheduleTest(  taskId=currentItem.taskId, runAt = currentItem.taskEventArgs, 
-                                            runType=currentItem.taskEventType,
-                                            runNb=currentItem.taskEventNb, 
-                                            withoutProbes=currentItem.taskWithoutProbes,
-                                            runEnabled=False,
-                                            withoutNotif=currentItem.taskWithoutNotif,
-                                            noKeepTr=currentItem.taskNoKeepTr,
-                                            fromTime=currentItem.taskEventFrom,
-                                            toTime=currentItem.taskEventTo
-                                            )
-
+            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=False, scheduleType=currentItem.taskEventType,
+                                            scheduleAt=currentItem.taskEventArgs, scheduleRepeat=currentItem.taskEventNb, 
+                                            probesEnabled=currentItem.taskWithoutProbes, notificationsEnabled=currentItem.taskWithoutNotif, 
+                                            debugEnabled=False, logsEnabled=currentItem.taskNoKeepTr, 
+                                            fromTime=currentItem.taskEventFrom, toTime=currentItem.taskEventTo )
+                                            
     def enableTask(self):
         """
         Enable a waiting task
         """
         # if self.itemCurrent is not None:
         for currentItem in self.testWaiting.selectedItems():
-            UCI.instance().rescheduleTest(  taskId=currentItem.taskId, runAt = currentItem.taskEventArgs, 
-                                            runType=currentItem.taskEventType,
-                                            runNb=currentItem.taskEventNb, 
-                                            withoutProbes=currentItem.taskWithoutProbes,
-                                            runEnabled=True,
-                                            withoutNotif=currentItem.taskWithoutNotif,
-                                            noKeepTr=currentItem.taskNoKeepTr,
-                                            fromTime=currentItem.taskEventFrom,
-                                            toTime=currentItem.taskEventTo
-                                            )
-
+            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=True, scheduleType=currentItem.taskEventType,
+                                            scheduleAt=currentItem.taskEventArgs, scheduleRepeat=currentItem.taskEventNb, 
+                                            probesEnabled=currentItem.taskWithoutProbes, notificationsEnabled=currentItem.taskWithoutNotif, 
+                                            debugEnabled=False, logsEnabled=currentItem.taskNoKeepTr, 
+                                            fromTime=currentItem.taskEventFrom, toTime=currentItem.taskEventTo )
+    
     def editWaiting(self):
         """
         Edit a waiting task
@@ -856,14 +849,12 @@ class WTestManager(QWidget, Logger.ClassLogger):
                                     schedFrom=self.itemCurrent.taskEventFrom, schedTo=self.itemCurrent.taskEventTo )
                 if dSched.exec_() == QDialog.Accepted:
                     runAt, runType, runNb, withoutProbes, runEnabled, noTr, withoutNotifs, runFrom, runTo = dSched.getSchedtime()
-                    # recursive = False
-                    # if int(runType) > UCI.SCHED_IN:
-                        # recursive = True
-                    UCI.instance().rescheduleTest( taskId=self.itemCurrent.taskId, runAt = runAt, runType=runType, runNb=runNb, 
-                                                        withoutProbes=withoutProbes, runEnabled=runEnabled,
-                                                        withoutNotif=withoutNotifs, noKeepTr=noTr,
-                                                        fromTime=runFrom, toTime=runTo)
 
+                    RCI.instance().rescheduleTask(taskId=self.itemCurrent.taskId, taskEnabled=runEnabled, scheduleType=runType,
+                                                    scheduleAt=runAt, scheduleRepeat=runNb, 
+                                                    probesEnabled=withoutProbes, notificationsEnabled=withoutNotifs, 
+                                                    debugEnabled=False, logsEnabled=noTr, 
+                                                    fromTime=runFrom, toTime=runTo )
     def clearHistory(self):
         """
         Call the server to clear the history
@@ -871,8 +862,8 @@ class WTestManager(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, "Clear tasks history", "Are you sure ?",
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().clearTasksHistory()
-
+            RCI.instance().clearHistory()
+            
     def testKilled(self):
         """
         Test kiled
@@ -912,7 +903,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         self.killAction.setEnabled(False)
         self.cancelAction.setEnabled(False)
         self.editWaitingAction.setEnabled(False)
-        if UCI.RIGHTS_ADMIN in UCI.instance().userRights:
+        if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
             self.killAllAction.setEnabled(True)
             self.cancelAllAction.setEnabled(True)
             self.clearHistoryAction.setEnabled(True)
@@ -991,9 +982,11 @@ class WTestManager(QWidget, Logger.ClassLogger):
             if self.getProjectName(task['project-id']) == "UNKNOWN":
                 continue
             taskItem = TaskRunningItem(  task = task, parent= self.testManager )
+        
         # resize cols
         for i in xrange(len(self.labels2) - 1):
             self.testManager.resizeColumnToContents(i)
+        
         # change sort order
         if self.ascendingOrder:
             self.testWaiting.sortItems(2, Qt.AscendingOrder)     # sort by sched time
@@ -1023,9 +1016,11 @@ class WTestManager(QWidget, Logger.ClassLogger):
             if self.getProjectName(projectid) == "UNKNOWN":
                 continue
             taskItem = TaskWaitingItem(  task = task, parent= self.testWaiting )
+        
         # resize cols
         for i in xrange(len(self.labels2) - 1):
             self.testWaiting.resizeColumnToContents(i)
+        
         # change sort order
         if self.ascendingOrderHistory:
             self.testWaiting.sortItems(3, Qt.AscendingOrder)     
@@ -1220,7 +1215,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         if item:
             self.itemCurrent = item
             # kill task available just for admin and tester
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights or UCI.RIGHTS_TESTER in UCI.instance().userRights :
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or UCI.RIGHTS_TESTER in RCI.instance().userRights :
                 if item.taskState == STATE_RUNNING :
                     self.menu.addAction( self.killAction )
                 self.menu.popup(self.testManager.mapToGlobal(pos))
@@ -1237,7 +1232,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         if item:
             self.itemCurrent = item
             # kill task available just for admin and tester
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights or UCI.RIGHTS_TESTER in UCI.instance().userRights :
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or UCI.RIGHTS_TESTER in RCI.instance().userRights :
                 self.menu.addAction( self.editWaitingAction )
                 self.menu.addAction( self.cancelAction )
                 self.menu.addSeparator()
@@ -1257,8 +1252,8 @@ class WTestManager(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, "Cancel test(s)", "Are you sure ?",
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().cancelTask(taskId=self.itemCurrent.taskId, taskIds=taskIds)
-
+            RCI.instance().cancelTasks(taskIds=taskIds)
+            
     def cancelAllTasks(self):
         """
         Cancel all tasks
@@ -1266,8 +1261,8 @@ class WTestManager(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, "Cancel all tests", "Are you sure ?",
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().cancelAllTasks()
-
+            RCI.instance().cancelTasksAll()
+            
     def killTask(self):
         """
         Kill the selected task
@@ -1280,8 +1275,8 @@ class WTestManager(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, "Kill test", "Are you sure ?",
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().killTask(taskId=self.itemCurrent.taskId, taskIds=taskIds)
-
+            RCI.instance().killTasks(taskIds=taskIds)
+            
     def killAllTasks(self):
         """
         Kill all tasks
@@ -1289,7 +1284,7 @@ class WTestManager(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, "Kill all tests", "Are you sure ?",
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes:
-            UCI.instance().killAllTasks()
+            RCI.instance().killTasksAll()
     
     def toggleSort(self):
         """

@@ -140,6 +140,7 @@ class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
 
     def onNetworkProgress(self, bytesRead, totalBytes):
         """
+        On network progress
         """
         self.InProgress.emit(bytesRead, totalBytes)
 
@@ -152,6 +153,7 @@ class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
 
     def onNetworkFinished(self, reply):
         """
+        On network finished
         """
 
         if reply in NETWORK_ERRORS:
@@ -209,10 +211,6 @@ class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
         On close event
         """
         self.httpPostId = None
-        if self.reply is not None:
-            self.reply.abort()
-        self.reply = None
-        
         event.accept()
 
     def setWsAddress(self, address, port, scheme, webpath, hostname ):
@@ -275,6 +273,7 @@ class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
 
     def NetworkCall(self, postData ):
         """
+        Network call
         """
         self.httpPostReq.append( postData )
         if self.reqInProgress is None:
@@ -282,6 +281,7 @@ class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
             
     def __NetworkCall(self, postData):
         """
+        Sub network call
         """
         self.startWorking()
 
@@ -344,6 +344,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
 
     def onNetworkProgress(self, bytesRead, totalBytes):
         """
+        On network progress
         """
         self.InProgress.emit(bytesRead, totalBytes)
 
@@ -356,6 +357,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
 
     def onNetworkFinished(self, reply):
         """
+        On network finished
         """
 
         if reply in NETWORK_ERRORS:
@@ -418,17 +420,13 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
         
         self.reqInProgress = None
         if len(self.httpPostReq):
-            self.__NetworkCall( postData=self.httpPostReq.pop(0) )
+            self.__NetworkCall( req=self.httpPostReq.pop(0) )
             
     def closeEvent(self, event):
         """
         On close event
         """
         self.httpPostId = None
-        if self.reply is not None:
-            self.reply.abort()
-        self.reply = None
-        
         event.accept()
 
     def setWsAddress(self, address, port, scheme, webpath, hostname ):
@@ -471,11 +469,13 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
 
     def setWsCookie(self, cook):
         """
+        Set the webservice cookie
         """
         self.WsCookie = cook
 
     def unsetWsCookie(self):
         """
+        Unset the webservice cookie
         """
         self.WsCookie = None
         
@@ -494,6 +494,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
 
     def NetworkCall(self, req ):
         """
+        Network call
         """
         self.httpPostReq.append( req )
         if self.reqInProgress is None:
@@ -501,6 +502,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
             
     def __NetworkCall(self, req):
         """
+        Sub network call
         """
         self.startWorking()
 
@@ -566,6 +568,7 @@ class WServerProgress(QWidget, Logger.ClassLogger):
     """
     def __init__(self, parent):
         """
+        Constructor
         """
         QWidget.__init__(self, parent)
         
@@ -573,6 +576,7 @@ class WServerProgress(QWidget, Logger.ClassLogger):
 
     def progress(self):
         """
+        return the progress bar
         """
         return self.progressBar
         
@@ -1077,15 +1081,19 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         self.wWebService.StartWorkingChannel.connect(self.OnChannelStartWorking)
         self.wWebService.StopWorking.connect(self.OnWsStopWorking)
         self.wWebService.InProgress.connect(self.onNetworkProgress)
+        
         # rest
         self.RestService.StartWorking.connect(self.OnRestStartWorking)
-        # self.RestService.StartWorkingChannel.connect(self.OnChannelStartWorking)
         self.RestService.StopWorking.connect(self.OnRestStopWorking)
         self.RestService.InProgress.connect(self.onRestNetworkProgress)
         
     def onRestNetworkProgress(self, bytesRead, totalBytes):
         """
+        On rest network progress
         """
+        if totalBytes == -1:
+            totalBytes = 0
+            bytesRead = 0
         self.wServerProgress.updateProgressRest(bytesRead, totalBytes)
         
     def OnRestStartWorking(self):
@@ -1109,6 +1117,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         
     def onNetworkProgress(self, bytesRead, totalBytes):
         """
+        On network progress
         """
         self.wServerProgress.updateProgress(bytesRead, totalBytes)
 
@@ -1168,7 +1177,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         TestManager.initialize( parent = self.serverTab )
         Probes.initialize( parent = self.serverTab )
         Agents.initialize( parent = self.serverTab )
-        Archives.initialize( parent = self.serverTab )
+        Archives.initialize( parent = self.serverTab, mainParent=self.parent )
         ReleaseNotes.initialize( parent = self.serverTab )
         Repositories.initialize( parent = self.serverTab )
         Counters.initialize( parent = self.serverTab )
@@ -1223,13 +1232,13 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         Call the server to verify if an update is needed for the client
         Update auto
         """
-        UCI.instance().getClientUpdateAuto()
+        RCI.instance().checkClientUpdate(recheck=True)
         
     def checkUpdate (self):
         """
         Call the server to verify if an update is needed for the client
         """
-        UCI.instance().getClientUpdate()
+        RCI.instance().checkClientUpdate()
     
     def decodeData(self, b64data):
         """
@@ -1272,7 +1281,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         try:
             self.wServerStatus.setStatus( status = self.wServerStatus.ONLINE,
                                           serverIp = UCI.instance().address,
-                                          rightUser =  UCI.instance().userRights,
+                                          rightUser =  RCI.instance().userRights,
                                           userLogin = UCI.instance().login,
                                           proxyIp = UCI.instance().addressProxyHttp,
                                           serverPort = UCI.instance().portWs )
@@ -1281,7 +1290,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
             self.disconnectAction.setEnabled(True)
             self.checkUpdateAction.setEnabled(True)
             
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights or  UCI.RIGHTS_TESTER in UCI.instance().userRights:
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights:
 
                 TestManager.instance().active()
                 TestManager.instance().setEnabled(True)
@@ -1306,7 +1315,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Agents.instance().loadStats( data = self.decodeData(data['agents-stats']) )
                 Agents.instance().loadDefault( data = self.decodeData(data['agents-default']) )
 
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights or  UCI.RIGHTS_TESTER in UCI.instance().userRights or  UCI.RIGHTS_LEADER in UCI.instance().userRights:
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
 
                 Archives.instance().active()
                 Archives.instance().setEnabled(True)
@@ -1318,7 +1327,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Archives.instance().loadData( data = self.decodeData(data['archives']), parent=rootItem )
                 Archives.instance().initializeProjects( projects=self.decodeData(data['projects']), defaultProject=data['default-project'] )
 
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights :
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
 
                 Miscellaneous.instance().active()
                 Miscellaneous.instance().setEnabled(True)
@@ -1340,14 +1349,14 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Repositories.instance().loadDataArchives( data = data['stats-repo-archives'],
                                                             backups=self.decodeData(data['backups-repo-archives']) )
                 
-            if UCI.RIGHTS_ADMIN in UCI.instance().userRights or  UCI.RIGHTS_TESTER in UCI.instance().userRights or \
-                UCI.RIGHTS_DEVELOPER in UCI.instance().userRights or  UCI.RIGHTS_LEADER in UCI.instance().userRights:
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or \
+                UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
 
                 Settings.instance().setServerContext( self.decodeData(data['informations']) )
                 ReleaseNotes.instance().active()
                 ReleaseNotes.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_RN_POS, True )
-                if len(UCI.instance().userRights) == 1 and UCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
+                if len(RCI.instance().userRights) == 1 and RCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
                     self.serverTab.setCurrentIndex(TAB_RN_POS)
                 
                 rnDecoded = base64.b64decode( data['rn'] )
@@ -1365,7 +1374,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
 
                 Counters.instance().loadData(counters=data['stats'] )
             
-            if UCI.RIGHTS_TESTER in UCI.instance().userRights or UCI.RIGHTS_DEVELOPER in UCI.instance().userRights:
+            if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
                 Counters.instance().deactivate()
             else:
                 Counters.instance().active()
@@ -1514,8 +1523,10 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                     Repositories.instance().resetBackupAdpsPart()
                 elif 'repo-libraries' in event:
                     Repositories.instance().resetBackupLibsPart()
-                elif 'repo-tests' in event:
+                elif 'repo-archives' in event:
                     Repositories.instance().resetBackupArchivesPart()
+                elif 'repo-tests' in event:
+                    Repositories.instance().resetBackupTestsPart()
                 else:
                     self.error( 'repo to reset unknwon: %s' % str(event) )
             else:
@@ -1530,8 +1541,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        Repositories.instance().loadData(   data = data['stats-repo-tests'],
-                                            backups=self.decodeData(data['backups-repo-tests']) )   
+        Repositories.instance().loadData(data = data)   
 
     def onRefreshStatsRepoAdapters(self, data):
         """
@@ -1540,8 +1550,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        Repositories.instance().loadDataAdapters( data = data['stats-repo-adapters'], 
-                                                    backups=self.decodeData(data['backups-repo-adapters']) )    
+        Repositories.instance().loadDataAdapters( data = data )    
 
     def onRefreshStatsRepoLibraries(self, data):
         """
@@ -1550,8 +1559,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        Repositories.instance().loadDataLibraries( data = data['stats-repo-libraries'], 
-                                                    backups=self.decodeData(data['backups-repo-libraries']) )   
+        Repositories.instance().loadDataLibraries( data = data )   
                                                     
     def onRefreshStatsRepoArchives(self, data):
         """
@@ -1560,18 +1568,17 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        Repositories.instance().loadDataArchives(   data = data['stats-repo-archives'], 
-                                                    backups=self.decodeData(data['backups-repo-archives']) )   
+        Repositories.instance().loadDataArchives( data = datan)   
 
-    def onRefreshStatsServer(self, data):
+    def onRefreshStatsServer(self, usages):
         """
         Refresh data on xml rpc call
 
         @param data: 
         @type data:
         """
-        Miscellaneous.instance().loadStats( data = self.decodeData(data) )
-
+        Miscellaneous.instance().loadStats( data = usages['disk'] )
+        
     def onRefreshContextServer(self, data):
         """
         Refresh data on xml rpc call
@@ -1586,7 +1593,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
 
     def onRefreshArchives(self, data):
         """
-        Refresh data on xml rpc call
+        Refresh data on xml rpc call, deprecated
 
         @param data: 
         @type data:     
@@ -1594,6 +1601,17 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         Archives.instance().cleanTreeView()
         rootItem = Archives.instance().createRootItem()
         Archives.instance().loadData( data = self.decodeData(data), parent=rootItem )
+
+    def onRefreshResults(self, listing):
+        """
+        Refresh results
+
+        @param data: 
+        @type data:     
+        """
+        Archives.instance().cleanTreeView()
+        rootItem = Archives.instance().createRootItem()
+        Archives.instance().loadData( data = listing, parent=rootItem )
         
     def onRefreshRunningAgents(self, data):
         """
@@ -1602,8 +1620,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:     
         """
-        Agents.instance().resetNbProbes()
-        Agents.instance().loadData(data = self.decodeData(data) )
+        Agents.instance().resetNbAgents()
+        Agents.instance().loadData(data = data )
     
     def onRefreshDefaultAgents(self, data):
         """
@@ -1612,7 +1630,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:     
         """
-        Agents.instance().loadDefault(data = self.decodeData(data) )
+        Agents.instance().loadDefault(data = data )
 
     def onRefreshRunningProbes(self, data):
         """
@@ -1621,7 +1639,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:     
         """
-        Probes.instance().loadData(data = self.decodeData(data) )
+        Probes.instance().resetNbProbes()
+        Probes.instance().loadData(data = data )
     
     def onRefreshDefaultProbes(self, data):
         """
@@ -1630,36 +1649,44 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:     
         """
-        Probes.instance().loadDefault(data = self.decodeData(data) )
+        Probes.instance().loadDefault(data = data )
 
     def onRefreshTasksWaiting(self, data):
         """
         Called on refresh tasks waiting
         """
-        if len(data['tasks-waiting']):
-            TestManager.instance().updateWaiting( data = self.decodeData(data['tasks-waiting']) )
+        if len(data):
+            TestManager.instance().updateWaiting( data = data )
 
     def onRefreshTasksRunning(self, data):
         """
         Called on refresh task running
         """
-        if len(data['tasks-running']):
-            TestManager.instance().updateRunning( data = self.decodeData(data['tasks-running']) )
+        if len(data):
+            TestManager.instance().updateRunning( data = data )
 
     def onRefreshTasksHistory(self, data):
         """
         Called on refresh task history
         """
-        if len(data['tasks-history']):
-            TestManager.instance().updateHistory( data = self.decodeData(data['tasks-history']) )
-
+        if len(data):
+            TestManager.instance().updateHistory( data = data )
+            
+    def onClearTasksHistory(self):
+        """
+        Clear tasks history
+        """
+        TestManager.instance().updateHistory( data = [] )
+        
     def onWebCall(self, data):
         """
+        On web call
         """
         self.wWebService.NetworkCall(postData=data)
         
     def onRestCall(self, uri, request, body=''):
         """
+        On rest call
         """
         self.RestService.NetworkCall(req=(uri, request, body) )
        
@@ -1692,11 +1719,13 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         
     def rest(self):
         """
+        Return rest webservice object
         """
         return self.RestService
         
     def xmlrpc(self):
         """
+        Return the xmlrpc object
         """
         return self.wWebService
         

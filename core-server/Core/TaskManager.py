@@ -21,7 +21,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-import MySQLdb
+try:
+    import MySQLdb
+except ImportError: # python3 support
+    import pymysql as MySQLdb
+
 import time
 import datetime
 import pickle
@@ -29,8 +33,11 @@ import pickle
 import threading 
 import os
 import parser
-import compiler
-import ConfigParser
+# import compiler
+try:
+    import ConfigParser
+except ImportError: # python3 support
+    import configparser as ConfigParser
 
 import uuid
 import sys
@@ -47,26 +54,45 @@ try:
 except ImportError:
     import json
 
-import Common
-import TestModel
-import SubTestModel
-import EventServerInterface as ESI
-import TestServerInterface as TSI
-import StatsManager
-import RepoManager
-import RepoArchives
-import RepoLibraries
-import RepoAdapters
-import DbManager
-import StorageDataAdapters
-import UsersManager
-import Context
-import ProjectsManager
-# new in v10.1
-import AgentsManager
-import ProbesManager
-# end of new
-
+try:
+    import Common
+    import TestModel
+    import SubTestModel
+    import EventServerInterface as ESI
+    import TestServerInterface as TSI
+    # import StatsManager
+    import RepoManager
+    import RepoArchives
+    import RepoLibraries
+    import RepoAdapters
+    import DbManager
+    import StorageDataAdapters
+    import UsersManager
+    # import Context
+    import ProjectsManager
+    # new in v10.1
+    import AgentsManager
+    import ProbesManager
+    # end of new
+except ImportError:
+    from . import Common
+    from . import TestModel
+    from . import SubTestModel
+    from . import EventServerInterface as ESI
+    from . import TestServerInterface as TSI
+    # from . import StatsManager
+    from . import RepoManager
+    from . import RepoArchives
+    from . import RepoLibraries
+    from . import RepoAdapters
+    from . import DbManager
+    from . import StorageDataAdapters
+    from . import UsersManager
+    # from . import Context
+    from . import ProjectsManager
+    from . import AgentsManager
+    from . import ProbesManager
+   
 from Libs import Scheduler, Settings, Logger
 import Libs.FileModels.TestResult as TestResult
 
@@ -100,6 +126,16 @@ SCHED_WEEKLY            =   7
 SCHED_NOW_MORE          =   8
 SCHED_QUEUE             =   9
 SCHED_QUEUE_AT          =   10
+
+SCHEDULE_TYPES    = {
+                        "daily": 5,
+                        "hourly": 4,
+                        "weekly": 7,
+                        "every": 6,
+                        "at": 0,
+                        "in": 1,
+                        "now": -1
+                    }
 
 MONDAY                  =   0
 TUESDAY                 =   1
@@ -175,7 +211,7 @@ def getGroupId():
 class Task(Logger.ClassLogger):
     def __init__(self, testData, testName, testPath, testUser, testId, testBackground, taskEnabled=True, withoutProbes=False,
                     debugActivated=False, withoutNotif=False, noKeepTr=False, testUserId=0, testProjectId=0, stepByStep=False,
-                    breakpoint=False, runSimultaneous=False, channelId=False):
+                    breakpoint=False, runSimultaneous=False, channelId=False, statsmgr=None, context=None):
         """
         Construc test class
 
@@ -197,6 +233,9 @@ class Task(Logger.ClassLogger):
         @param testBackground:
         @type testBackground:
         """
+        self.statsmgr = statsmgr
+        self.ctx = context
+        
         self.mutex = threading.RLock()
 
         self.channelId = channelId
@@ -275,7 +314,8 @@ class Task(Logger.ClassLogger):
 
         test = { "name": self.testName, "start-at": self.startTime }
         statistics = { "total": "%s" % maxRun, 'count': "%s" % (self.recurId+1),
-                        'passed': "%s" % self.resultsStats["passed"], 'failed': "%s" % self.resultsStats["failed"], 
+                        'passed': "%s" % self.resultsStats["passed"], 
+                        'failed': "%s" % self.resultsStats["failed"], 
                         'undefined': "%s" % self.resultsStats["undefined"] }
         testDescr = { "test":  test, "user": self.userName, "statistics": statistics }
         f = open( "%s/DESCRIPTION" % self.getPath(envTmp=envTmp), 'w' )
@@ -368,19 +408,24 @@ class Task(Logger.ClassLogger):
         """
         if withId:
             if withGroupId:
-                return ( self.schedId, self.schedType, str(self.schedArgs), str(self.schedAt), self.getTaskName(), str(self.userName),
-                            str(self.startTime), str(self.duration), str(self.state),  self.schedNb, self.recurId, self.enabled, self.withoutProbes,
+                return ( self.schedId, self.schedType, str(self.schedArgs), str(self.schedAt), 
+                          self.getTaskName(), str(self.userName),
+                            str(self.startTime), str(self.duration), str(self.state),  self.schedNb, 
+                            self.recurId, self.enabled, self.withoutProbes,
                             self.withoutNotif, self.noKeepTr, self.userId, self.projectId,
                                 str(self.schedFrom), str(self.schedTo), self.groupId )
             else:
                 # Called to add in backup 
-                return ( self.schedId, self.schedType, str(self.schedArgs), str(self.schedAt), self.getTaskName(), str(self.userName),
-                            str(self.startTime), str(self.duration), str(self.state),  self.schedNb, self.recurId, self.enabled, self.withoutProbes,
+                return ( self.schedId, self.schedType, str(self.schedArgs), str(self.schedAt), 
+                            self.getTaskName(), str(self.userName),
+                            str(self.startTime), str(self.duration), str(self.state),  self.schedNb, 
+                            self.recurId, self.enabled, self.withoutProbes,
                             self.withoutNotif, self.noKeepTr, self.userId, self.projectId,
                                 str(self.schedFrom), str(self.schedTo) )
         else:
             # Called to add in the history
-            return ( self.schedType, str(self.schedArgs), str(self.schedAt), self.getTaskName(), str(self.userName), str(self.startTime), str(self.duration), 
+            return ( self.schedType, str(self.schedArgs), str(self.schedAt), self.getTaskName(), 
+                     str(self.userName), str(self.startTime), str(self.duration), 
                     str(self.state), self.projectId )
 
     def getId(self):
@@ -456,21 +501,24 @@ class Task(Logger.ClassLogger):
         
         if runType ==  Scheduler.SCHED_DAILY:
             cur_dt = time.localtime()
-            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, h, mn, s, 0)
+            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, 
+                                        cur_dt.tm_mday, h, mn, s, 0)
             timestamp = time.mktime(next_dt.timetuple())
             self.schedAt = timestamp
             self.schedArgs = ( 0, 0, 0, h, mn, s)
             
         elif runType ==  Scheduler.SCHED_HOURLY:
             cur_dt = time.localtime()
-            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, cur_dt.tm_hour, mn, s, 0)
+            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, 
+                                        cur_dt.tm_hour, mn, s, 0)
             timestamp = time.mktime(next_dt.timetuple())
             self.schedAt = timestamp
             self.schedArgs = ( 0, 0, 0, 0, mn, s)
             
         elif runType ==  Scheduler.SCHED_EVERY_MIN:
             cur_dt = time.localtime()
-            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, cur_dt.tm_hour, cur_dt.tm_min, s, 0)
+            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, 
+                                        cur_dt.tm_hour, cur_dt.tm_min, s, 0)
             timestamp = time.mktime(next_dt.timetuple())
             self.schedAt = timestamp
             self.schedArgs = ( 0, 0, 0, 0, 0, s)
@@ -521,7 +569,8 @@ class Task(Logger.ClassLogger):
             else:
                 to_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, toH, toMn, 0, 0)
                 
-            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, cur_dt.tm_hour, cur_dt.tm_min, cur_dt.tm_sec, 0)
+            next_dt = datetime.datetime(cur_dt.tm_year, cur_dt.tm_mon, cur_dt.tm_mday, 
+                                        cur_dt.tm_hour, cur_dt.tm_min, cur_dt.tm_sec, 0)
             self.trace("Current next time: %s" % next_dt.isoformat() )
 
             if from_dt == to_dt:
@@ -623,8 +672,7 @@ class Task(Logger.ClassLogger):
 
         # prepare a unique id for the test
         ret = []
-        ret.append( time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(self.prepareTime)) ) #  + \
-                    # ".%6.6d" % int((self.prepareTime * 1000000)% 1000000  ) )
+        ret.append( time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(self.prepareTime)) )
         ret.append( self.taskUuid )
         ret.append( base64.b64encode(testidentifier.encode("utf8")) )
         ret.append( self.userName )
@@ -664,7 +712,7 @@ class Task(Logger.ClassLogger):
             fp = "%s/%s" % ( self.getPath(envTmp=envTmp), STATE_FINISHED )
             res = os.path.exists( fp )
             if res: os.remove( fp )
-        except OSError, e:
+        except OSError as e:
             self.trace( 'Unable to remove finished file: %s' % str(e) )
         except Exception as e:
             self.error( 'Unable to remove finished file: %s' % str(e) )
@@ -694,7 +742,7 @@ class Task(Logger.ClassLogger):
                 toSend.insert(0, lastinsertid ) # insert ok
 
             # new in v10, return only history task according to the user
-            connected = Context.instance().getUsersConnectedCopy()
+            connected = self.ctx.instance().getUsersConnectedCopy()
             for cur_user in connected:
                 prjs = ProjectsManager.instance().getProjects( user=cur_user, b64=False)
                 prjsDict = {}
@@ -749,7 +797,7 @@ class Task(Logger.ClassLogger):
             self.saveTestDescr()
             
             # Notify all connected users to remove event from the waiting list on the client interface
-            connected = Context.instance().getUsersConnectedCopy()
+            connected = self.ctx.instance().getUsersConnectedCopy()
             for cur_user in connected:
                 self.trace("updating task waiting: %s" % cur_user)
                 data = ( 'task-waiting', ( "update", TaskMngr.getWaiting(user=cur_user)) )   
@@ -758,7 +806,7 @@ class Task(Logger.ClassLogger):
         
             # Notify all connected users to add event to running list on the client interface 
             # new in v10
-            connected = Context.instance().getUsersConnectedCopy()
+            connected = self.ctx.instance().getUsersConnectedCopy()
             for cur_user in connected:
                 self.trace("updating task running: %s" % cur_user)
                 data = ( 'task-running', ( "update", TaskMngr.getRunning(user=cur_user) ) ) 
@@ -771,7 +819,7 @@ class Task(Logger.ClassLogger):
                 self.stopTime = time.time()
                 self.duration = self.stopTime - self.startTime
                 # notify all connected users to remove event to running list
-                connected = Context.instance().getUsersConnectedCopy()
+                connected = self.ctx.instance().getUsersConnectedCopy()
                 for cur_user in connected:
                     data = ( 'task-running', ( "update", TaskMngr.getRunning(user=cur_user) ) ) 
                     ESI.instance().notify(body=data, toUser=cur_user)
@@ -840,7 +888,9 @@ class Task(Logger.ClassLogger):
         @rtype: string
         """
         if withDate:
-            return  "/%s/%s/%s" % ( self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), self.completeId() )
+            return  "/%s/%s/%s" % ( self.projectId, 
+                                    time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                    self.completeId() )
         else:
             return  self.completeId()
 
@@ -861,12 +911,17 @@ class Task(Logger.ClassLogger):
             if noDate:
                 return  "%s/%s" % ( testsResultPath, self.completeId() )
             else:
-                return  "%s/%s/%s/%s" % ( testsResultPath, self.projectId,  time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), self.completeId() )
+                return  "%s/%s/%s/%s" % ( testsResultPath, 
+                                          self.projectId,
+                                          time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                          self.completeId() )
         else:
             if noDate:
                 return  "%s" % ( self.completeId() )
             else:
-                return  "%s/%s/%s" % ( self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), self.completeId() )
+                return  "%s/%s/%s" % ( self.projectId, 
+                                       time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                       self.completeId() )
 
     def getDirToday(self, envTmp=False, fullPath=True):
         """
@@ -882,7 +937,9 @@ class Task(Logger.ClassLogger):
         if envTmp:
             testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults-tmp' ) )
         if fullPath:
-            return  "%s/%s/%s" % ( testResultPath, self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)) )
+            return  "%s/%s/%s" % ( testResultPath, 
+                                   self.projectId, 
+                                   time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)) )
         else:
             return  "%s/%s" % (self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)))
             
@@ -914,13 +971,21 @@ class Task(Logger.ClassLogger):
         """
         try: 
             tmpPath = '%s%s/Parsed' % ( Settings.getDirExec(), Settings.get( 'Paths', 'tmp' )  )
-            os.mkdir( tmpPath, 0755 )
+            os.mkdir( tmpPath, 0o755 )
         except Exception as e:
             pass
         # write wrong test
-        fileName = '%s%s/Parsed/%s_%s_%s.BAD' % ( Settings.getDirExec(), Settings.get( 'Paths', 'tmp' ), self.testName, self.userName, self.testId  )
+        fileName = '%s%s/Parsed/%s_%s_%s.BAD' % (   Settings.getDirExec(), 
+                                                    Settings.get( 'Paths', 'tmp' ), 
+                                                    self.testName,
+                                                    self.userName, 
+                                                    self.testId  )
         if subTest:
-            fileName = '%s%s/Parsed/SubTE_%s_%s_%s.BAD' % ( Settings.getDirExec(), Settings.get( 'Paths', 'tmp' ), self.testName, self.userName, self.testId  )
+            fileName = '%s%s/Parsed/SubTE_%s_%s_%s.BAD' % ( Settings.getDirExec(), 
+                                                            Settings.get( 'Paths', 'tmp' ), 
+                                                            self.testName, 
+                                                            self.userName, 
+                                                            self.testId  )
         f = open( fileName ,  'w')
         f.write(te)
         f.close()
@@ -944,7 +1009,7 @@ class Task(Logger.ClassLogger):
                 try: 
                     prjFolder = self.getDirProject(envTmp=envTmp)
                     if not os.path.exists( prjFolder ):
-                        os.mkdir( prjFolder, 0755 )
+                        os.mkdir( prjFolder, 0o755 )
                 except Exception as e:
                     self.trace( "folder %s already exist: %s" % (prjFolder, str(e)) )
                 else:
@@ -953,12 +1018,12 @@ class Task(Logger.ClassLogger):
                     try: 
                         mainDir = self.getDirToday(envTmp=envTmp)
                         if not os.path.exists( mainDir ):
-                            os.mkdir( mainDir, 0755 )
+                            os.mkdir( mainDir, 0o755 )
                     except Exception as e:
                         self.trace( "dir %s already exist: %s" % (mainDir, str(e)) )
                     else:
-                        os.mkdir( self.getPath(envTmp=envTmp, noDate=False), 0755 )
-            except OSError, e:
+                        os.mkdir( self.getPath(envTmp=envTmp, noDate=False), 0o755 )
+            except OSError as e:
                 cleanupTmp = False
                 self.error( 'Parse test design: unable to prepare the directory, system error: %s' % str(e) )
                 ret["error"] = True
@@ -970,12 +1035,16 @@ class Task(Logger.ClassLogger):
                 try:
                     te = TestModel.createTestDesign(    
                                                         dataTest = self.dataTest, userName=self.userName, testName=self.testName, 
-                                                        trPath=self.getTestPath(withDate=True), logFilename=self.completeId(), withoutProbes=self.withoutProbes,
-                                                        defaultLibrary=RepoLibraries.instance().getDefaultV2(), defaultAdapter=RepoAdapters.instance().getDefaultV2(),
-                                                        userId=self.userId, projectId=self.projectId, stepByStep=self.stepByStep, breakpoint=self.breakpoint,
+                                                        trPath=self.getTestPath(withDate=True), logFilename=self.completeId(), 
+                                                        withoutProbes=self.withoutProbes,
+                                                        defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
+                                                        defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                        userId=self.userId, projectId=self.projectId, stepByStep=self.stepByStep, 
+                                                        breakpoint=self.breakpoint,
                                                         testId=self.testId, runningAgents=AgentsManager.instance().getRunning(), 
-                                                        runningProbes=ProbesManager.instance().getRunning(), testLocation=self.getTestLocation(),
-                                                        parametersShared=Context.instance().getTestEnvironment(user=self.userName)
+                                                        runningProbes=ProbesManager.instance().getRunning(), 
+                                                        testLocation=self.getTestLocation(),
+                                                        parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName)
                                                     )
                 except Exception as e:
                     cleanupTmp = False
@@ -1011,7 +1080,7 @@ class Task(Logger.ClassLogger):
                         cfgtest = open(cfgtest_path,'w')            
                         cfgparser.write(cfgtest)
                         cfgtest.close()
-                    except OSError, e:
+                    except OSError as e:
                         cleanupTmp = False
                         self.error( 'Parse test design: unable to save te, system error: %s' % str(e) )
                         ret["error"] = True
@@ -1027,8 +1096,7 @@ class Task(Logger.ClassLogger):
                         self.trace( "Parse test design: compile the test executable" )
                         try:
                             parser.suite(te).compile()
-                            # compiler.parse(te)
-                        except SyntaxError, e:
+                        except SyntaxError as e:
                             cleanupTmp = False
                             self.trace( 'Parse test design: unable to compile syntax te: %s' % e )
                             ret["error"] = True
@@ -1175,14 +1243,20 @@ class Task(Logger.ClassLogger):
             startExecTestLine = 0
             te = ''
             try:
-                te = TestModel.createTestExecutable(dataTest = self.dataTest, userName=self.userName, testName=self.testName, 
-                                trPath=self.getTestPath(), logFilename=self.completeId(), withoutProbes=self.withoutProbes,
-                                defaultLibrary=RepoLibraries.instance().getDefaultV2(), defaultAdapter=RepoAdapters.instance().getDefaultV2(),
-                                userId=self.userId, projectId=self.projectId, subTEs=len(sub_tes), channelId=self.channelId,
-                                parametersShared=Context.instance().getTestEnvironment(user=self.userName),
-                                stepByStep=self.stepByStep, breakpoint=self.breakpoint, testId=self.testId, testLocation=self.getTestLocation(),
-                                runningAgents=AgentsManager.instance().getRunning(), runningProbes=ProbesManager.instance().getRunning()
-                        )
+                te = TestModel.createTestExecutable(dataTest = self.dataTest, userName=self.userName, 
+                                                    testName=self.testName, trPath=self.getTestPath(), 
+                                                    logFilename=self.completeId(), withoutProbes=self.withoutProbes,
+                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
+                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                    userId=self.userId, projectId=self.projectId, 
+                                                    subTEs=len(sub_tes), channelId=self.channelId,
+                                                    parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName),
+                                                    stepByStep=self.stepByStep, breakpoint=self.breakpoint, 
+                                                    testId=self.testId, testLocation=self.getTestLocation(),
+                                                    runningAgents=AgentsManager.instance().getRunning(), 
+                                                    runningProbes=ProbesManager.instance().getRunning(),
+                                                    taskUuid=self.taskUuid
+                                                    )
             except Exception as e:
                 self.error( "parse test - unable to prepare te: %s" % str(e) )
                 self.wrongParseToFile( te=te)
@@ -1202,7 +1276,6 @@ class Task(Logger.ClassLogger):
                     # compile
                     try:
                         parser.suite(subtest_val).compile()
-                        #compiler.parse(subtest_val)
                     except SyntaxError as e:
                         self.trace( "sub test syntax error: %s" % str(e) )
                         lineno = e.lineno
@@ -1225,8 +1298,7 @@ class Task(Logger.ClassLogger):
                 self.trace('Parse test: compiling main te')
                 try:
                     parser.suite(te).compile()
-                    #compiler.parse(te)
-                except SyntaxError, e:
+                except SyntaxError as e:
                     self.trace( "syntax error: %s" % str(e) )
                     lineno = e.lineno
                     e.lineno = None
@@ -1298,25 +1370,25 @@ class Task(Logger.ClassLogger):
                 try: 
                     tmpPath = '%s%s' % (  Settings.getDirExec(), Settings.get( 'Paths', 'testsresults-tmp' ) )
                     if not os.path.exists( tmpPath ):
-                        os.mkdir( tmpPath, 0755 )
+                        os.mkdir( tmpPath, 0o755 )
                 except Exception as e:
                     self.trace( "dir %s already exist: %s" % (tmpPath, str(e)) )
             # create main dir
             try: 
                 mainDir = self.getDirProject(envTmp=envTmp)
                 if not os.path.exists( mainDir ):
-                    os.mkdir( mainDir, 0755 )
+                    os.mkdir( mainDir, 0o755 )
             except Exception as e:
                 self.trace( "dir project %s already exist: %s" % (mainDir, str(e)) )
             try: 
                 mainDir = self.getDirToday(envTmp=envTmp)
                 if not os.path.exists( mainDir ):
-                    os.mkdir( mainDir, 0755 )
+                    os.mkdir( mainDir, 0o755 )
             except Exception as e:
                 self.trace( "dir date %s already exist: %s" % (mainDir, str(e)) )
                 
             # create specific folder
-            os.mkdir( self.getPath(envTmp=envTmp), 0755 )
+            os.mkdir( self.getPath(envTmp=envTmp), 0o755 )
             
         except OSError as e:
             self.error( 'unable to prepare the directory, system error: %s' % str(e) )
@@ -1376,11 +1448,11 @@ class Task(Logger.ClassLogger):
                             
                     if ts['enable'] == TestModel.TS_ENABLED:
                         subte = SubTestModel.createSubTest( dataTest = ts, descriptions=dataTest['properties']['descriptions']['description'],
-                                                                trPath=self.getTestPath(),
-                                                        defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                        defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
-                                                        isTestUnit=isSubTu, isTestAbstract=isSubTa,
-                                                        isTestPlan=isTp, isTestGlobal=isTg )
+                                                            trPath=self.getTestPath(),
+                                                            defaultLibrary=RepoLibraries.instance().getDefaultV2(),
+                                                            defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
+                                                            isTestUnit=isSubTu, isTestAbstract=isSubTa,
+                                                            isTestPlan=isTp, isTestGlobal=isTg )
                         sub_tes.append( subte )
 
         except Exception as e:
@@ -1395,13 +1467,19 @@ class Task(Logger.ClassLogger):
             if envTmp: # not alter data in tmp env
                 dataTest = copy.deepcopy(self.dataTest)
 
-            te = TestModel.createTestExecutable(    dataTest = dataTest, userName=self.userName, testName=self.testName, 
-                                                    trPath=self.getTestPath(), logFilename=self.completeId(), withoutProbes=self.withoutProbes,
-                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(), defaultAdapter=RepoAdapters.instance().getDefaultV2(),
-                                                    userId=self.userId, projectId=self.projectId, subTEs=len(sub_tes), channelId=self.channelId,
-                                                    parametersShared=Context.instance().getTestEnvironment(user=self.userName),
-                                                    stepByStep=self.stepByStep, breakpoint=self.breakpoint, testId=self.testId, testLocation=self.getTestLocation(),
-                                                    runningAgents=AgentsManager.instance().getRunning(), runningProbes=ProbesManager.instance().getRunning()
+            te = TestModel.createTestExecutable(    dataTest = dataTest, userName=self.userName, 
+                                                    testName=self.testName, trPath=self.getTestPath(), 
+                                                    logFilename=self.completeId(), withoutProbes=self.withoutProbes,
+                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
+                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                    userId=self.userId, projectId=self.projectId, 
+                                                    subTEs=len(sub_tes), channelId=self.channelId,
+                                                    parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName),
+                                                    stepByStep=self.stepByStep, breakpoint=self.breakpoint, 
+                                                    testId=self.testId, testLocation=self.getTestLocation(),
+                                                    runningAgents=AgentsManager.instance().getRunning(), 
+                                                    runningProbes=ProbesManager.instance().getRunning(),
+                                                    taskUuid=self.taskUuid
                                                 )
         except Exception as e:
             self.error( 'unable to create the main te: %s' % e )
@@ -1442,7 +1520,8 @@ class Task(Logger.ClassLogger):
             f.close()
             if not envTmp:
                 self.saveTestDescr()
-                RepoArchives.instance().cacheUuid(taskId=self.taskUuid, testPath=self.getPath(envTmp=False, fullPath=False))
+                RepoArchives.instance().cacheUuid(taskId=self.taskUuid, 
+                                                  testPath=self.getPath(envTmp=False, fullPath=False))
 
             self.trace("Writing log file")
             # write log
@@ -1456,11 +1535,15 @@ class Task(Logger.ClassLogger):
             cfgtest_path = "%s/test.ini" % self.getPath(envTmp=envTmp)
             cfgparser = ConfigParser.RawConfigParser()
             cfgparser.read( cfgtest_path )
-            cfgparser.set('Paths', 'tmp', "%s/%s/" % ( StorageDataAdapters.instance().getStoragePath(), self.getPath(fullPath=False) ) )
-            cfgparser.set('Paths', 'templates', "%s/%s/" % ( Settings.getDirExec(), Settings.get( 'Paths', 'templates' ) ) )
+            cfgparser.set('Paths', 'tmp', "%s/%s/" % ( StorageDataAdapters.instance().getStoragePath(), 
+                                                       self.getPath(fullPath=False) ) )
+            cfgparser.set('Paths', 'templates', "%s/%s/" % ( Settings.getDirExec(), 
+                                                             Settings.get( 'Paths', 'templates' ) ) )
             cfgparser.set('Paths', 'result', "%s" % self.getPath(envTmp=envTmp) )
-            cfgparser.set('Paths', 'sut-adapters', "%s/%s/" % ( Settings.getDirExec(), Settings.get( 'Paths', 'adapters' ) ) )
-            cfgparser.set('Paths', 'public', "%s/%s/" % ( Settings.getDirExec(), Settings.get( 'Paths', 'public' ) ) )
+            cfgparser.set('Paths', 'sut-adapters', "%s/%s/" % ( Settings.getDirExec(), 
+                                                                Settings.get( 'Paths', 'adapters' ) ) )
+            cfgparser.set('Paths', 'public', "%s/%s/" % ( Settings.getDirExec(), 
+                                                          Settings.get( 'Paths', 'public' ) ) )
             
             cfgparser.set('Tests_Framework', 'continue-on-step-error', '%s' % Settings.get( 'Tests_Framework', 'continue-on-step-error' ) )
             cfgparser.set('Tests_Framework', 'header-test-report', '%s' % Settings.get( 'Tests_Framework', 'header-test-report' ) )
@@ -1540,8 +1623,9 @@ class Task(Logger.ClassLogger):
                     notif = {}
                     notif['archive'] = m 
                     data = ( 'archive', ( None, notif) ) 
-                    ESI.instance().notifyByUserAndProject(body = data, admin=True, leader=False, tester=True, developer=False, 
-                                                            projectId="%s" % self.projectId)
+                    ESI.instance().notifyByUserAndProject(  body = data, admin=True, leader=False, 
+                                                            tester=True, developer=False, 
+                                                            projectId="%s" % self.projectId )
         
         # Compilation
         if self.syntaxOK:
@@ -1552,7 +1636,6 @@ class Task(Logger.ClassLogger):
             for i in xrange(len(sub_tes)):
                 try:
                     parser.suite(sub_tes[i]).compile()
-                    #compiler.parse(sub_tes[i])
                 except SyntaxError as e:
                     e.lineno = None
                     self.trace( 'unable to compile sub te syntax te: %s' % e )
@@ -1606,8 +1689,12 @@ class Task(Logger.ClassLogger):
             testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults-tmp' ) )
         else:
             testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
-        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
-                                            self.completeId(), self.testName, str(self.replayId) )
+        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  
+                                           self.projectId, 
+                                           time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                           self.completeId(), 
+                                           self.testName, 
+                                           str(self.replayId) )
         try:
             if returnXml:
                 f = open( '%s.%s' % (fileName, RepoManager.TEST_RESULT_DESIGN_XML_EXT) , 'r'  )
@@ -1642,8 +1729,12 @@ class Task(Logger.ClassLogger):
         """
         reports = ''
         testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
-        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
-                                            self.completeId(), self.testName, str(self.replayId) )
+        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  
+                                           self.projectId, 
+                                           time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                           self.completeId(), 
+                                           self.testName, 
+                                           str(self.replayId) )
         try:
             
             if returnXml:
@@ -1722,9 +1813,12 @@ class Task(Logger.ClassLogger):
         """
         testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
 
-        dirTask = "%s/%s/%s/" % ( self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)),  self.completeId() )
+        dirTask = "%s/%s/%s/" % ( self.projectId, 
+                                  time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)),  
+                                  self.completeId() )
         
-        # Search the file on the disk because the number of current comment can be different that the value known by the user
+        # Search the file on the disk because the number of current comment can 
+        # be different that the value known by the user
         trxFile = 'undefined'
         for f in os.listdir( "%s/%s" % (testResultPath,dirTask) ):
             if f.startswith( "%s_%s" % (self.testName, str(self.replayId)) ) and f.endswith('trx'):
@@ -1738,9 +1832,15 @@ class Task(Logger.ClassLogger):
         filename = testname_replayid_nbcomments_verdict.testresult
         """
         testResultPath = '%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
-        dirTask = "%s/%s/%s/" % ( self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)),  self.completeId() )
-        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
-                                            self.completeId(), self.testName, str(self.replayId) )
+        dirTask = "%s/%s/%s/" % ( self.projectId, 
+                                  time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)),
+                                  self.completeId() )
+        fileName = "%s/%s/%s/%s/%s_%s" % ( testResultPath,  
+                                           self.projectId, 
+                                           time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                           self.completeId(), 
+                                           self.testName, 
+                                           str(self.replayId) )
         try:
             os.path.getsize( "%s.log" % fileName )
         except Exception as e:
@@ -1758,9 +1858,13 @@ class Task(Logger.ClassLogger):
         f2.close()
         
         # get final result
-        # this file "VERDICT" is created by the test library throught the function "log_script_stopped"
+        # this file "VERDICT" is created by the test library throught 
+        # the function "log_script_stopped"
         verdict = 'UNDEFINED'
-        path_verdict = "%s/%s/%s/%s/" % ( testResultPath,  self.projectId, time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), self.completeId() )
+        path_verdict = "%s/%s/%s/%s/" % ( testResultPath,  
+                                          self.projectId, 
+                                          time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                                          self.completeId() )
         if os.path.exists( "%s/VERDICT_PASS" % path_verdict ):
             verdict = 'PASS'
         if os.path.exists( "%s/VERDICT_FAIL" % path_verdict  ):
@@ -1794,7 +1898,10 @@ class Task(Logger.ClassLogger):
         # construct data model
         dataModel = TestResult.DataModel(testResult=read_data, testHeader=read_header)
         nbComments = 0
-        filenameTrx = "%s_%s_%s.%s" % (fileName, verdict, str(nbComments), RepoManager.TEST_RESULT_EXT) 
+        filenameTrx = "%s_%s_%s.%s" % ( fileName, 
+                                        verdict, 
+                                        str(nbComments), 
+                                        RepoManager.TEST_RESULT_EXT ) 
         f = open( filenameTrx, 'wb')
         raw_data = dataModel.toXml()
         f.write( zlib.compress( raw_data ) )
@@ -1811,31 +1918,48 @@ class Task(Logger.ClassLogger):
             if self.noKeepTr and self.verdict != 'PASS':
                 self.trace('no keep test result option activated: notify the test result because the result if different of pass')
                 # msg ( dest, ( action, data ) )
-                m = [   {   "type": "folder", "project": "%s" % self.projectId, "name": time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
-                            "content": [ { "project": "%s" % self.projectId, "type": "folder", "name": self.completeId(),"content": [], "virtual-name": self.completeId(withTestPath=True)} ] }  ]
+                m = [   {   "type": "folder", 
+                            "project": "%s" % self.projectId, 
+                            "name": time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                            "content": [ { "project": "%s" % self.projectId,
+                                           "type": "folder", 
+                                           "name": self.completeId(),
+                                           "content": [], 
+                                           "virtual-name": self.completeId(withTestPath=True)} ] }  ]
                 notif = {}
                 notif['archive'] = m 
                 data = ( 'archive', ( None, notif) ) 
 
-                ESI.instance().notifyByUserAndProject(body = data, admin=True, leader=False, tester=True, developer=False, projectId="%s" % self.projectId)
+                ESI.instance().notifyByUserAndProject(body = data, admin=True, leader=False, tester=True, 
+                                                      developer=False, projectId="%s" % self.projectId)
 
             if self.noKeepTr and self.verdict == 'PASS':
                 self.trace('no keep test result option activated: do not notify the user because the result is pass')
             else:
                 size_ = os.path.getsize( filenameTrx )
                 notif = {}
-                m = [   {   "type": "folder", "name": time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), "project": "%s" % self.projectId, 
-                            "content": [ {  "type": "folder", "name": self.completeId(), "project": "%s" % self.projectId, "virtual-name": self.completeId(withTestPath=True),
+                m = [   {   "type": "folder", 
+                            "name": time.strftime("%Y-%m-%d", time.localtime(self.prepareTime)), 
+                            "project": "%s" % self.projectId, 
+                            "content": [ {  "type": "folder", 
+                                            "name": self.completeId(), 
+                                            "project": "%s" % self.projectId, 
+                                            "virtual-name": self.completeId(withTestPath=True),
                             "content": [ { "type": "file", "project": "%s" % self.projectId, 
-                                           "name": "%s_%s_%s_%s.%s" % ( self.testName, str(self.replayId), verdict, str(nbComments), RepoManager.TEST_RESULT_EXT ),
+                                           "name": "%s_%s_%s_%s.%s" % ( self.testName, 
+                                                                        str(self.replayId), 
+                                                                        verdict, 
+                                                                        str(nbComments), 
+                                                                        RepoManager.TEST_RESULT_EXT ),
                                            'size': str(size_) } ]} ] }  ]
                 notif['archive'] = m 
-                notif['stats-repo-archives'] = {    'nb-zip':0, 'nb-trx':1, 'nb-tot': 1,
-                                                'mb-used': RepoArchives.instance().getSizeRepoV2(folder=RepoArchives.instance().testsPath),
-                                                'mb-free': RepoArchives.instance().freeSpace(p=RepoArchives.instance().testsPath) }
+                notif['stats-repo-archives'] = { 'nb-zip':0, 'nb-trx':1, 'nb-tot': 1,
+                                                 'mb-used': RepoArchives.instance().getSizeRepoV2(folder=RepoArchives.instance().testsPath),
+                                                 'mb-free': RepoArchives.instance().freeSpace(p=RepoArchives.instance().testsPath) }
                 data = ( 'archive', ( None, notif) )    
 
-                ESI.instance().notifyByUserAndProject(body = data, admin=True, leader=False, tester=True, developer=False, projectId="%s" % self.projectId)
+                ESI.instance().notifyByUserAndProject(body = data, admin=True, leader=False, tester=True, 
+                                                      developer=False, projectId="%s" % self.projectId)
                 
         # not necessary to keep test results logs, delete it
         if self.noKeepTr:
@@ -1895,7 +2019,6 @@ class Task(Logger.ClassLogger):
             # -O : optimize generated bytecode slightly
             if Settings.get( 'Bin', 'optimize-test' ) != "True":
                 args.append( "-O" )
-            #args.append( "%s/%s" % (self.getPath(), self.completeId() ) )
             args.append( "%s/MainTE.py" % self.getPath() ) # change in v16
             args = args + cmdOptions
             
@@ -1938,8 +2061,8 @@ class Task(Logger.ClassLogger):
                 self.notifResultMail()
 
             # Update stats
-            StatsManager.instance().addResultScript( self.state, self.userId, 
-                                                    self.duration, self.projectId )
+            self.statsmgr.addResultScript( self.state, self.userId, 
+                                           self.duration, self.projectId )
             
             if not self.noKeepTr:
                 # Inspect the data storage adapters, zip data if present 
@@ -2008,13 +2131,13 @@ class Task(Logger.ClassLogger):
             else:
                 self.trace( 'task state: notification on this state not authorized: %s' % self.state )
 
-            if self.verdict == StatsManager.PASS and notifs_bool[0]:
+            if self.verdict == self.statsmgr.PASS and notifs_bool[0]:
                 self.trace( 'test verdict [%s]: notification user option activated, mail to sent' % self.verdict )
                 self.sendMail(userTo=user_profile['email'])
-            elif self.verdict == StatsManager.FAIL and notifs_bool[1]:
+            elif self.verdict == self.statsmgr.FAIL and notifs_bool[1]:
                 self.trace( 'test verdict [%s]: notification user option activated, mail to sent' % self.verdict )
                 self.sendMail(userTo=user_profile['email'])
-            elif self.verdict == StatsManager.UNDEFINED and notifs_bool[2]:
+            elif self.verdict == self.statsmgr.UNDEFINED and notifs_bool[2]:
                 self.trace( 'test verdict [%s]: notification user option activated, mail to sent' % self.verdict )
                 self.sendMail(userTo=user_profile['email'])
             else:
@@ -2090,11 +2213,15 @@ class Task(Logger.ClassLogger):
         return success
 
 class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
-    def __init__(self):
+    def __init__(self, statsmgr, context):
         """
         Construct Task Manager
         """
         Scheduler.SchedulerThread.__init__(self, out=self.trace, err=self.error)
+        
+        self.statsmgr = statsmgr
+        self.ctx = context
+        
         self.mutex = threading.RLock()
         self.tasks = []
         self.enqueuedTasks = {}
@@ -2222,7 +2349,8 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                 self.enqueuedTasks[ (groupId, userName) ] = tests
 
             # register the first test
-            self.runQueueTask(tst=tst, groupId=groupId, userName=userName, runAt=runAt, queueAt=queueAt)
+            self.runQueueTask(tst=tst, groupId=groupId, userName=userName, 
+                              runAt=runAt, queueAt=queueAt)
 
         return True
 
@@ -2266,13 +2394,14 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
             runType = SCHED_QUEUE_AT
         try:
             task = self.registerTask( 
-                        testData=tst['test-data'], testName=tst['test-name'], testPath=tst['test-path'], testUserId=user_profile['id'],
-                        testUser=userName, testId=groupId, testBackground=True,
-                        runAt=runAt, runType=runType, runNb=-1, withoutProbes=False,
-                        debugActivated=False, withoutNotif=False, noKeepTr=False,
-                        testProjectId=tst['prj-id'], runFrom=(0,0,0,0,0,0), runTo=(0,0,0,0,0,0),
-                        groupId=groupId
-                    )
+                                        testData=tst['test-data'], testName=tst['test-name'], 
+                                        testPath=tst['test-path'], testUserId=user_profile['id'],
+                                        testUser=userName, testId=groupId, testBackground=True,
+                                        runAt=runAt, runType=runType, runNb=-1, withoutProbes=False,
+                                        debugActivated=False, withoutNotif=False, noKeepTr=False,
+                                        testProjectId=tst['prj-id'], runFrom=(0,0,0,0,0,0), runTo=(0,0,0,0,0,0),
+                                        groupId=groupId
+                                    )
         except Exception as e:
             self.error( "group tasks, error detected: %s" % e )
             self.runQueueNextTask(groupId=groupId, userName=userName)
@@ -2336,7 +2465,8 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         """
         ret = None
         try:
-            sql = "INSERT INTO `%s`( `eventtype`,`eventargs`,`eventtime`,`eventname`,`eventauthor`,`realruntime`,`eventduration`,`eventresult`,`projectid`)" % self.TN_HISTORY
+            sql = "INSERT INTO `%s`( `eventtype`,`eventargs`,`eventtime`,`eventname`," % self.TN_HISTORY
+            sql += "`eventauthor`,`realruntime`,`eventduration`,`eventresult`,`projectid`)" 
             sql += "VALUES(%s, \"%s\", %s, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", %s)" % task.toTuple()
             ret, lastinsertid = DbManager.instance().querySQL(sql, insertData=True)
         except Exception as e:
@@ -2376,9 +2506,20 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                 # Unpack data 
                 testName, userName, testPath, testName, dataTest, testId, background, schedType, schedAt, schedNb, \
                 enabled, withoutProbes, withoutNotif, noKeepTr, userId, projectId, schedFrom, schedTo = taskData
-                self.trace( "Loading backup [Sched-Type=%s] [Sched-At=%s] [Sched-Nb=%s] [TestName=%s]" % (schedType, schedAt, schedNb, testName) )
-                self.trace( "Loading backup. [UserName=%s] [Background=%s] [Enabled=%s] [WithoutProbes=%s] [WithoutNotif=%s]" % (userName, background, enabled, withoutProbes, withoutNotif) )
-                self.trace( "Loading backup.. [NoKeepTr=%s] [UserId=%s] [ProjectId=%s] [Sched-From=%s] [Sched-To=%s]" % (noKeepTr, userId, projectId, schedFrom, schedTo) )
+                self.trace( "Loading backup [Sched-Type=%s] [Sched-At=%s] [Sched-Nb=%s] [TestName=%s]" % (schedType, 
+                                                                                                          schedAt, 
+                                                                                                          schedNb, 
+                                                                                                          testName) )
+                self.trace( "Loading backup. [UserName=%s] [Background=%s] [Enabled=%s] [WithoutProbes=%s] [WithoutNotif=%s]" % (userName, 
+                                                                                                                                 background, 
+                                                                                                                                 enabled, 
+                                                                                                                                 withoutProbes, 
+                                                                                                                                 withoutNotif) )
+                self.trace( "Loading backup.. [NoKeepTr=%s] [UserId=%s] [ProjectId=%s] [Sched-From=%s] [Sched-To=%s]" % (noKeepTr, 
+                                                                                                                         userId, 
+                                                                                                                         projectId, 
+                                                                                                                         schedFrom, 
+                                                                                                                         schedTo) )
 
                 # Remove backup file
                 self.trace( 'deleting old backup %s' % fb )
@@ -2393,7 +2534,8 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                             task = self.reloadTask( testData=dataTest, testName=testName, testPath=testPath, testUser=userName,
                                                     testId=testId, testBackground=background, runAt=schedAt, runType=schedType,
                                                     runNb=schedNb, runEnabled=enabled, withoutProbes=withoutProbes, withoutNotif=withoutNotif,
-                                                    noKeepTr=noKeepTr, testUserId=userId, testProjectId=projectId, runFrom=schedFrom, runTo=schedTo )
+                                                    noKeepTr=noKeepTr, testUserId=userId, testProjectId=projectId, runFrom=schedFrom, 
+                                                    runTo=schedTo )
                             if task is None:
                                 success = False
                         except Exception as e:
@@ -2502,13 +2644,14 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         historyTasks = []
         # new in v10, return only running task according to the user
         if user is not None:
-            if isinstance(user, Context.UserContext):
+            if isinstance(user, self.ctx.UserContext):
                 prjs = user.getProjects(b64=False)
             else:
                 prjs = ProjectsManager.instance().getProjects( user=user, b64=False)
         # end of new in v10
         
-        sql = """SELECT `id`, `eventtype`, `eventargs`, `eventtime`, `eventname`, `eventauthor`, `realruntime`, `eventduration`, `eventresult`, `projectid` FROM `%s` """ % self.TN_HISTORY
+        sql = """SELECT `id`, `eventtype`, `eventargs`, `eventtime`, `eventname`, `eventauthor`,"""
+        sql += """ `realruntime`, `eventduration`, `eventresult`, `projectid` FROM `%s` """ % self.TN_HISTORY
         # new in v10, return only history task according to the user
         if user is not None:
             sql += " WHERE "
@@ -2544,7 +2687,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         waitingTasks = []
         # new in v10, return only running task according to the user
         if user is not None:
-            if isinstance(user, Context.UserContext):
+            if isinstance(user, self.ctx.UserContext):
                 prjs = user.getProjects(b64=False)
             else:
                 prjs = ProjectsManager.instance().getProjects( user=user, b64=False)
@@ -2575,7 +2718,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         runningTasks = []
         # new in v10, return only running task according to the user
         if user is not None:
-            if isinstance(user, Context.UserContext):
+            if isinstance(user, self.ctx.UserContext):
                 prjs = user.getProjects(b64=False)
             else:
                 prjs = ProjectsManager.instance().getProjects( user=user, b64=False)
@@ -2611,7 +2754,32 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
             if task.getId() == taskId:
                 return task
         return None
+    
+    def getTaskBy(self, taskId, userName=None):
+        """
+        Returns the task corresponding to the id passed as argument, otherwise None
 
+        @param taskId:
+        @type taskId:
+
+        @return:
+        @rtype:
+        """
+        ret = self.ctx.instance().CODE_NOT_FOUND
+        for task in self.tasks:
+            if task.getId() == taskId:
+                if userName is not None:
+                    if task.userName != userName:
+                        self.trace( 'access to this task is denied %s' % userName )
+                        ret = self.ctx.instance().CODE_FORBIDDEN
+                    else:
+                        ret = task
+                        break
+                else:   
+                    ret= task
+                    break
+        return ret
+        
     def executeTask (self, task, needPrepare=True):
         """
         Execute the task gived on argument
@@ -2623,7 +2791,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         testThread = threading.Thread(target = lambda: task.run(needPrepare=needPrepare)) 
         testThread.start()
     
-    def replayTask (self, tid):
+    def replayTask (self, tid, userName=None):
         """
         Replay the task 
 
@@ -2636,28 +2804,36 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         self.trace( "replaying task" )
         task = self.getTask( taskId = tid )
         if task is None:
-            self.error( 'task %s not found' % tid )
-            return False
+            self.trace( 'task %s not found' % tid )
+            return self.ctx.instance().CODE_NOT_FOUND
+        
+        if userName is not None:
+            if task.userName != userName:
+                self.trace( 'access to this task is denied %s' % userName )
+                return self.ctx.instance().CODE_FORBIDDEN
+        
+        # continue all is ok
         task.setReplayId()
         testRegistered = TSI.instance().registerTest( id =  task.getId() , background = task.background )
         if not testRegistered:
             msg_err = 'unable to register the task in the system'
             self.error( msg_err )
-            return False
+            return self.ctx.instance().CODE_ERROR
         
         self.trace( "Re-backup the test" )
         taskBackuped = self.backupTask(task=task)
         if not taskBackuped :
             msg_err = 'Unable to backup the task in the system'
             self.error( msg_err )
-            return False
+            return self.ctx.instance().CODE_ERROR
 
         self.executeTask( task = task )
-        return True
+        return self.ctx.instance().CODE_OK
 
     def reloadTask(self, testData, testName, testPath, testUser, testId, testBackground, runAt,
-                        runType, runNb, runEnabled, withoutProbes, withoutNotif, noKeepTr, testUserId, testProjectId, 
-                         runFrom, runTo):
+                    runType, runNb, runEnabled, withoutProbes, withoutNotif, noKeepTr, 
+                    testUserId, testProjectId, 
+                    runFrom, runTo):
         """
         Reload a specific task
 
@@ -2737,10 +2913,13 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         else:
             return False
 
-    def registerTask(self, testData, testName, testPath, testUser, testId, testBackground, runAt, runType, runNb, runEnabled=True,
-                    withoutProbes=False, debugActivated=False, withoutNotif=False, noKeepTr=False, testUserId=0, testProjectId=0,
-                    runFrom=(0,0,0,0,0,0), runTo=(0,0,0,0,0,0), groupId=None, stepByStep=False, breakpoint=False, runSimultaneous=False,
-                    channelId=False):
+    def registerTask(self, testData, testName, testPath, testUser, testId, testBackground, 
+                     runAt, runType, runNb, runEnabled=True,
+                     withoutProbes=False, debugActivated=False, withoutNotif=False, 
+                     noKeepTr=False, testUserId=0, testProjectId=0,
+                     runFrom=(0,0,0,0,0,0), runTo=(0,0,0,0,0,0), groupId=None, stepByStep=False, 
+                     breakpoint=False, runSimultaneous=False,
+                     channelId=False):
         """
         - Get id from the scheduler
         - Check the syntax of test on the temp environment
@@ -2779,15 +2958,29 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         self.mutex.acquire()
         self.trace( "Scheduling task" )
         
-        self.trace( "Registering task [Run-Type=%s] [Run-At=%s] [Run-Nb=%s] [TestName=%s] [TestUser=%s]" % (runType, runAt, runNb, testName, testUser) )
-        self.trace( "Registering task. [InBackground=%s] [Run-Enabled=%s] [WithoutProbes=%s] [Debug=%s] [Notif=%s]" % (testBackground, runEnabled, withoutProbes, debugActivated, withoutNotif) )
-        self.trace( "Registering task.. [NoKeepTr=%s] [UserId=%s] [ProjectId=%s] [Run-From=%s]" % (noKeepTr, testUserId, testProjectId, runFrom) )
-        self.trace( "Registering task... [Run-To=%s] [StepByStep=%s] [Breakpoint=%s] [ChannelId=%s]" % (runTo, stepByStep, breakpoint, channelId) )
+        self.trace( "Registering task [Run-Type=%s] [Run-At=%s] [Run-Nb=%s] [TestName=%s] [TestUser=%s]" % (runType, 
+                                                                                                            runAt, 
+                                                                                                            runNb, 
+                                                                                                            testName, 
+                                                                                                            testUser) )
+        self.trace( "Registering task. [InBackground=%s] [Run-Enabled=%s] [WithoutProbes=%s] [Debug=%s] [Notif=%s]" % (testBackground, 
+                                                                                                                       runEnabled, 
+                                                                                                                       withoutProbes, 
+                                                                                                                       debugActivated, 
+                                                                                                                       withoutNotif) )
+        self.trace( "Registering task.. [NoKeepTr=%s] [UserId=%s] [ProjectId=%s] [Run-From=%s]" % ( noKeepTr, 
+                                                                                                    testUserId, 
+                                                                                                    testProjectId, 
+                                                                                                    runFrom) )
+        self.trace( "Registering task... [Run-To=%s] [StepByStep=%s] [Breakpoint=%s] [ChannelId=%s]" % (runTo, 
+                                                                                                        stepByStep,
+                                                                                                        breakpoint, 
+                                                                                                        channelId) )
 
-        task = Task(    testData=testData, testName=testName, testPath=testPath, testUser=testUser, testId=testId, testUserId=testUserId,
-                        testBackground=testBackground, taskEnabled=runEnabled, withoutProbes=withoutProbes, debugActivated=debugActivated,
-                        withoutNotif=withoutNotif, noKeepTr=noKeepTr, testProjectId=testProjectId, stepByStep=stepByStep, breakpoint=breakpoint,
-                        runSimultaneous=runSimultaneous, channelId=channelId)
+        task = Task( testData=testData, testName=testName, testPath=testPath, testUser=testUser, testId=testId, testUserId=testUserId,
+                     testBackground=testBackground, taskEnabled=runEnabled, withoutProbes=withoutProbes, debugActivated=debugActivated,
+                     withoutNotif=withoutNotif, noKeepTr=noKeepTr, testProjectId=testProjectId, stepByStep=stepByStep, breakpoint=breakpoint,
+                     runSimultaneous=runSimultaneous, channelId=channelId, statsmgr=self.statsmgr, context=self.ctx)
         task.setId( self.getEventId() )
 
         if groupId is not None:
@@ -2829,8 +3022,9 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         # Initialize the task with the start time 
         if isinstance(runAt, tuple) or isinstance(runAt, list):
             self.trace( "Task %s init" % task.getId() )
-            timesec = task.initialize( runAt=runAt, runType=runType, runNb=runNb, runEnabled=runEnabled, withoutProbes=withoutProbes, 
-                                        debugActivated=debugActivated, withoutNotif=withoutNotif, noKeepTr=noKeepTr,
+            timesec = task.initialize( runAt=runAt, runType=runType, runNb=runNb, runEnabled=runEnabled, 
+                                       withoutProbes=withoutProbes, debugActivated=debugActivated, 
+                                       withoutNotif=withoutNotif, noKeepTr=noKeepTr,
                                        runFrom=runFrom, runTo=runTo)
             self.trace( "Task %s should run at %s" % (task.getId(),timesec) )
         else:
@@ -2849,7 +3043,8 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                 timeref = time.time()
                 while timesec < timeref:
                     self.trace( "Catches up the late for the task %s" % task.getId()  )
-                    timesec = self.getNextTime( schedType=task.schedType, shedAt=task.schedAt, schedArgs=task.schedArgs,
+                    timesec = self.getNextTime( schedType=task.schedType, shedAt=task.schedAt, 
+                                                schedArgs=task.schedArgs,
                                                 schedFrom=runFrom, schedTo=runTo)
                     task.schedAt = timesec
                     # BEGIN new in 3.2.0
@@ -2898,7 +3093,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
 
         #  Save the task on the list and notify all connected users
         self.tasks.append(task)     
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-waiting', ( "update", self.getWaiting(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
@@ -2908,7 +3103,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         self.mutex.release()
         return task
 
-    def killTask(self, taskId):
+    def killTask(self, taskId, userName=None):
         """
         Kill a specific running task
 
@@ -2919,16 +3114,23 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         @rtype:
         """
         self.trace( "killing task %s" % taskId )
-        success = None
+        success = self.ctx.instance().CODE_ERROR
+        
         task = self.getTask( taskId = taskId )
         if task is None:
             self.error( 'task %s not found' % taskId )
+            success = self.ctx.instance().CODE_NOT_FOUND
         else:
+            if userName is not None:
+                if task.userName != userName:
+                    self.trace( 'access to this task is denied %s' % userName )
+                    return self.ctx.instance().CODE_FORBIDDEN
+                    
             if task.state == STATE_RUNNING:
                 task.setState( state=STATE_KILLING )
                 killed = task.killTest()
                 if killed:
-                    success = taskId
+                    success = self.ctx.instance().CODE_OK
                     self.info( 'Task %s killed' % str(taskId) ) 
         return success
     
@@ -2955,7 +3157,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         del tasksToRemove
         return success
 
-    def cancelTask(self, taskId):
+    def cancelTask(self, taskId, userName=None):
         """
         Cancel a specific waiting task
 
@@ -2963,20 +3165,27 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         @rtype:
         """
         self.trace( "cancelling task %s" % taskId )
-        success = None
+        success = self.ctx.instance().CODE_ERROR
+        
         task = self.getTask( taskId = taskId )
         if task is None:
             self.error( 'task %s not found' % taskId )
+            success = self.ctx.instance().CODE_NOT_FOUND
         else:
+            if userName is not None:
+                if task.userName != userName:
+                    self.trace( 'access to this task is denied %s' % userName )
+                    return self.ctx.instance().CODE_FORBIDDEN
+                    
             if task.state == STATE_WAITING or task.state == STATE_DISABLED:
                 taskCancelled = task.cancelTest()
                 if not taskCancelled:
                     self.error( 'unable to cancel the following task %s' % task.getId() )
                 else:
-                    success = taskId
+                    success = self.ctx.instance().CODE_OK
                     self.info( 'Task %s cancelled' % str(taskId) ) 
 
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-waiting', ( "update", self.getWaiting(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
@@ -3005,7 +3214,7 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
             self.removeTask(task=task)
         del tasksToRemove       
 
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-waiting', ( "update", self.getWaiting(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
@@ -3024,13 +3233,15 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                 raise Exception("sql problem: %s" % self.TN_HISTORY)
         except Exception as e:
             self.error('unable to delete all tasks from history: %s' % str(e) )
+            return False
             
         # notify all connected users
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-history', ( "update", self.getHistory(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
         del connected
+        return True
         
     def onTaskFinished(self, task):
         """
@@ -3110,7 +3321,8 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                             taskEnabled=task.enabled, withoutProbes=task.withoutProbes, withoutNotif=task.withoutNotif,
                             debugActivated=task.debugActivated, noKeepTr=task.noKeepTr, testProjectId=task.projectId,
                             stepByStep=task.stepByStep, breakpoint=task.breakpoint,
-                            runSimultaneous=task.runSimultaneous, channelId=task.channelId
+                            runSimultaneous=task.runSimultaneous, channelId=task.channelId, 
+                            statsmgr=self.statsmgr, context=self.ctx.instance()
                         )
         taskNew.taskUuid = task.taskUuid
         taskNew.setId( self.getEventId() )
@@ -3153,13 +3365,14 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
 
         # Register the task on the scheduler
         EventReg = self.registerEvent(  id=taskNew.getId(), author=taskNew.userName, name=taskNew.getTaskName(), 
-                                        weekly=None, daily=None, hourly=None, everyMin=None, everySec=None, at=None, delay=None, timesec=taskNew.schedAt,
+                                        weekly=None, daily=None, hourly=None, everyMin=None, everySec=None, 
+                                        at=None, delay=None, timesec=taskNew.schedAt,
                                         callback = self.executeTask, task = taskNew )
         taskNew.setEventReg( event=EventReg )
 
         # Save the task on the list and notify all connected users
         self.tasks.append(taskNew)
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-waiting', ( "update", self.getWaiting(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
@@ -3226,8 +3439,9 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         except Exception as e:
             self.error( 'Task [Id=%s] no more exists in the list: %s' % (task.getId(),str(e)) )
     
-    def updateTask(self, taskId, schedType, shedAt, schedNb,  schedEnabled=True, withoutProbes=False, debugActivated=False, noKeepTr=False,
-                                withoutNotif=False, schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0) ):
+    def updateTask(self, taskId, schedType, shedAt, schedNb,  schedEnabled=True, withoutProbes=False, 
+                    debugActivated=False, noKeepTr=False, withoutNotif=False, 
+                    schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0), userName=None ):
         """
         Update a specific task, change the start time
 
@@ -3241,14 +3455,22 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         @type shedAt:
         """
         self.trace( "update task %s" % taskId )
-        success = None
+        success = self.ctx.instance().CODE_ERROR
+        
         task = self.getTask( taskId = taskId )
         if task is None:
             self.error( 'task %s not found' % taskId )
+            success = self.ctx.instance().CODE_NOT_FOUND
         else:
+            if userName is not None:
+                if task.userName != userName:
+                    self.trace( 'access to this task is denied %s' % userName )
+                    return self.ctx.instance().CODE_FORBIDDEN
+                    
             # Initialize the task with the start time 
             timesec = task.initialize( runAt=shedAt, runType=schedType, runNb=schedNb, runEnabled=schedEnabled, withoutProbes=withoutProbes,
-                                        debugActivated=debugActivated, noKeepTr=noKeepTr, withoutNotif=withoutNotif, runFrom=schedFrom, runTo=schedTo)
+                                        debugActivated=debugActivated, noKeepTr=noKeepTr, withoutNotif=withoutNotif, 
+                                        runFrom=schedFrom, runTo=schedTo)
 
             if task.isRecursive():
                 timeref = time.time()
@@ -3261,12 +3483,13 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
             if task.state == STATE_DISABLED:
                 task.setState( state=STATE_UPDATING )
                 EventReg = self.registerEvent(  id=task.getId(), author=task.userName, name=task.getTaskName(), 
-                                        weekly=None, daily=None, hourly=None, everyMin=None, everySec=None, at=None, delay=None, timesec=task.schedAt,
-                                        callback = self.executeTask, task = task )
+                                                weekly=None, daily=None, hourly=None, everyMin=None, everySec=None, at=None, 
+                                                delay=None, timesec=task.schedAt,
+                                                callback = self.executeTask, task = task )
                 task.setState( state=STATE_WAITING )
                 task.setEventReg( event=EventReg )
                 self.info( 'Task %s enabled' % str(taskId) ) 
-                success = taskId
+                success = self.ctx.instance().CODE_OK
 
                 # Backup the task on the disk
                 self.trace( "Backup the test" )
@@ -3282,18 +3505,19 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                         self.error( 'unable to unregister the following task %s' % task.getId() )
                         task.setState( state=STATE_ERROR )
                     else:
-                        success = taskId
+                        success = self.ctx.instance().CODE_OK
                         task.setState( state=STATE_DISABLED )
                         self.info( 'Task %s disabled' % str(taskId) ) 
                 else:
                     # Update event in the scheduler
-                    taskRescheduled = TaskMngr.updateEvent( event = task.eventReg, weekly=None, daily=None, hourly=None, everyMin=None, everySec=None,
+                    taskRescheduled = TaskMngr.updateEvent( event = task.eventReg, weekly=None, daily=None, hourly=None, 
+                                                            everyMin=None, everySec=None,
                                                             at=None, delay=None, timesec=timesec )
                     if not taskRescheduled:
                         self.error( 'unable to update the following task %s' % task.getId() )
                         task.setState( state=STATE_ERROR )
                     else:
-                        success = taskId
+                        success = self.ctx.instance().CODE_OK
                         task.setState( state=STATE_WAITING )
                         self.info( 'Task %s updated' % str(taskId) ) 
             
@@ -3307,34 +3531,38 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                 self.error( 'invalid state during the update of the task [current state=%s]' % task.state )
                 
         # notify all connected users
-        connected = Context.instance().getUsersConnectedCopy()
+        connected = self.ctx.instance().getUsersConnectedCopy()
         for cur_user in connected:
             data = ( 'task-waiting', ( "update", self.getWaiting(user=cur_user)) )   
             ESI.instance().notify(body=data, toUser=cur_user)
         del connected
         return success
 
-    def resetHistoryInDb(self):
-        """
-        """
-        # init some shortcut
-        escape = MySQLdb.escape_string
-        
-        sql = "DELETE FROM `%s`;" % self.TN_HISTORY
-        dbRet, _ = DbManager.instance().querySQL( query = sql )
-        if not dbRet: 
-            self.error("unable to reset history tasks table")
-            return (Context.CODE_ERROR, "unable to reset history tasks table")
+    # def resetHistoryInDb(self):
+        # """
+        # """
+        # sql = "DELETE FROM `%s`;" % self.TN_HISTORY
+        # dbRet, _ = DbManager.instance().querySQL( query = sql )
+        # if not dbRet: 
+            # self.error("unable to reset history tasks table")
+            # return (self.ctx.instance().CODE_ERROR, "unable to reset history tasks table")
             
-        return (Context.CODE_OK, "" )
-###############################
-def getObjectTask (testData, testName, testPath, testUser, testId, testBackground, projectId=0):
+        # notify all connected users
+        # connected = self.ctx.instance().getUsersConnectedCopy()
+        # for cur_user in connected:
+            # data = ( 'task-history', ( "update", self.getHistory(user=cur_user)) )   
+            # ESI.instance().notify(body=data, toUser=cur_user)
+            
+        # return (self.ctx.instance().CODE_OK, "" )
+
+def getObjectTask (testData, testName, testPath, testUser, testId, testBackground, 
+                    projectId=0, statsmgr=None, context=None):
     """
     """
-    task = Task(testData, testName, testPath, testUser, testId, testBackground, testProjectId=projectId)
+    task = Task(testData, testName, testPath, testUser, testId, testBackground, 
+                testProjectId=projectId, statsmgr=statsmgr, context=context)
     return task
 
-###############################
 TaskMngr = None
 def instance ():
     """
@@ -3345,12 +3573,12 @@ def instance ():
     """
     return TaskMngr
 
-def initialize ():
+def initialize (statsmgr, context):
     """
     Instance creation
     """
     global TaskMngr
-    TaskMngr = TaskManager()
+    TaskMngr = TaskManager(statsmgr=statsmgr, context=context)
     TaskMngr.start()
 
 def finalize ():

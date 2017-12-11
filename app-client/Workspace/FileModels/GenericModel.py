@@ -120,6 +120,9 @@ class GenericModel(Logger.ClassLogger):
             raw = unicode( xmlraw ).encode('utf-8')
             compressed = zlib.compress( raw, self.compress ) 
             encoded = base64.b64encode( compressed )
+            
+            if sys.version_info > (3,):
+                encoded = encoded.decode("utf-8") 
         except Exception as e:
             self.error( e )
         return encoded

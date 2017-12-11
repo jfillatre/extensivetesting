@@ -44,6 +44,8 @@ try:
 except ImportError: # support python3
     from . import RemoteRepository
 import UserClientInterface as UCI
+import RestClientInterface as RCI
+
 
 class Repository(RemoteRepository.Repository):
     """
@@ -77,7 +79,7 @@ class Repository(RemoteRepository.Repository):
         """
         Check syntax of all libraries
         """
-        UCI.instance().checkSyntaxLibraries()
+        RCI.instance().checkSyntaxLibraries()
 
     def moreCreateActions(self):
         """
@@ -156,30 +158,40 @@ class Repository(RemoteRepository.Repository):
         """
         Set library as default
         """
-        pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-        UCI.instance().setDefaultLibrary(packageLibrary=pathFolder)
+        pathFolder = self.itemCurrent.getPath(withFileName = False, 
+                                              withFolderName=True)
+        RCI.instance().setDefaultLibrary(packageName=pathFolder)
 
     def setLibraryAsGeneric(self):
         """
         Set library as default
         """
-        pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-        UCI.instance().setGenericLibrary(packageLibrary=pathFolder)
+        pathFolder = self.itemCurrent.getPath(withFileName = False, 
+                                              withFolderName=True)
+        RCI.instance().setGenericLibrary(packageName=pathFolder)
         
     def moveRemoteFile(self, currentName, currentPath, currentExtension, newPath):
         """
         Reimplemented from RemoteRepository
         Move remote file
         """
-        UCI.instance().moveFileRepo( repo=UCI.REPO_LIBRARIES, mainPath=currentPath, FileName=currentName, extFile=currentExtension, newPath=newPath)
-
+        # UCI.instance().moveFileRepo( repo=UCI.REPO_LIBRARIES, mainPath=currentPath, 
+                                     # FileName=currentName, extFile=currentExtension, newPath=newPath)
+        RCI.instance().moveFileLibraries(filePath=currentPath, fileName=currentName, 
+                                         fileExt=currentExtension, 
+                                         newPath=newPath)
+                                     
     def moveRemoteFolder(self, currentName, currentPath, newPath):
         """
         Reimplemented from RemoteRepository
         Move remote folder
         """
-        UCI.instance().moveFolderRepo( repo=UCI.REPO_LIBRARIES, mainPath=currentPath, FolderName=currentName, newPath=newPath)
-
+        # UCI.instance().moveFolderRepo( repo=UCI.REPO_LIBRARIES, mainPath=currentPath, 
+                                       # FolderName=currentName, newPath=newPath)
+        RCI.instance().moveFolderLibraries(folderPath=currentPath, 
+                                           folderName=currentName, 
+                                           newPath=newPath)
+                                       
     def openRemoteFile (self, pathFile):
         """
         Reimplemented from RemoteRepository
@@ -188,8 +200,9 @@ class Repository(RemoteRepository.Repository):
         @param pathFile: 
         @type pathFile:
         """
-        UCI.instance().openFileRepo( repo=UCI.REPO_LIBRARIES, pathFile = pathFile)
-
+        # UCI.instance().openFileRepo( repo=UCI.REPO_LIBRARIES, pathFile = pathFile)
+        RCI.instance().openFileLibraries(filePath=pathFile)
+        
     def deleteAllFolders (self, pathFolder):
         """
         Reimplemented from RemoteRepository
@@ -198,8 +211,9 @@ class Repository(RemoteRepository.Repository):
         @param pathFolder: 
         @type pathFolder:
         """
-        UCI.instance().delDirAllRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder)
-
+        # UCI.instance().delDirAllRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder)
+        RCI.instance().removeFoldersLibraries(folderPath=pathFolder)
+        
     def deleteFile (self, pathFile):
         """
         Reimplemented from RemoteRepository
@@ -208,8 +222,9 @@ class Repository(RemoteRepository.Repository):
         @param pathFile: 
         @type pathFile:
         """
-        UCI.instance().delFileRepo(repo=UCI.REPO_LIBRARIES, pathFile=pathFile)
-
+        # UCI.instance().delFileRepo(repo=UCI.REPO_LIBRARIES, pathFile=pathFile)
+        RCI.instance().removeFileLibraries(filePath=pathFile)
+        
     def deleteFolder (self, pathFolder):
         """
         Reimplemented from RemoteRepository
@@ -218,8 +233,9 @@ class Repository(RemoteRepository.Repository):
         @param pathFolder: 
         @type pathFolder:
         """
-        UCI.instance().delDirRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder)
-
+        # UCI.instance().delDirRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder)
+        RCI.instance().removeFolderLibraries(folderPath=pathFolder)
+        
     def addFolder (self, pathFolder, folderName):
         """
         Reimplemented from RemoteRepository
@@ -231,15 +247,18 @@ class Repository(RemoteRepository.Repository):
         @param folderName: 
         @type folderName:
         """
-        UCI.instance().addDirRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder, folderName = folderName)
-
+        # UCI.instance().addDirRepo( repo=UCI.REPO_LIBRARIES, pathFolder=pathFolder, folderName = folderName)
+        RCI.instance().addFolderLibraries(folderPath=pathFolder, 
+                                          folderName = folderName)
+        
     def refresh(self):
         """
         Reimplemented from RemoteRepository
         Refresh
         """
-        UCI.instance().refreshRepo(repo=UCI.REPO_LIBRARIES)
-
+        # UCI.instance().refreshRepo(repo=UCI.REPO_LIBRARIES)
+        RCI.instance().listingLibraries()
+        
     def renameFile (self, mainPath, oldFileName, newFileName, extFile):
         """
         Reimplemented from RemoteRepository
@@ -257,8 +276,13 @@ class Repository(RemoteRepository.Repository):
         @param extFile: 
         @type extFile:
         """
-        UCI.instance().renameFileRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFileName=oldFileName, newFileName= newFileName, extFile=extFile)
-
+        # UCI.instance().renameFileRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, 
+                                        # oldFileName=oldFileName, newFileName= newFileName, extFile=extFile)
+        RCI.instance().renameFileLibraries( filePath=mainPath, 
+                                            fileName=oldFileName, 
+                                            fileExt=extFile, 
+                                            newName=newFileName)
+                                             
     def renameFolder (self, mainPath, oldFolderName, newFolderName):
         """
         Reimplemented from RemoteRepository
@@ -273,8 +297,12 @@ class Repository(RemoteRepository.Repository):
         @param newFolderName: 
         @type newFolderName:
         """
-        UCI.instance().renameDirRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFolder=oldFolderName, newFolder=newFolderName)
-
+        # UCI.instance().renameDirRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, 
+                                     # oldFolder=oldFolderName, newFolder=newFolderName)
+        RCI.instance().renameFolderLibraries(folderPath=mainPath, 
+                                             folderName = oldFolderName, 
+                                             newName=newFolderName)
+                                         
     def duplicateFile (self, mainPath, oldFileName, newFileName, extFile, newPath=''):
         """
         Reimplemented from RemoteRepository
@@ -292,9 +320,14 @@ class Repository(RemoteRepository.Repository):
         @param extFile: 
         @type extFile:
         """
-        UCI.instance().duplicateFileRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFileName=oldFileName, 
-                                        newFileName=newFileName, extFile=extFile, newPath=newPath)
-
+        # UCI.instance().duplicateFileRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFileName=oldFileName, 
+                                        # newFileName=newFileName, extFile=extFile, newPath=newPath)
+        RCI.instance().duplicateFileLibraries(filePath=mainPath,
+                                               fileName=oldFileName, 
+                                               fileExt=extFile, 
+                                               newPath=newPath, 
+                                               newName=newFileName)
+        
     def duplicateFolder (self, mainPath, oldFolderName, newFolderName, newPath=''):
         """
         Reimplemented from RemoteRepository
@@ -309,5 +342,9 @@ class Repository(RemoteRepository.Repository):
         @param newFolderName: 
         @type newFolderName:
         """
-        UCI.instance().duplicateDirRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFolderName=oldFolderName,
-                                        newFolderName=newFolderName, newPath=newPath)
+        # UCI.instance().duplicateDirRepo(repo=UCI.REPO_LIBRARIES, mainPath=mainPath, oldFolderName=oldFolderName,
+                                        # newFolderName=newFolderName, newPath=newPath)
+        RCI.instance().duplicateFolderLibraries( folderPath=mainPath, 
+                                                folderName = oldFolderName, 
+                                                newPath=newPath,
+                                                newName=newFolderName)
