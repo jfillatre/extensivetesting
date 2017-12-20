@@ -64,6 +64,7 @@ def q(v=""):
 
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 import Workspace
 
@@ -471,6 +472,13 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
                 return editor
             elif value['key'] == 'state':
                 wdoc = index.model().getWdoc()
+                
+                if wdoc is None:
+                    return
+                    
+                if not wdoc.isSaved():
+                    return
+
                 isTp = False
                 isTs = False
                 isTu = False
@@ -493,8 +501,18 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
                         # uci call
                         if stateTest == 'Executing':
                             duration = time.time() - float(wdoc.dataModel.testdev)
-                            UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp,
-                                                        isTs=isTs, isTu=isTu, isTg=isTg, isTa=isTa)
+                            # UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp,
+                                                        # isTs=isTs, isTu=isTu, isTg=isTg, isTa=isTa)
+                                                        
+                            # rest call
+                            RCI.instance().durationTestsWritingMetrics( duration=int(duration), 
+                                                                        projectId=wdoc.project, 
+                                                                        isTp=isTp, 
+                                                                        isTs=isTs, 
+                                                                        isTu=isTu, 
+                                                                        isTg=isTg, 
+                                                                        isTa=isTa)
+                            
                         # update data model
                         if stateTest == 'Writing':
                             wdoc.dataModel.testdev=time.time()
@@ -694,9 +712,12 @@ class CommentsDialog(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """
         Create qt actions
         """     
-        self.addCommentAction = QtHelper.createAction(self, "&Add", self.addComment, tip = 'Add comment', icon = QIcon(":/add_post.png") )
-        self.clearAction = QtHelper.createAction(self, "&Clear", self.clearText, tip = 'Clear fields', icon = QIcon(":/clear.png") )
-        self.delCommentsAction = QtHelper.createAction(self, "&Delete all", self.delComments, tip = 'Delete all comments', icon = QIcon(":/del-posts.png") )
+        self.addCommentAction = QtHelper.createAction(self, "&Add", self.addComment, 
+                                                    tip = 'Add comment', icon = QIcon(":/add_post.png") )
+        self.clearAction = QtHelper.createAction(self, "&Clear", self.clearText, 
+                                                    tip = 'Clear fields', icon = QIcon(":/clear.png") )
+        self.delCommentsAction = QtHelper.createAction(self, "&Delete all", self.delComments,   
+                                                    tip = 'Delete all comments', icon = QIcon(":/del-posts.png") )
         self.setDefaultActionsValues()
 
     def setDefaultActionsValues (self):
@@ -789,7 +810,8 @@ class CommentsDialog(QtHelper.EnhancedQDialog, Logger.ClassLogger):
             self.comments = [ self.comments ]
         
         for tPost in self.comments:
-            dt = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime( float(tPost['datetime'])) )  + ".%3.3d" % int(( float(tPost['datetime']) * 1000) % 1000 )
+            dt = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime( float(tPost['datetime'])) )  + \
+                    ".%3.3d" % int(( float(tPost['datetime']) * 1000) % 1000 )
             post_decoded = base64.b64decode(tPost['post'])
             post_decoded = post_decoded.decode('utf8').replace('\n', '<br />')
             commentsParsed.append( 'By <b>%s</b>, %s<p style="margin-left:20px">%s</p>' % (tPost['author'], dt, post_decoded) )
@@ -1008,6 +1030,10 @@ class DescriptionsTableView(QTableView, Logger.ClassLogger):
         wdoc = self.model.getWdoc()
         if wdoc is None:
             return
+            
+        if not wdoc.isSaved():
+            return
+            
         isTp = False
         isTs = False
         isTu = False
@@ -1030,8 +1056,15 @@ class DescriptionsTableView(QTableView, Logger.ClassLogger):
                 break
 
         # call web service
-        UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp, isTs=isTs, isTu=isTu, isTg=isTg)
-
+        # UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp, isTs=isTs, isTu=isTu, isTg=isTg)
+        RCI.instance().durationTestsWritingMetrics( duration=int(duration), 
+                                                    projectId=wdoc.project, 
+                                                    isTp=isTp, 
+                                                    isTs=isTs, 
+                                                    isTu=isTu, 
+                                                    isTg=isTg, 
+                                                    isTa=isTa)
+                                                                        
     def stateWritingTest(self):
         """
         Set the writing state for the current test

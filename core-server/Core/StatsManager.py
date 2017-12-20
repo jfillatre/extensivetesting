@@ -692,7 +692,7 @@ class StatsManager(Logger.ClassLogger):
         @type isTg: boolean
         """
         rlt = True
-        if not Settings.getInt( 'MySql', 'insert-test-statistics'): return rlt
+        # if not Settings.getInt( 'MySql', 'insert-test-statistics'): return rlt
         self.trace( 'add writing duration %s sec.' % writingDuration )
         self.__mutex__.acquire()
         try:

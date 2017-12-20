@@ -535,35 +535,33 @@ def createTestDesign(   dataTest, userName, testName, trPath, logFilename, witho
     @return:
     @rtype: string
     """
-    if 'testglobal' in dataTest:
+    if dataTest["test-extension"] == "tgx":
         return createTestDesignForTg( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
-                                        defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, testLocation, taskUuid)
+                                    defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
+                                    runningAgents, runningProbes, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tpx":
+        return createTestDesignForTp( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
+                                    defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
+                                    runningAgents, runningProbes, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tux":
+        return createTestDesignForTu( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                    defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
+                                    runningAgents, runningProbes, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tax":
+        return createTestDesignForTa( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                    defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
+                                    runningAgents, runningProbes, testLocation, taskUuid)
     else:
-        if 'testplan' in dataTest:
-            return createTestDesignForTp( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
-                                            defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                runningAgents, runningProbes, testLocation, taskUuid)
-        else:
-            if 'testunit' in dataTest:
-                return createTestDesignForTu( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                                defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation, taskUuid)
-            elif 'testabstract' in dataTest:
-                return createTestDesignForTa( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                                defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation, taskUuid)
-            else:
-                return createTestDesignForTs( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                                defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
-                                                    runningAgents, runningProbes, testLocation, taskUuid)
+        return createTestDesignForTs( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                    defaultAdapter, userId, projectId, parametersShared, stepByStep, breakpoint, testId,
+                                    runningAgents, runningProbes, testLocation, taskUuid)
 
 def createTestDesignForTg(dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
                             projectId=0, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
                             testLocation='', taskUuid=''  ):
     """
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -586,8 +584,9 @@ def createTestDesignForTg(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    testglobal = dataTest['testglobal']
-
+    # testglobal = dataTest['testglobal']
+    testglobal = dataTest['test-execution']
+    
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
     missingDatasetOut = loadDataset(parameters=parametersOut, inputs=False, user=userName)
@@ -605,7 +604,8 @@ def createTestDesignForTg(dataTest, userName, testName, trPath, logFilename, wit
 
     # import static arguments
     te.append( getStaticArgs(envTmp=True) )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
     te.append( """projectid_ = '%s'\n""" % projectId )
@@ -849,14 +849,14 @@ TLX.instance().setUniqueId("%s", tsId = "%s")
                         ts['properties']['agents']['agent'], nbTab = ts['depth'] + 2 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-definition'], nbTab = ts['depth'] + 2 ))
             else:
                 te.append(indent("class TESTCASE(TestCase):", nbTab = ts['depth'] + 2 ))
                 te.append("\n")
-                te.append(indent(ts['src'], nbTab = ts['depth'] + 3 ))
+                te.append(indent(ts['test-definition'], nbTab = ts['depth'] + 3 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src2'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-execution'], nbTab = ts['depth'] + 2 ))
             else:
                 te.append(indent("TESTCASE(suffix=None, testName='%s' % description('name')).execute()", nbTab = ts['depth'] + 2 ))
             te.append(indent("""
@@ -883,7 +883,7 @@ def createTestDesignForTp(dataTest, userName, testName, trPath, logFilename, wit
                             testLocation='' , taskUuid='' ):
     """
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -906,8 +906,9 @@ def createTestDesignForTp(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    testplan = dataTest['testplan']
-
+    # testplan = dataTest['testplan']
+    testplan = dataTest['test-execution']
+    
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
     missingDatasetOut = loadDataset(parameters=parametersOut, inputs=False, user=userName)
@@ -925,7 +926,8 @@ def createTestDesignForTp(dataTest, userName, testName, trPath, logFilename, wit
 
     # import static arguments
     te.append( getStaticArgs(envTmp=True) )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
     te.append( """projectid_ = '%s'\n""" % projectId )
@@ -966,7 +968,7 @@ return_code = RETURN_CODE_OK
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_=userid_)
 
 TestExecutorLib.dontExecute()
@@ -1170,14 +1172,14 @@ TLX.instance().setUniqueId("%s", tsId = "%s")
                         ts['properties']['agents']['agent'], nbTab = ts['depth'] + 2 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-definition'], nbTab = ts['depth'] + 2 ))
             else:
                 te.append(indent("class TESTCASE(TestCase):", nbTab = ts['depth'] + 2 ))
                 te.append("\n")
-                te.append(indent(ts['src'], nbTab = ts['depth'] + 3 ))
+                te.append(indent(ts['test-definition'], nbTab = ts['depth'] + 3 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src2'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-execution'], nbTab = ts['depth'] + 2 ))
             else:
                 te.append(indent("TESTCASE(suffix=None, testName='%s' % description('name')).execute()", nbTab = ts['depth'] + 2 ))
             te.append(indent("""
@@ -1204,7 +1206,7 @@ def createTestDesignForTs(dataTest, userName, testName, trPath, logFilename, wit
                             testLocation='', taskUuid=''  ):
     """
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -1227,14 +1229,16 @@ def createTestDesignForTs(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-    if 'src-exec' in dataTest:
-        srcExec = dataTest['src-exec']
-
-    if 'testunit' in dataTest:
-        srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
-        srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
+    # if 'src-exec' in dataTest:
+        # srcExec = dataTest['src-exec']
+    srcTest = dataTest['test-definition']
+    srcExec = dataTest['test-execution']
+    
+    # if 'testunit' in dataTest:
+        # srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
+        # srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
 
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
@@ -1253,7 +1257,8 @@ def createTestDesignForTs(dataTest, userName, testName, trPath, logFilename, wit
 
     # import static arguments
     te.append( getStaticArgs(envTmp=True) )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
     te.append( """projectid_ = '%s'\n""" % projectId )
@@ -1295,7 +1300,7 @@ return_code = RETURN_CODE_OK
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_)
 
 TestExecutorLib.dontExecute()
@@ -1455,7 +1460,7 @@ def createTestDesignForTu(dataTest, userName, testName, trPath, logFilename, wit
                             testLocation='', taskUuid=''  ):
     """
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -1478,9 +1483,11 @@ def createTestDesignForTu(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
 
+    srcTest = dataTest['test-definition']
+    
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
     missingDatasetOut = loadDataset(parameters=parametersOut, inputs=False, user=userName)
@@ -1498,7 +1505,8 @@ def createTestDesignForTu(dataTest, userName, testName, trPath, logFilename, wit
 
     # import static arguments
     te.append( getStaticArgs(envTmp=True) )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
     te.append( """projectid_ = '%s'\n""" % projectId )
@@ -1540,7 +1548,7 @@ return_code = RETURN_CODE_OK
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_)
 
 TestExecutorLib.dontExecute()
@@ -1697,7 +1705,7 @@ def createTestDesignForTa(dataTest, userName, testName, trPath, logFilename, wit
                             testLocation='', taskUuid=''  ):
     """
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -1720,9 +1728,10 @@ def createTestDesignForTa(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
+    srcTest = dataTest['test-definition']
+    
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
     missingDatasetOut = loadDataset(parameters=parametersOut, inputs=False, user=userName)
@@ -1740,7 +1749,8 @@ def createTestDesignForTa(dataTest, userName, testName, trPath, logFilename, wit
 
     # import static arguments
     te.append( getStaticArgs(envTmp=True) )
-
+    
+    te.append( """taskuuid_ = '%s'\n""" % taskUuid )
     te.append( """user_ = '%s'\n""" % userName )
     te.append( """userid_ = '%s'\n""" % userId )
     te.append( """projectid_ = '%s'\n""" % projectId )
@@ -1782,7 +1792,7 @@ return_code = RETURN_CODE_OK
 
 TDS.initialize(path = result_path)
 
-TLX.initialize(path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
+TLX.initialize(task_uuid=taskuuid_, path = result_path, name = log_filename, user_ = user_, testname_ = test_name, id_ = test_id,
 	replay_id_ = replay_id, task_id_ = task_id, userid_ = userid_)
 
 TestExecutorLib.dontExecute()
@@ -1935,9 +1945,11 @@ sys.exit(return_code)
 """)
     return unicode(''.join(te)).encode('utf-8')
 
-def createTestExecutable( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary='', defaultAdapter='', userId=0,
-                            projectId=0, subTEs=1, parametersShared=[], stepByStep=False, breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
-                            channelId=False, testLocation='', taskUuid=''):
+def createTestExecutable( dataTest, userName, testName, trPath, logFilename, withoutProbes, 
+                          defaultLibrary='', defaultAdapter='', userId=0,
+                          projectId=0, subTEs=1, parametersShared=[], stepByStep=False, 
+                          breakpoint=False, testId=0, runningAgents=[], runningProbes=[],
+                          channelId=False, testLocation='', taskUuid=''):
     """
     Creates and returns the test executable: testplan or testsuite
 
@@ -1947,28 +1959,26 @@ def createTestExecutable( dataTest, userName, testName, trPath, logFilename, wit
     @return:
     @rtype: string
     """
-    if 'testglobal' in dataTest:
+    if dataTest["test-extension"] == "tgx":
         return createTestGlobal( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                    defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                        runningAgents, runningProbes, channelId, testLocation, taskUuid)
+                                defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
+                                runningAgents, runningProbes, channelId, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tpx":
+        return createTestPlan( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
+                                runningAgents, runningProbes, channelId, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tux":
+        return createTestUnit( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
+                                runningAgents, runningProbes, channelId, testLocation, taskUuid)
+    elif dataTest["test-extension"] == "tax":
+        return createTestAbstract( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
+                                defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
+                                runningAgents, runningProbes, channelId, testLocation, taskUuid)
     else:
-        if 'testplan' in dataTest:
-            return createTestPlan( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                    defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                        runningAgents, runningProbes, channelId, testLocation, taskUuid)
-        else:
-            if 'testunit' in dataTest:
-                return createTestUnit( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                        defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
-            elif 'testabstract' in dataTest:
-                return createTestAbstract( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary, 
-                                        defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
-            else:
-                return createTestSuite( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
-                                        defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
-                                            runningAgents, runningProbes, channelId, testLocation, taskUuid)
+        return createTestSuite( dataTest, userName, testName, trPath, logFilename, withoutProbes, defaultLibrary,
+                                defaultAdapter, userId, projectId, subTEs, parametersShared, stepByStep, breakpoint, testId,
+                                runningAgents, runningProbes, channelId, testLocation, taskUuid)
 
 # -------- Events test global -----------
 
@@ -2051,7 +2061,7 @@ def createTestGlobal ( dataTest, userName, testName, trPath, logFilename, withou
     @return:
     @rtype: string
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -2074,8 +2084,9 @@ def createTestGlobal ( dataTest, userName, testName, trPath, logFilename, withou
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    testglobal = dataTest['testglobal']
-
+    # testglobal = dataTest['testglobal']
+    testglobal = dataTest['test-execution']
+    
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
     # prepare datasets
@@ -2563,7 +2574,7 @@ TLX.instance().log_testunit_warning(message = 'Image %s is missing in outputs pa
                 te.append(indent("from SubTE%s import *" % i , nbTab = ts['depth'] + 2 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src2'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-execution'], nbTab = ts['depth'] + 2 ))
             elif isTa:
                 te.append(indent("TESTCASE(suffix=None, testName='%s' % description('name')).execute()", nbTab = ts['depth'] + 2 ))
             else:
@@ -2735,7 +2746,7 @@ def createTestPlan ( dataTest, userName, testName, trPath, logFilename, withoutP
     @return:
     @rtype: string
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -2758,8 +2769,9 @@ def createTestPlan ( dataTest, userName, testName, trPath, logFilename, withoutP
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    testplan = dataTest['testplan']
-
+    # testplan = dataTest['testplan']
+    testplan = dataTest['test-execution']
+    
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
     # prepare datasets
@@ -3204,7 +3216,7 @@ TLX.instance().log_testunit_warning(message = 'Image %s is missing in outputs pa
                 te.append(indent("from SubTE%s import *" % i , nbTab = ts['depth'] + 2 ))
             te.append("\n")
             if isTs:
-                te.append(indent(ts['src2'], nbTab = ts['depth'] + 2 ))
+                te.append(indent(ts['test-execution'], nbTab = ts['depth'] + 2 ))
             elif isTa:
                 te.append(indent("TESTCASE(suffix=None, testName='%s' % description('name')).execute()", nbTab = ts['depth'] + 2 ))
             else:
@@ -3370,7 +3382,7 @@ def createTestSuite (	dataTest, userName, testName, trPath, logFilename, without
     @return:
     @rtype: string
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -3393,14 +3405,17 @@ def createTestSuite (	dataTest, userName, testName, trPath, logFilename, without
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-    if 'src-exec' in dataTest:
-        srcExec = dataTest['src-exec']
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
+    # if 'src-exec' in dataTest:
+        # srcExec = dataTest['src-exec']
 
-    if 'testunit' in dataTest:
-        srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
-        srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
+    srcTest = dataTest['test-definition']
+    srcExec = dataTest['test-execution']
+    
+    # if 'testunit' in dataTest:
+        # srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
+        # srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
 
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
@@ -3764,7 +3779,7 @@ def createTestUnit (	dataTest, userName, testName, trPath, logFilename, withoutP
     @return:
     @rtype: string
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -3787,9 +3802,10 @@ def createTestUnit (	dataTest, userName, testName, trPath, logFilename, withoutP
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']    
+    srcTest = dataTest['test-definition']
+    
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
     # prepare datasets
@@ -4143,7 +4159,7 @@ def createTestAbstract (	dataTest, userName, testName, trPath, logFilename, with
     @return:
     @rtype: string
     """
-    properties = dataTest['properties']
+    properties = dataTest['test-properties']
     parameters = properties['inputs-parameters']['parameter']
     parametersOut = properties['outputs-parameters']['parameter']
     agents = properties['agents']['agent']
@@ -4166,9 +4182,10 @@ def createTestAbstract (	dataTest, userName, testName, trPath, logFilename, with
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
+    srcTest = dataTest['test-definition']
+    
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
     # prepare datasets

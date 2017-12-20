@@ -373,7 +373,12 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
             if sys.version_info < (3,): httpCode = httpCode.toString()
                 
             self.trace("rest http code response: %s" % httpCode)
-            if httpCode is None: return
+            if httpCode is None: 
+                self.error("no http code, timeout?")
+                self.stopWorking()
+                # RCI.instance().onGenericError( title=self.tr("REST Error"), 
+                                                # err="Timeout" )
+                return
             
             if int(httpCode) in [ 401 ]:
                 self.error("rest authentication failed, http body content for REST: %s" % (rsp) )
@@ -1304,14 +1309,16 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Probes.instance().active()
                 Probes.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_PROBES_POS, True )
-                Probes.instance().loadData( data = self.decodeData(data['probes']), dataInstalled=self.decodeData(data['probes-installed']) )
+                Probes.instance().loadData( data = self.decodeData(data['probes']), 
+                                            dataInstalled=self.decodeData(data['probes-installed']) )
                 Probes.instance().loadStats( data = self.decodeData(data['probes-stats']) )
                 Probes.instance().loadDefault( data = self.decodeData(data['probes-default']) )
     
                 Agents.instance().active()
                 Agents.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_AGENTS_POS, True )
-                Agents.instance().loadData( data = self.decodeData(data['agents']), dataInstalled=self.decodeData(data['agents-installed']) )
+                Agents.instance().loadData( data = self.decodeData(data['agents']), 
+                                            dataInstalled=self.decodeData(data['agents-installed']) )
                 Agents.instance().loadStats( data = self.decodeData(data['agents-stats']) )
                 Agents.instance().loadDefault( data = self.decodeData(data['agents-default']) )
 
@@ -1568,7 +1575,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        Repositories.instance().loadDataArchives( data = datan)   
+        Repositories.instance().loadDataArchives( data = data)   
 
     def onRefreshStatsServer(self, usages):
         """
@@ -1678,11 +1685,11 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         TestManager.instance().updateHistory( data = [] )
         
-    def onWebCall(self, data):
-        """
-        On web call
-        """
-        self.wWebService.NetworkCall(postData=data)
+    # def onWebCall(self, data):
+        # """
+        # On web call
+        # """
+        # self.wWebService.NetworkCall(postData=data)
         
     def onRestCall(self, uri, request, body=''):
         """
@@ -1694,10 +1701,10 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         Configure server for network handler
         """
-        self.wWebService.setWsAddress( address= address, port = port,
-                                        scheme=scheme, 
-                                        webpath=Settings.instance().readValue( key = 'Server/xmlrpc-path' ),
-                                        hostname=hostname )
+        # self.wWebService.setWsAddress( address= address, port = port,
+                                        # scheme=scheme, 
+                                        # webpath=Settings.instance().readValue( key = 'Server/xmlrpc-path' ),
+                                        # hostname=hostname )
         self.RestService.setWsAddress( address= address, port = port,
                                         scheme=scheme, 
                                         webpath=Settings.instance().readValue( key = 'Server/rest-path' ),
@@ -1707,14 +1714,14 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         Configure proxy for network handler
         """
-        self.wWebService.setWsProxy(ip=ip, port=port)
+        # self.wWebService.setWsProxy(ip=ip, port=port)
         self.RestService.setWsProxy(ip=ip, port=port)
         
     def stopWorking(self):
         """
         Stop working
         """
-        self.wWebService.stopWorking()
+        # self.wWebService.stopWorking()
         self.RestService.stopWorking()
         
     def rest(self):
@@ -1723,11 +1730,11 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         return self.RestService
         
-    def xmlrpc(self):
-        """
-        Return the xmlrpc object
-        """
-        return self.wWebService
+    # def xmlrpc(self):
+        # """
+        # Return the xmlrpc object
+        # """
+        # return self.wWebService
         
         
 ServerExplorer = None # Singleton

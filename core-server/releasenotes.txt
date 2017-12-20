@@ -6,8 +6,12 @@
 		2. (major) toolboxes windows and linux no more embedded in the package
 		3. (medium) no more default agent and probe running on server side
 		4. (medium) no more toolbox deployed on boot server
-        5. (medium) build: update of the python selenium library with version 3.7.0
-        6. (minor) remove deprecated python modules: commands, compiler
-		7. (minor) rest api: /rest/results/report/basic/html updated to support replay id
+		5. (medium) build: update of the python selenium library with version 3.7.0
+		6. (minor) remove deprecated python modules: commands, compiler
+		7. (major) rest api: /rest/results/* updated to support replay id, new type of reports and more
+		8. (major) test libray: task uuid added in test logger xml events
+		9. (major) rest api: /rest/tasks/* updated with news functions
 	Issues Fixed
 		1. (minor) test library: undefined variable in virtualRun function #issue1
+		2. (minor) unable to reset libraries and adapters repositories
+		3. (minor) unable to import test abstract, extension not authorized

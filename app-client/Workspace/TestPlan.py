@@ -68,6 +68,7 @@ except ImportError: # python3 support
 
 
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 import Settings
 
 
@@ -1061,12 +1062,26 @@ class WTestPlan(Document.WDocument):
         if parentId == 0: insertAction = 0
         
         if self.testGlobal:
-            UCI.instance().getFileRepo( pathFile=test['pathfile'], forDest=UCI.FOR_DEST_TG, 
-                                        project=test['projectid'], actionId=insertAction, testId=parentId)
+            # UCI.instance().getFileRepo( pathFile=test['pathfile'], forDest=UCI.FOR_DEST_TG, 
+                                        # project=test['projectid'], actionId=insertAction, testId=parentId)
+            RCI.instance().openFileTests(projectId=int(test['projectid']), 
+                                         filePath=test['pathfile'], 
+                                         ignoreLock=True, 
+                                         readOnly=False, 
+                                         customParam=parentId, 
+                                         actionId=insertAction, 
+                                         destinationId=UCI.FOR_DEST_TG)                            
+                                        
         else:
-            UCI.instance().getFileRepo( pathFile=test['pathfile'], forDest=UCI.FOR_DEST_TP, 
-                                        project=test['projectid'], actionId=insertAction, testId=parentId)
-            
+            # UCI.instance().getFileRepo( pathFile=test['pathfile'], forDest=UCI.FOR_DEST_TP, 
+                                        # project=test['projectid'], actionId=insertAction, testId=parentId)
+            RCI.instance().openFileTests(projectId=int(test['projectid']), 
+                                         filePath=test['pathfile'], 
+                                         ignoreLock=True, 
+                                         readOnly=False, 
+                                         customParam=parentId, 
+                                         actionId=insertAction, 
+                                         destinationId=UCI.FOR_DEST_TP) 
     def updateAllDefaultAliases(self):
         """
         """
@@ -1267,12 +1282,17 @@ class WTestPlan(Document.WDocument):
                 absPath = '%s.%s' % ( filename, extension)
 
             if self.testGlobal:
-                UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, testId=int(currentItem.text(COL_ID)),
-                                            actionId=UCI.ACTION_UPDATE_PATH, project=projectId )
+                # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, testId=int(currentItem.text(COL_ID)),
+                                            # actionId=UCI.ACTION_UPDATE_PATH, project=projectId )
+                RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                             customParam=int(currentItem.text(COL_ID)), 
+                                             actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TG)
             else:
-                UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, testId=int(currentItem.text(COL_ID)),
-                                            actionId=UCI.ACTION_UPDATE_PATH, project=projectId )
-    
+                # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, testId=int(currentItem.text(COL_ID)),
+                                            # actionId=UCI.ACTION_UPDATE_PATH, project=projectId )
+                RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                             customParam=int(currentItem.text(COL_ID)), 
+                                             actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TP)
     def updateMainLocations(self):
         """
         Update projects of all remote tests
@@ -1786,7 +1806,7 @@ class WTestPlan(Document.WDocument):
                 
                 # load from remote
                 elif str(self.itemCurrent.text(COL_REPO)) == FROM_REMOTE_REPO:
-                    if UCI.instance().isAuthenticated():
+                    if RCI.instance().isAuthenticated:
                         absPath = self.dataModel.getTestFile(self.itemCurrent.text(COL_ID) )['file']
                         # get projectid
                         try:
@@ -1798,11 +1818,17 @@ class WTestPlan(Document.WDocument):
                         if mergeProperties:
                             actionId = UCI.ACTION_MERGE_PARAMS
                         if self.testGlobal:
-                            UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, testId=int(self.itemCurrent.text(COL_ID)), 
-                                                        project=prjId, actionId=actionId )
+                            # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, testId=int(self.itemCurrent.text(COL_ID)), 
+                                                        # project=prjId, actionId=actionId )
+                            RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                                         customParam=int(self.itemCurrent.text(COL_ID)), 
+                                                         actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TG)
                         else:
-                            UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, testId=int(self.itemCurrent.text(COL_ID)),
-                                                        project=prjId, actionId=actionId )
+                            # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, testId=int(self.itemCurrent.text(COL_ID)),
+                                                        # project=prjId, actionId=actionId )
+                            RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                                         customParam=int(self.itemCurrent.text(COL_ID)), 
+                                                         actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TP)
                     else:
                         QMessageBox.information(self, self.tr("Information") , self.tr("Connect to the server first.") )
                 else:
@@ -1867,14 +1893,15 @@ class WTestPlan(Document.WDocument):
         """
         Open the remote file
         """
-        if UCI.instance().isAuthenticated():
+        if RCI.instance().isAuthenticated:
             # get projectid
             try:
                 prjName, absPath = absPath.split(':', 1)
                 prjId = self.iRepo.remote().getProjectId(project=prjName)
             except Exception as e:
                 prjId=0
-            UCI.instance().openFileRepo( pathFile=absPath, project=prjId)
+            # UCI.instance().openFileRepo( pathFile=absPath, project=prjId)
+            RCI.instance().openFileTests(projectId=int(prjId), filePath=absPath)
         else:
             QMessageBox.information(self, self.tr("Information") , self.tr("Connect to the server first.") )
     
@@ -2777,7 +2804,7 @@ class WTestPlan(Document.WDocument):
                         self.addSubItems( files = dialog.getSelection() , fromType = FROM_LOCAL_REPO, parentTs=self.itemCurrent, insertTest=insertTest )
             
             else:
-                if UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+                if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                     prjName = self.iRepo.remote().getCurrentProject()
                     prjId = self.iRepo.remote().getProjectId(project=prjName)
                     if self.testGlobal:
@@ -2796,7 +2823,7 @@ class WTestPlan(Document.WDocument):
                     QMessageBox.warning(self, self.tr("Import") , self.tr("Connect to the test center first!") )
         
         # import test from remote
-        elif UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+        elif RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
             prjName = self.iRepo.remote().getCurrentProject()
             prjId = self.iRepo.remote().getProjectId(project=prjName)
             if self.testGlobal:
@@ -2923,10 +2950,13 @@ class WTestPlan(Document.WDocument):
                 
             # go the to function insertRemoteSubItem to see the response to the following action
             if self.testGlobal:
-                UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, project=project, actionId=insertTest, testId=parentId)
+                # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TG, project=project, actionId=insertTest, testId=parentId)
+                RCI.instance().openFileTests(projectId=int(project), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                             customParam=parentId, actionId=insertTest, destinationId=UCI.FOR_DEST_TG)
             else:
-                UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, project=project, actionId=insertTest, testId=parentId)
-        
+                # UCI.instance().getFileRepo( pathFile=absPath, forDest=UCI.FOR_DEST_TP, project=project, actionId=insertTest, testId=parentId)
+                RCI.instance().openFileTests(projectId=int(project), filePath=absPath, ignoreLock=False, readOnly=False, 
+                                             customParam=parentId, actionId=insertTest, destinationId=UCI.FOR_DEST_TP)
         else:
         
             # this part is only to import a local file in the testplan

@@ -25,8 +25,8 @@ try:
     import CliFunctions
     import WebServer
     import RestServerInterface
-    import XmlrpcServerInterface
-    import XmlrpcServerRights
+    # import XmlrpcServerInterface
+    # import XmlrpcServerRights
     import ProbeServerInterface
     import AgentServerInterface
     import EventServerInterface
@@ -51,8 +51,8 @@ except ImportError: # python3 support
     from . import CliFunctions
     from . import WebServer
     from . import RestServerInterface
-    from . import XmlrpcServerInterface
-    from . import XmlrpcServerRights
+    # from . import XmlrpcServerInterface
+    # from . import XmlrpcServerRights
     from . import ProbeServerInterface
     from . import AgentServerInterface
     from . import EventServerInterface
@@ -220,15 +220,15 @@ class AutomationServer(Logger.ClassLogger, daemon.Daemon):
                                            statsmgr=StatsManager.instance(),
                                            context = Context.instance()
                                         )
-            self.info("Starting WSU on %s:%s" %  (  Settings.get('Bind','ip-wsu') , 
-                                                    Settings.getInt('Bind','port-wsu') ) )
-            XmlrpcServerRights.initialize()
-            XmlrpcServerInterface.initialize( listeningAddress = 
-                                                (   Settings.get('Bind','ip-wsu'),
-                                                    Settings.getInt('Bind','port-wsu')
-                                                ),
-                                                https=Settings.getInt('WebServices','https')
-                                            )
+            # self.info("Starting WSU on %s:%s" %  (  Settings.get('Bind','ip-wsu') , 
+                                                    # Settings.getInt('Bind','port-wsu') ) )
+            # XmlrpcServerRights.initialize()
+            # XmlrpcServerInterface.initialize( listeningAddress = 
+                                                # (   Settings.get('Bind','ip-wsu'),
+                                                    # Settings.getInt('Bind','port-wsu')
+                                                # ),
+                                                # https=Settings.getInt('WebServices','https')
+                                            # )
             self.info("Starting RSU on %s:%s" %  (  Settings.get('Bind','ip-rsi') , 
                                                     Settings.getInt('Bind','port-rsi') ) )
             RestServerInterface.initialize( listeningAddress = 
@@ -259,9 +259,9 @@ class AutomationServer(Logger.ClassLogger, daemon.Daemon):
                                             )
 
             # Start on modules
-            XmlrpcServerInterface.instance().start()
-            self.info("WSU is listening on tcp://%s:%s" % ( Settings.get('Bind','ip-wsu'), 
-                                                            Settings.get('Bind','port-wsu') ) ) 
+            # XmlrpcServerInterface.instance().start()
+            # self.info("WSU is listening on tcp://%s:%s" % ( Settings.get('Bind','ip-wsu'), 
+                                                            # Settings.get('Bind','port-wsu') ) ) 
             RestServerInterface.instance().start()
             self.info("RSI is listening on tcp://%s:%s" % ( Settings.get('Bind','ip-rsi'), 
                                                             Settings.get('Bind','port-rsi') ) )                 
@@ -406,12 +406,12 @@ class AutomationServer(Logger.ClassLogger, daemon.Daemon):
             StorageDataAdapters.finalize()
         except Exception: pass
         self.trace("finalize WSU")
-        try:
-            XmlrpcServerInterface.instance().stop()
-            XmlrpcServerInterface.finalize()
-            XmlrpcServerRights.finalize()
-        except Exception: pass
-        self.trace("finalize RSI")
+        # try:
+            # XmlrpcServerInterface.instance().stop()
+            # XmlrpcServerInterface.finalize()
+            # XmlrpcServerRights.finalize()
+        # except Exception: pass
+        # self.trace("finalize RSI")
         try:
             RestServerInterface.instance().stop()
             RestServerInterface.finalize()

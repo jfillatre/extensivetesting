@@ -175,7 +175,8 @@ class Repository(RemoteRepository.Repository):
                                      self.tr("Are you sure to set the default adapters and libraries version for all tests?"),
                                      QMessageBox.Yes | QMessageBox.Cancel )
         if reply == QMessageBox.Yes:
-            UCI.instance().setTestsWithDefaultVersion()
+            # UCI.instance().setTestsWithDefaultVersion()
+            RCI.instance().setAllTestsAsDefault()
             
     def generateSamples(self):
         """

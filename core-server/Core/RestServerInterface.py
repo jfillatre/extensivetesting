@@ -1770,7 +1770,7 @@ class PublicListing(Handler):
           - public_storage
         summary: Get the listing of all files and folders in the public area
         description: ''
-        operationId: listingPublic
+        operationId: publicListing
         produces:
           - application/json
         parameters:
@@ -1813,7 +1813,7 @@ class PublicDirectoryAdd(Handler):
           - public_storage
         summary: Add directory in the public storage
         description: ''
-        operationId: addFolderPublic
+        operationId: publicDirectoryAdd
         produces:
           - application/json
         parameters:
@@ -1890,7 +1890,7 @@ class PublicDirectoryRename(Handler):
           - public_storage
         summary: Rename directory name in the public storage
         description: ''
-        operationId: renameFolderPublic
+        operationId: publicDirectoryRename
         produces:
           - application/json
         parameters:
@@ -1982,7 +1982,7 @@ class PublicDirectoryRemove(Handler):
           - public_storage
         summary: Remove directory in the public storage and their contents recursively
         description: ''
-        operationId: removeFolderPublic
+        operationId: publicDirectoryRemove
         produces:
           - application/json
         parameters:
@@ -2077,7 +2077,7 @@ class PublicImport(Handler):
           - public_storage
         summary: Import file to the public storage. Provide the file in base64 format
         description: ''
-        operationId: importFilePublic
+        operationId: publicFileImport
         produces:
           - application/json
         parameters:
@@ -2156,17 +2156,57 @@ class PublicImport(Handler):
 
 class PublicRemove(Handler):
     """
-    Remove file from the public storage
-    """   
+    /rest/public/file/remove
+    """  
     def post(self):
         """
-        Remove file from the public storage
-        Send POST request (uri /rest/public/file/remove) with the following body JSON 
-        { "file-path": "/" }
-        Cookie session_id is mandatory.
-
-        @return: success message
-        @rtype: dict 
+        tags:
+          - public_storage
+        summary: Import file to the public storage. Provide the file in base64 format
+        description: ''
+        operationId: publicFileRemove
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ file-path, file-content ]
+              properties:
+                file-path:
+                  type: string
+                file-content:
+                  type: string
+                  string: in base64 format
+        responses:
+          '200':
+            description: File sucessfully imported
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "message": "file sucessfully imported",
+                  "cmd": "/public/file/import"
+                }
+          '401':
+            description: Access denied 
+          '400':
+            description: Bad request
+          '403':
+            description: File already exists
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -2194,20 +2234,57 @@ class PublicRemove(Handler):
 
 class PublicRename(Handler):
     """
-    Rename file in the public storage
-    """
+    /rest/public/file/rename
+    """ 
     def post(self):
         """
-        Rename file in the public storage
-        Send POST request (uri /rest/public/file/rename) with the following body JSON 
-            { 
-                "source":      {"file-path": "/", "file-name": "test", "file-extension": "tsx"  },
-                "destination":  { "file-name": "test" }
-            }
-        Cookie session_id is mandatory.
-
-        @return: success message
-        @rtype: dict 
+        tags:
+          - public_storage
+        summary: Import file to the public storage. Provide the file in base64 format
+        description: ''
+        operationId: publicFileRename
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ file-path, file-content ]
+              properties:
+                file-path:
+                  type: string
+                file-content:
+                  type: string
+                  string: in base64 format
+        responses:
+          '200':
+            description: File sucessfully imported
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "message": "file sucessfully imported",
+                  "cmd": "/public/file/import"
+                }
+          '401':
+            description: Access denied 
+          '400':
+            description: Bad request
+          '403':
+            description: File already exists
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -2247,16 +2324,57 @@ class PublicRename(Handler):
 
 class PublicDownload(Handler):
     """
-    Download file from the public storage
+    /rest/public/file/download
     """   
     def post(self):
         """
-        Download file from the public storage in base64 format
-        Send POST request (uri /rest/public/file/download) with the following body JSON { "file-path": "/" }
-        Cookie session_id is mandatory.
-
-        @return: file content encoding in base64
-        @rtype: dict 
+        tags:
+          - public_storage
+        summary: Import file to the public storage. Provide the file in base64 format
+        description: ''
+        operationId: publicFileDownload
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ file-path, file-content ]
+              properties:
+                file-path:
+                  type: string
+                file-content:
+                  type: string
+                  string: in base64 format
+        responses:
+          '200':
+            description: File sucessfully imported
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "message": "file sucessfully imported",
+                  "cmd": "/public/file/import"
+                }
+          '401':
+            description: Access denied 
+          '400':
+            description: Bad request
+          '403':
+            description: File already exists
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -2281,18 +2399,18 @@ class PublicDownload(Handler):
 """
 Adapters handler
 """
-class AdaptersAdd(Handler):
+class AdaptersAdapterAddByWsdlFile(Handler):
     """
-    /rest/adapters/add
+    /rest/adapters/adapter/add/by/wsdl/file
     """
     @_to_yaml
     def post(self):
         """
         tags:
           - adapters
-        summary: Add a new adapter
+        summary: Add adapter from wsdl file
         description: ''
-        operationId: adaptersAdd
+        operationId: adaptersAdapterAddByWsdlFile
         consumes:
           - application/json
         produces:
@@ -2308,7 +2426,169 @@ class AdaptersAdd(Handler):
             required: true
             schema:
               properties:
-                backup-name:
+                wsdl-file:
+                  type: string
+                package-name:
+                  type: string
+                adapter-overwrite:
+                  type: boolean
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/adapters-listing/adapter/add/by/wsdl/file", 
+                  "message": "adapter added"
+                }
+          '400':
+            description: Bad request provided
+          '401':
+            description: unauthorized
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            wsdlFile = self.request.data.get("wsdl-file")
+            if wsdlFile is None: raise EmptyValue("Please specify a wsdl file")   
+
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name") 
+
+            adapterOverwrite = self.request.data.get("overwrite-adapter")
+            if adapterOverwrite is None: raise EmptyValue("Please specify a adapter overwrite") 
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success = RepoAdapters.instance().generateFromWSDL(
+                                                    wsdlUrl='',
+                                                    wsdlFile=wsdlFile,
+                                                    pkg=packageName,
+                                                    overwrite=adapterOverwrite
+                                                )
+        
+        if not success:
+            raise HTTP_500("Unable to generate adapter from wsdl file")
+            
+        return { "cmd": self.request.path, "message": "adapter added" }
+        
+class AdaptersAdapterAddByWsdlUrl(Handler):
+    """
+    /rest/adapters/adapter/add/by/wsdl/url
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: Add adapter from wsdl url
+        description: ''
+        operationId: adaptersAdapterAddByWsdlUrl
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              properties:
+                wsdl-url:
+                  type: string
+                package-name:
+                  type: string
+                adapter-overwrite:
+                  type: boolean
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/adapters-listing/adapter/add/by/wsdl/url", 
+                  "message": "adapter added"
+                }
+          '400':
+            description: Bad request provided
+          '401':
+            description: unauthorized
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            wsdlUrl = self.request.data.get("wsdl-url")
+            if wsdlUrl is None: raise EmptyValue("Please specify a wsdl url")   
+
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name") 
+
+            adapterOverwrite = self.request.data.get("adapter-overwrite")
+            if adapterOverwrite is None: raise EmptyValue("Please specify a adapter overwrite") 
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success = RepoAdapters.instance().generateFromWSDL(
+                                                    wsdlUrl=wsdlUrl,
+                                                    wsdlFile='',
+                                                    pkg=packageName,
+                                                    overwrite=adapterOverwrite
+                                                )
+        
+        if not success:
+            raise HTTP_500("Unable to generate adapter from wsdl url")
+            
+        return { "cmd": self.request.path, "message": "adapter added" }
+        
+class AdaptersAdapterAdd(Handler):
+    """
+    /rest/adapters/adapter/add
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: Add a new adapter
+        description: ''
+        operationId: adaptersAdapterAdd
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              properties:
+                package-name:
+                  type: string
+                adapter-name:
                   type: string
         responses:
           '200':
@@ -2321,8 +2601,8 @@ class AdaptersAdd(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/adapters/add", 
-                  "message": "added"
+                  "cmd": "/adapters/adapter/add", 
+                  "message": "adapter added"
                 }
           '400':
             description: Bad request provided
@@ -2332,20 +2612,224 @@ class AdaptersAdd(Handler):
         user_profile = _get_user(request=self.request)
 
         try:
-            backupName = self.request.data.get("backup-name")
-            if backupName is None: 
-                raise EmptyValue("Please specify a backupName")            
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name")   
+
+            adapterName = self.request.data.get("adapter-name")
+            if adapterName is None: raise EmptyValue("Please specify a adapter name")            
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        success =  RepoLibraries.instance().createBackup(backupName=backupName)  
+        success = RepoAdapters.instance().addAdapter(  pathFolder=packageName, 
+                                                       adapterName=adapterName, 
+                                                       mainAdapters=False)
+        
         if success != Context.instance().CODE_OK:
-            raise HTTP_500("Unable to create backup")
+            raise HTTP_500("Unable to add adapter")
             
-        return { "cmd": self.request.path, "message": "created" }
-  
+        return { "cmd": self.request.path, "message": "adapter added" }
+        
+class AdaptersPackageAdd(Handler):
+    """
+    /rest/adapters/package/add
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: Add a new package of adapters
+        description: ''
+        operationId: adaptersPackageAdd
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/libraries/package/add", 
+                  "message": "package added"
+                }
+          '400':
+            description: Bad request provided
+          '401':
+            description: unauthorized
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success = RepoAdapters.instance().addAdapter(  pathFolder="", 
+                                                       adapterName=packageName, 
+                                                       mainAdapters=True  )
+        
+        if success != Context.instance().CODE_OK:
+            raise HTTP_500("Unable to add package of adapters")
+            
+        return { "cmd": self.request.path, "message": "package added" }
+
+class AdaptersPackageDefault(Handler):
+    """
+    /rest/adapters/package/default
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: set adapters package as default
+        description: ''
+        operationId: adaptersPackageDefault
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ package-name ]
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            description: adapters vXXXX is default
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/adapters/package/default", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        # user_profile = _get_user(self.request)
+        
+        try:
+            packageName = self.request.data.get("package-name")
+            if not packageName: raise EmptyValue("Please specify the package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success =  RepoAdapters.instance().setDefaultV2(packageName)
+        if success == Context.instance().CODE_ERROR:
+            raise HTTP_500("Unable to set as default the package %s" % packageName )
+
+        return { "cmd": self.request.path, "message": "success" }
+
+class AdaptersPackageGeneric(Handler):
+    """
+    /rest/adapters/package/generic
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: set adapters package as generic
+        description: ''
+        operationId: adaptersPackageGeneric
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ package-name ]
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            description: adapters vXXXX is generic
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/adapters/package/generic", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(self.request)
+        
+        try:
+            packageName = self.request.data.get("package-name")
+            if not packageName: raise EmptyValue("Please specify the package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success =  RepoAdapters.instance().setGeneric(packageName)
+        if success == Context.instance().CODE_ERROR:
+            raise HTTP_500("Unable to set as generic the package %s" % packageName )
+                
+        return { "cmd": self.request.path, "message": "success" }
+          
 class AdaptersStatistics(Handler):
     """
     /rest/adapters/statistics
@@ -2391,139 +2875,7 @@ class AdaptersStatistics(Handler):
         _, _, _, statistics = RepoAdapters.instance().getTree(b64=True)
         
         return { "cmd": self.request.path, "statistics": statistics }
-
-class AdaptersSetDefault(Handler):
-    """
-    /rest/adapters/set/default
-    """   
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - adapters
-        summary: set adapters as default
-        description: ''
-        operationId: adaptersSetDefault
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ package-name ]
-              properties:
-                package-name:
-                  type: string
-        responses:
-          '200':
-            description: adapters vXXXX is default
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/adapters/set/default", 
-                  "message": "success"
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error
-        """
-        # user_profile = _get_user(self.request)
-        
-        try:
-            packageName = self.request.data.get("package-name")
-            if not packageName: raise EmptyValue("Please specify the package name")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        success =  RepoAdapters.instance().setDefaultV2(packageName)
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to set as default the package %s" % packageName )
-
-        return { "cmd": self.request.path, "message": "success" }
-
-class AdaptersSetGeneric(Handler):
-    """
-    /rest/adapters/set/generic
-    """   
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - adapters
-        summary: set adapters as generic
-        description: ''
-        operationId: adaptersSetGeneric
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ package-name ]
-              properties:
-                package-name:
-                  type: string
-        responses:
-          '200':
-            description: adapters vXXXX is generic
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/adapters/generic", 
-                  "message": "success"
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error
-        """
-        user_profile = _get_user(self.request)
-        
-        try:
-            packageName = self.request.data.get("package-name")
-            if not packageName: raise EmptyValue("Please specify the package name")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        success =  RepoAdapters.instance().setGeneric(packageName)
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to set as generic the package %s" % packageName )
-                
-        return { "cmd": self.request.path, "message": "success" }
-        
+      
 class AdaptersCheckSyntaxAll(Handler):
     """
     /rest/adapters/syntax/all
@@ -2571,6 +2923,73 @@ class AdaptersCheckSyntaxAll(Handler):
         
         return { "cmd": self.request.path, "syntax-status": success, "syntax-error": details }
 
+class AdaptersCheckSyntax(Handler):
+    """
+    /rest/adapters/check/syntax
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - adapters
+        summary: check the syntax of a adapter
+        description: ''
+        operationId: adaptersCheckSyntax
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ file-content ]
+              properties:
+                file-content:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                success:
+                  type: boolean
+                syntax-error:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/adapters/check/syntax", 
+                  "file-content": "...."
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            fileContent = self.request.data.get("file-content")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        success, syntaxerror = RepoAdapters.instance().checkSyntax(content=fileContent)
+
+        return { "cmd": self.request.path, "success": success, "syntax-error": syntaxerror }
+   
 class AdaptersFileUnlockAll(Handler):
     """
     /rest/adapters/file/unlock/all
@@ -4043,28 +4462,37 @@ class AdaptersFileUpload(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, directory-name, directory-path ]
+              required: [ project-id, file-path, file-name, file-extension, file-content ]
               properties:
                 project-id:
                   type: integer
-                directory-name:
+                file-path:
                   type: string
-                directory-path:
+                file-name:
                   type: string
+                file-extension:
+                  type: string
+                file-content:
+                  type: string
+                overwrite:
+                  type: boolean
+                close-after:
+                  type: boolean
+                add-folders:
+                  type: boolean
         responses:
           '200':
-            description: rename response
             schema :
               properties:
                 cmd:
                   type: string
-                message:
-                  type: string
+                code:
+                  type: integer
             examples:
               application/json: |
                 {
-                  "cmd": "/adapters/directory/rename", 
-                  "message": "directory successfully renamed"
+                  "cmd": "/adapters/file/upload", 
+                  "code": 200
                 }
           '400':
             description: Bad request provided
@@ -4074,50 +4502,57 @@ class AdaptersFileUpload(Handler):
         user_profile = _get_user(request=self.request)
 
         try:
-            projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
-            
             filePath = self.request.data.get("file-path")
+            if filePath is None: raise EmptyValue("Please specify a file path")
+            fileName = self.request.data.get("file-name")
+            if fileName is None: raise EmptyValue("Please specify a file name")
+            fileExt = self.request.data.get("file-extension")
+            if fileExt is None: raise EmptyValue("Please specify a file extension")
             fileContent = self.request.data.get("file-content")
-            if not filePath and not fileContent: raise EmptyValue("Please specify a file content and path")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+            
+            _overwrite = self.request.data.get("overwrite")
+            _closeafter = self.request.data.get("close-after")
+            _addfolders = self.request.data.get("add-folders")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
-        # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-                
-        # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
-        if not projectAuthorized:
-            raise HTTP_403('Access denied to this project')
-        
-        # avoid directory traversal
-        filePath = os.path.normpath("/" + filePath )
-        
-        _filePath, fileExtension = filePath.rsplit(".", 1)
-        _filePath = _filePath.rsplit("/", 1)
-        if len(_filePath) == 2:
-            filePath = _filePath[0]
-            fileName =  _filePath[1]
-        else:
-            filePath = "/"
-            fileName =  _filePath[0]
+        overwrite = False
+        if _overwrite is not None:
+            overwrite = _overwrite
             
-        success, _, _, _, _ = RepoTests.instance().importFile( pathFile=filePath, nameFile=fileName, extFile=fileExtension,
-                                                                                contentFile=fileContent, binaryMode=True, project=prjId)  
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to add file")
-        if success == Context.instance().CODE_ALLREADY_EXISTS:
-            raise HTTP_403("File already exists")
+        closeAfter = False
+        if _closeafter is not None:
+            closeAfter = _closeafter
             
-        return { "cmd": self.request.path, "message": "file sucessfully imported" }
+        addFolders = False
+        if _addfolders is not None:
+            addFolders = _addfolders
+            
+        putFileReturn = RepoAdapters.instance().uploadFile( pathFile=filePath, 
+                                                            nameFile=fileName, 
+                                                            extFile=fileExt, 
+                                                            contentFile=fileContent, 
+                                                            login=user_profile['login'], 
+                                                            project='', 
+                                                            overwriteFile=overwrite,
+                                                            createFolders=addFolders,
+                                                            lockMode=True, 
+                                                            binaryMode=True,
+                                                            closeAfter=closeAfter )
+        success, pathFile, nameFile, extFile, _, overwriteFile, closeAfter, isLocked, lockedBy = putFileReturn
+
+        return { "cmd": self.request.path, 
+                 "code": success,
+                 "file-path": pathFile,
+                 "file-name": nameFile,
+                 "file-extension": extFile,
+                 "overwrite":  overwriteFile,
+                 "close-after": closeAfter,
+                 "locked": isLocked,
+                 "locked-by": lockedBy }
 
 class AdaptersFileDownload(Handler):
     """
@@ -4301,9 +4736,9 @@ class AdaptersFileOpen(Handler):
 """
 Libraries handler
 """
-class LibrariesAdd(Handler):
+class LibrariesLibraryAdd(Handler):
     """
-    /rest/libraries/add
+    /rest/libraries/library/add
     """
     @_to_yaml
     def post(self):
@@ -4312,7 +4747,7 @@ class LibrariesAdd(Handler):
           - libraries
         summary: Add a new library
         description: ''
-        operationId: librariesAdd
+        operationId: librariesLibraryAdd
         consumes:
           - application/json
         produces:
@@ -4328,7 +4763,9 @@ class LibrariesAdd(Handler):
             required: true
             schema:
               properties:
-                backup-name:
+                package-name:
+                  type: string
+                library-name:
                   type: string
         responses:
           '200':
@@ -4341,8 +4778,8 @@ class LibrariesAdd(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/libraries/add", 
-                  "message": "added"
+                  "cmd": "/libraries/library/add", 
+                  "message": "library added"
                 }
           '400':
             description: Bad request provided
@@ -4352,20 +4789,222 @@ class LibrariesAdd(Handler):
         user_profile = _get_user(request=self.request)
 
         try:
-            backupName = self.request.data.get("backup-name")
-            if backupName is None: 
-                raise EmptyValue("Please specify a backupName")            
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name")   
+
+            libraryName = self.request.data.get("library-name")
+            if libraryName is None: raise EmptyValue("Please specify a library name")            
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        success =  RepoLibraries.instance().createBackup(backupName=backupName)  
+        success = RepoLibraries.instance().addLibrary(  pathFolder=packageName, 
+                                                        libraryName=libraryName, 
+                                                        mainLibraries=False)
+        
         if success != Context.instance().CODE_OK:
-            raise HTTP_500("Unable to create backup")
+            raise HTTP_500("Unable to add library")
             
-        return { "cmd": self.request.path, "message": "created" }
-             
+        return { "cmd": self.request.path, "message": "library added" }
+        
+class LibrariesPackageAdd(Handler):
+    """
+    /rest/libraries/package/add
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - libraries
+        summary: Add a new package of libraries
+        description: ''
+        operationId: librariesPackageAdd
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/libraries/package/add", 
+                  "message": "package added"
+                }
+          '400':
+            description: Bad request provided
+          '401':
+            description: unauthorized
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            packageName = self.request.data.get("package-name")
+            if packageName is None: raise EmptyValue("Please specify a package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success = RepoLibraries.instance().addLibrary(  pathFolder="", 
+                                                        libraryName=packageName, 
+                                                        mainLibraries=True  )
+        
+        if success != Context.instance().CODE_OK:
+            raise HTTP_500("Unable to add package of libraries")
+            
+        return { "cmd": self.request.path, "message": "package added" }
+
+class LibrariesPackageDefault(Handler):
+    """
+    /rest/libraries/package/default
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - libraries
+        summary: set libraries package as default
+        description: ''
+        operationId: librariesPackageDefault
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ package-name ]
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/libraries/package/default", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(self.request)
+        
+        try:
+            packageName = self.request.data.get("package-name")
+            if not packageName: raise EmptyValue("Please specify the package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success =  RepoLibraries.instance().setDefaultV2(packageName)
+        if success == Context.instance().CODE_ERROR:
+            raise HTTP_500("Unable to set as default the package %s" % packageName )
+
+        return { "cmd": self.request.path, "message": "success"  }
+
+class LibrariesPackageGeneric(Handler):
+    """
+    /rest/libraries/package/generic
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - libraries
+        summary: set libraries package as generic
+        description: ''
+        operationId: librariesPackageGeneric
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ package-name ]
+              properties:
+                package-name:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/libraries/package/generic", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error 
+        """
+        user_profile = _get_user(self.request)
+        
+        try:
+            packageName = self.request.data.get("package-name")
+            if not packageName: raise EmptyValue("Please specify the package name")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success =  RepoLibraries.instance().setGeneric(packageName)
+        if success == Context.instance().CODE_ERROR:
+            raise HTTP_500("Unable to set as generic the package %s" % packageName )
+                
+        return { "cmd": self.request.path, "message": "success"  }
+    
 class LibrariesStatistics(Handler):
     """
     /rest/libraries/statistics
@@ -4411,139 +5050,7 @@ class LibrariesStatistics(Handler):
         _, _, _, statistics = RepoLibraries.instance().getTree(b64=True)
         
         return { "cmd": self.request.path, "statistics": statistics }
-
-class LibrariesSetDefault(Handler):
-    """
-    /rest/libraries/set/default
-    """   
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - libraries
-        summary: set libraries as default
-        description: ''
-        operationId: librariesSetDefault
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ package-name ]
-              properties:
-                package-name:
-                  type: string
-        responses:
-          '200':
-            description: libraries packaged
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/libraries/set/default", 
-                  "message": "success"
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error
-        """
-        user_profile = _get_user(self.request)
-        
-        try:
-            packageName = self.request.data.get("package-name")
-            if not packageName: raise EmptyValue("Please specify the package name")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        success =  RepoLibraries.instance().setDefaultV2(packageName)
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to set as default the package %s" % packageName )
-
-        return { "cmd": self.request.path, "message": "success"  }
-
-class LibrariesSetGeneric(Handler):
-    """
-    /rest/libraries/set/generic
-    """   
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - libraries
-        summary: set libraries as generic
-        description: ''
-        operationId: librariesSetGeneric
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ package-name ]
-              properties:
-                package-name:
-                  type: string
-        responses:
-          '200':
-            description: libraries packaged
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/libraries/set/generic", 
-                  "message": "success"
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error 
-        """
-        user_profile = _get_user(self.request)
-        
-        try:
-            packageName = self.request.data.get("package-name")
-            if not packageName: raise EmptyValue("Please specify the package name")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        success =  RepoLibraries.instance().setGeneric(packageName)
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to set as generic the package %s" % packageName )
-                
-        return { "cmd": self.request.path, "message": "success"  }
-        
+    
 class LibrariesCheckSyntaxAll(Handler):
     """
     /rest/libraries/syntax/all
@@ -4591,6 +5098,76 @@ class LibrariesCheckSyntaxAll(Handler):
         
         return { "cmd": self.request.path, "syntax-status": success, "syntax-error": details }
 
+class LibrariesCheckSyntax(Handler):
+    """
+    /rest/libraries/check/syntax
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - libraries
+        summary: check the syntax of a library
+        description: ''
+        operationId: librariesCheckSyntax
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ file-content ]
+              properties:
+                file-content:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                success:
+                  type: boolean
+                syntax-error:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/libraries/check/syntax", 
+                  success:
+                    type: boolean
+                  syntax-error:
+                    type: string
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            fileContent = self.request.data.get("file-content")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success, syntaxerror = RepoLibraries.instance().checkSyntax(content=fileContent)
+
+        return { "cmd": self.request.path, "success": success, "syntax-error": syntaxerror }
+   
 class LibrariesFileUnlockAll(Handler):
     """
     /rest/libraries/file/unlock/all
@@ -6059,28 +6636,37 @@ class LibrariesFileUpload(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, directory-name, directory-path ]
+              required: [ project-id, file-path, file-name, file-extension, file-content ]
               properties:
                 project-id:
                   type: integer
-                directory-name:
+                file-path:
                   type: string
-                directory-path:
+                file-name:
                   type: string
+                file-extension:
+                  type: string
+                file-content:
+                  type: string
+                overwrite:
+                  type: boolean
+                close-after:
+                  type: boolean
+                add-folders:
+                  type: boolean
         responses:
           '200':
-            description: rename response
             schema :
               properties:
                 cmd:
                   type: string
-                message:
-                  type: string
+                code:
+                  type: integer
             examples:
               application/json: |
                 {
-                  "cmd": "/libraries/directory/rename", 
-                  "message": "directory successfully renamed"
+                  "cmd": "/libraries/file/upload", 
+                  "code": 200
                 }
           '400':
             description: Bad request provided
@@ -6090,50 +6676,57 @@ class LibrariesFileUpload(Handler):
         user_profile = _get_user(request=self.request)
 
         try:
-            projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
-            
             filePath = self.request.data.get("file-path")
+            if filePath is None: raise EmptyValue("Please specify a file path")
+            fileName = self.request.data.get("file-name")
+            if fileName is None: raise EmptyValue("Please specify a file name")
+            fileExt = self.request.data.get("file-extension")
+            if fileExt is None: raise EmptyValue("Please specify a file extension")
             fileContent = self.request.data.get("file-content")
-            if not filePath and not fileContent: raise EmptyValue("Please specify a file content and path")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+            
+            _overwrite = self.request.data.get("overwrite")
+            _closeafter = self.request.data.get("close-after")
+            _addfolders = self.request.data.get("add-folders")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
-        # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-                
-        # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
-        if not projectAuthorized:
-            raise HTTP_403('Access denied to this project')
-        
-        # avoid directory traversal
-        filePath = os.path.normpath("/" + filePath )
-        
-        _filePath, fileExtension = filePath.rsplit(".", 1)
-        _filePath = _filePath.rsplit("/", 1)
-        if len(_filePath) == 2:
-            filePath = _filePath[0]
-            fileName =  _filePath[1]
-        else:
-            filePath = "/"
-            fileName =  _filePath[0]
+        overwrite = False
+        if _overwrite is not None:
+            overwrite = _overwrite
             
-        success, _, _, _, _ = RepoTests.instance().importFile( pathFile=filePath, nameFile=fileName, extFile=fileExtension,
-                                                                                contentFile=fileContent, binaryMode=True, project=prjId)  
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("Unable to add file")
-        if success == Context.instance().CODE_ALLREADY_EXISTS:
-            raise HTTP_403("File already exists")
+        closeAfter = False
+        if _closeafter is not None:
+            closeAfter = _closeafter
             
-        return { "cmd": self.request.path, "message": "file sucessfully imported" }
+        addFolders = False
+        if _addfolders is not None:
+            addFolders = _addfolders
+            
+        putFileReturn = RepoLibraries.instance().uploadFile( pathFile=filePath, 
+                                                             nameFile=fileName, 
+                                                             extFile=fileExt, 
+                                                             contentFile=fileContent, 
+                                                             login=user_profile['login'], 
+                                                             project='', 
+                                                             overwriteFile=overwrite,
+                                                             createFolders=addFolders,
+                                                             lockMode=True, 
+                                                             binaryMode=True,
+                                                             closeAfter=closeAfter )
+        success, pathFile, nameFile, extFile, _, overwriteFile, closeAfter, isLocked, lockedBy = putFileReturn
+
+        return { "cmd": self.request.path, 
+                 "code": success,
+                 "file-path": pathFile,
+                 "file-name": nameFile,
+                 "file-extension": extFile,
+                 "overwrite":  overwriteFile,
+                 "close-after": closeAfter,
+                 "locked": isLocked,
+                 "locked-by": lockedBy }
 
 class LibrariesFileDownload(Handler):
     """
@@ -6872,8 +7465,7 @@ class TestsBasicListing(Handler):
 
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6885,16 +7477,753 @@ class TestsBasicListing(Handler):
                 raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
         listing = RepoTests.instance().getBasicListing(projectId=prjId)  
         
-        return { "cmd": self.request.path, "tests-listing": listing, "project-id": prjId }
+        return { "cmd": self.request.path, "tests-listing": listing, "project-id": projectId }
+
+class TestsScheduleGroup(Handler):
+    """
+    /rest/tests/schedule/group
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: Schedule a group of tests
+        description: ''
+        operationId: testsScheduleGroup
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ tests, postpone-at, parallel-mode, postpone-mode]
+              properties:
+                tests:
+                  type: array
+                postpone-at:
+                  type: array
+                  description: [ Y,M,D,H,M,S ]
+                parallel-mode:
+                  type: boolean
+                postpone-mode:
+                  type: boolean
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/schedule/group", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            postponeAt = self.request.data.get("postpone-at")
+            if postponeAt is None: raise EmptyValue("Please specify a postpone at")
+            
+            postponeMode = self.request.data.get("postpone-mode")
+            if postponeMode is None: raise EmptyValue("Please specify a postpone mode")
+            
+            tests = self.request.data.get("tests")
+            if tests is None: raise EmptyValue("Please specify tests")
+            
+            parallel = self.request.data.get("parallel-mode")
+            if parallel is None: raise EmptyValue("Please specify parallel-mode")
+
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        if len(postponeAt) != 6:
+            raise HTTP_400("Bad schedule-at provided in request, array of size 6 expected")
+            
+        testsRun = []
+        for t in tests:
+            try:
+                prjName, absPath = t.split(':', 1)
+            except Exception as e:
+                raise HTTP_500("Unable to extract project name: %s" % str(e))
+
+            prjID = ProjectsManager.instance().getProjectID(name=prjName)
+            testPath, testExtension = absPath.rsplit('.', 1)
+            if len(testPath.rsplit('/', 1)) > 1:
+                testName = testPath.rsplit('/', 1)[1]
+            else:
+                testName = testPath.rsplit('/', 1)[0]
+
+            if testExtension == 'tsx':
+                doc = TestSuite.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, 
+                                                           testPath, testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test suite: %s' % testPath)
+
+                testData = { 'test-definition': doc.testdef, 
+                             'test-execution': doc.testexec, 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+                testsRun.append( {  'prj-id': prjID, 
+                                    'test-extension': testExtension, 
+                                    'test-name': testName,
+                                    'test-path': testPath, 'test-data': testData } )
+
+            elif testExtension == 'tux':
+                doc = TestUnit.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           prjID, testPath, testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test unit: %s' % testPath)
+
+                testData = { 'test-definition': doc.testdef, 
+                             'test-execution': '', 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+                testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension,
+                                    'test-name': testName,
+                                    'test-path': testPath, 'test-data': testData } )
+            
+            elif testExtension == 'tax':
+                doc = TestAbstract.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           prjID, testPath, testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test abstract: %s' % testPath)
+
+                testData = { 'test-definition': doc.testdef, 
+                             'test-execution': '', 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+                testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 
+                                    'test-name': testName,
+                                    'test-path': testPath, 'test-data': testData } )
+                                        
+            elif testExtension == 'tpx':
+                doc = TestPlan.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           prjID, testPath, testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test plan: %s' % testPath)
+
+                rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
+                if rslt is not None:
+                    raise HTTP_500('Unable to prepare test plan: %s' % testPath)
+
+                testData = { 'test-execution': doc.getSorted(), 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+                testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 
+                                    'test-name': testName, 
+                                    'test-path': testPath, 'test-data': testData } )
+
+            elif testExtension == 'tgx':
+                doc = TestPlan.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           prjID, testPath, testExtension) )
+                if not res:
+                     raise HTTP_500('Unable to read test global: %s' % testPath)
+
+                rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
+                if rslt is not None:
+                    raise HTTP_500('Unable to prepare test global: %s' % testPath)
+
+                testData = { 'test-execution': alltests, 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+                testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 
+                                    'test-name': testName,
+                                    'test-path': testPath, 'test-data': testData } )
+            
+            else:
+                raise HTTP_500('test extension not supported: %s' % testExtension)
+
+        if len(testsRun):
+            success = TaskManager.instance().addTasks(userName=user_profile['login'], 
+                                                      tests=testsRun, 
+                                                      runAt=postponeAt,
+                                                      queueAt=postponeMode, 
+                                                      simultaneous=parallel )
+            if not success:
+                raise HTTP_500('Unable to run the group of tests')
+        else:
+            raise HTTP_500('No tests provided')
+            
+        return { "cmd": self.request.path, "message": "success" }
+          
+class TestsSchedule(Handler):
+    """
+    /rest/tests/schedule
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: Schedule a test unit/suite or abstract
+        description: ''
+        operationId: testsSchedule
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-id, test-definition, test-execution, test-properties, test-path, test-name, schedule-id, schedule-at]
+              properties:
+                project-id:
+                  type: integer
+                test-definition:
+                  type: string
+                test-execution:
+                  type: string 
+                test-properties:
+                  type: object 
+                test-path:
+                  type: string 
+                test-name:
+                  type: string
+                schedule-id:
+                  type: integer
+                schedule-at:
+                  type: array
+                  description: [ Y,M,D,H,M,S ]
+                schedule-repeat:
+                  type: integer
+                probes-enabled:
+                  type: boolean 
+                debug-enabled:
+                  type: boolean 
+                notifications-enabled:
+                  type: boolean 
+                logs-enabled:
+                  type: boolean 
+                from-time:
+                  type: array
+                  description: [ Y,M,D,H,M,S ]
+                to-time:
+                  type: array 
+                  description: [ Y,M,D,H,M,S ]
+                tab-id:
+                  type: integer
+                step-mode:
+                  type: boolean 
+                breakpoint-mode:
+                  type: boolean 
+                background-mode:
+                  type: boolean 
+        responses:
+          '200':
+            description: tests listing
+            schema :
+              properties:
+                cmd:
+                  type: string
+                tests-listing:
+                  type: array
+                  items:
+                    type: string
+                project-id:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/schedule"
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectId = self.request.data.get("project-id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+
+            testDefinition = self.request.data.get("test-definition")
+            if testDefinition is None: raise EmptyValue("Please specify a test definition")
+            
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+            
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            
+            scheduleId = self.request.data.get("schedule-id")
+            if scheduleId is None : raise EmptyValue("Please specify schedule-id")
+            
+            scheduleAt = self.request.data.get("schedule-at")
+            if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
+            
+            _scheduleRepeat = self.request.data.get("schedule-repeat")
+            _tabId = self.request.data.get("tab-id")
+            _backgroundMode = self.request.data.get("background-mode")
+            _stepMode = self.request.data.get("step-mode")
+            _breakpointMode = self.request.data.get("breakpoint-mode")
+            _probesEnabled = self.request.data.get("probes-enabled")
+            _notificationsEnabled = self.request.data.get("notifications-enabled")
+            _logsEnabled = self.request.data.get("logs-enabled")
+            _debugEnabled = self.request.data.get("debug-enabled")
+            _fromTime = self.request.data.get("from-time")
+            _toTime = self.request.data.get("to-time")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        # checking input    
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        
+        # find if the user is connected on the channel too
+        channelId=False
+        channel = Context.instance().getUser(user_profile["login"])
+        if channel is not None: channelId = list(channel['address'])
+            
+        #run a test not save; change the project id to the default
+        if projectId == 0: 
+            projectId = ProjectsManager.instance().getDefaultProjectForUser(user=user_profile['login'])
+              
+        # get the project id according to the name and checking authorization
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
+        if not projectAuthorized:
+            raise HTTP_403('Access denied to this project')
+
+        # no test content provided
+        if not len(testDefinition) and not len(testExecution) and not len(testProperties): 
+            if testExtension == 'tsx':
+                doc = TestSuite.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           projectId, 
+                                                           testPath, 
+                                                           testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test suite: %s' % testPath)
+
+                testData = { 'test-definition': doc.testdef, 
+                             'test-execution': doc.testexec, 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension 
+                             }
+
+            elif testExtension == 'tux':
+                doc = TestUnit.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           projectId, 
+                                                           testPath, 
+                                                           testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test unit: %s' % testPath)
+                    
+                testData = { 'test-definition': doc.testdef, 
+                             'test-properties': '', 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension  }
+            
+            elif testExtension == 'tax':
+                doc = TestAbstract.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           projectId, 
+                                                           testPath, 
+                                                           testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test abstract: %s' % testPath)
+                    
+                testData = { 'test-definition': doc.testdef, 
+                             'test-execution': '', 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension  }
+            else:
+                raise HTTP_403('Test extension not supported: %s' % testExtension)
+        
+        else:
+            if testExtension == 'tsx':
+                testData = { 'test-definition': testDefinition, 
+                             'test-execution': testExecution, 
+                             'test-properties': testProperties,
+                             'test-extension': testExtension  }
+                
+            elif testExtension == 'tux':
+                testData = { 'test-definition': testDefinition, 
+                             'test-execution': '', 
+                             'test-properties': testProperties,
+                             'test-extension': testExtension  }  
+                
+            elif testExtension == 'tax':
+                testData = { 'test-definition': testDefinition, 
+                             'test-execution': '', 
+                             'test-properties': testProperties,
+                             'test-extension': testExtension  }  
+                             
+            else:
+                raise HTTP_403('Test extension not supported: %s' % testExtension)
+                
+        tabId = 0
+        backgroundMode = True
+        stepMode = False
+        breakpointMode = False
+        notificationsEnabled = False
+        logsEnabled = True
+        debugEnabled = False
+        probesEnabled = False
+        fromTime = (0,0,0,0,0,0)
+        toTime = (0,0,0,0,0,0)
+        message = "success"
+        scheduleRepeat = 0
+
+        if _scheduleRepeat is not None: scheduleRepeat = _scheduleRepeat
+        if _tabId is not None: tabId = _tabId
+        if _backgroundMode is not None: backgroundMode=_backgroundMode
+        if _stepMode is not None: stepMode=_stepMode
+        if _breakpointMode is not None: breakpointMode=_breakpointMode
+        if _notificationsEnabled is not None: notificationsEnabled=_notificationsEnabled
+        if _logsEnabled is not None: logsEnabled=_logsEnabled
+        if _debugEnabled is not None: debugEnabled=_debugEnabled
+        if _probesEnabled is not None: probesEnabled=_probesEnabled
+        if _fromTime is not None: fromTime=_fromTime
+        if _toTime is not None: toTime=_toTime
+        
+        task = TaskManager.instance().registerTask( 
+                                                testData=testData, 
+                                                testName=testName, 
+                                                testPath=testPath, 
+                                                testUserId=user_profile['id'],
+                                                testUser=user_profile['login'],
+                                                testId=tabId, 
+                                                testBackground=backgroundMode,
+                                                runAt=scheduleAt, 
+                                                runType=scheduleId, 
+                                                runNb=scheduleRepeat, 
+                                                withoutProbes=probesEnabled,
+                                                debugActivated=debugEnabled, 
+                                                withoutNotif=notificationsEnabled, 
+                                                noKeepTr=logsEnabled,
+                                                testProjectId=projectId, 
+                                                runFrom=fromTime, 
+                                                runTo=toTime, 
+                                                stepByStep=stepMode, 
+                                                breakpoint=breakpointMode, 
+                                                channelId=channelId
+                                            )
   
+        if task.lastError is not None:
+            raise HTTP_500('Unable to run the test: %s' % task.lastError)
+  
+        if task.isRecursive(): message = "recursive"
+        if task.isRecursive() and backgroundMode: message = "recursive-background"
+        if task.isPostponed(): message = "postponed"
+        if task.isPostponed() and backgroundMode: message = "postponed-background"
+        if task.isSuccessive(): message = "successive"
+        if task.isSuccessive() and backgroundMode: message = "successive-background"
+        if not task.isSuccessive() and not task.isPostponed() and not task.isRecursive() and backgroundMode:
+            message = "background"
+        
+        return { "cmd": self.request.path, 
+                 "message": message,
+                 "task-id": task.getId(),
+                 "test-id": task.getTestID(),
+                 "tab-id": tabId,
+                 "test-name": testName
+               }
+               
+class TestsScheduleTpg(Handler):
+    """
+    /rest/tests/schedule/tpg
+    """   
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: Schedule a testplan or test global
+        description: ''
+        operationId: testsScheduleTpg
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-id ]
+              properties:
+                project-id:
+                  type: integer
+        responses:
+          '200':
+            description: tests listing
+            schema :
+              properties:
+                cmd:
+                  type: string
+                tests-listing:
+                  type: array
+                  items:
+                    type: string
+                project-id:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/schedule/tpg"
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectId = self.request.data.get("project-id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+            
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            
+            scheduleId = self.request.data.get("schedule-id")
+            if scheduleId is None : raise EmptyValue("Please specify schedule-id")
+            
+            scheduleAt = self.request.data.get("schedule-at")
+            if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
+            
+            scheduleRepeat = self.request.data.get("schedule-repeat")
+            if scheduleRepeat is None: raise EmptyValue("Please specify schedule-repeat")
+
+            _tabId = self.request.data.get("tab-id")
+            _backgroundMode = self.request.data.get("background-mode")
+            _stepMode = self.request.data.get("step-mode")
+            _breakpointMode = self.request.data.get("breakpoint-mode")
+            _probesEnabled = self.request.data.get("probes-enabled")
+            _notificationsEnabled = self.request.data.get("notifications-enabled")
+            _logsEnabled = self.request.data.get("logs-enabled")
+            _debugEnabled = self.request.data.get("debug-enabled")
+            _fromTime = self.request.data.get("from-time")
+            _toTime = self.request.data.get("to-time")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        # checking input    
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        
+        # find if the user is connected on the channel too
+        channelId=False
+        channel = Context.instance().getUser(user_profile["login"])
+        if channel is not None: channelId = list(channel['address'])
+            
+        #run a test not save; change the project id to the default
+        if projectId == 0: 
+            projectId = ProjectsManager.instance().getDefaultProjectForUser(user=user_profile['login'])
+              
+        # get the project id according to the name and checking authorization
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
+        if not projectAuthorized:
+            raise HTTP_403('Access denied to this project')
+
+        # no test content provided
+        if not len(testExecution) and not len(testProperties): 
+            if testExtension == 'tpx':
+                doc = TestPlan.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           projectId, 
+                                                           testPath, 
+                                                           testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test plan: %s' % testPath)
+                    
+                tests = doc.getSorted()
+                success, error_msg = RepoTests.instance().addtf2tp( data_=tests )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test plan: %s' % error_msg )
+
+                testData = { 'test-execution': tests,  
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+            
+            elif testExtension == 'tgx':
+                doc = TestPlan.DataModel()
+                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                                                           projectId, 
+                                                           testPath, 
+                                                           testExtension) )
+                if not res:
+                    raise HTTP_500('Unable to read test global: %s' % testPath)
+                    
+                alltests = doc.getSorted()
+                success, error_msg, alltests = RepoTests.instance().addtf2tg( data_= alltests )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test global: %s' % error_msg)
+                
+                testData = { 'test-execution': alltests, 
+                             'test-properties': doc.properties['properties'],
+                             'test-extension': testExtension }
+            else:
+                raise HTTP_403('Test extension not supported: %s' % testExtension)
+        
+        else:
+            if testExtension == 'tpx':
+                success, error_msg = RepoTests.instance().addtf2tp( data_=testExecution )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test plan: %s' % error_msg )
+
+                testData = { 'test-definition': '',
+                             'test-execution': testExecution, 
+                             'test-properties': testProperties,
+                             'test-extension': testExtension  }
+
+            elif testExtension == 'tgx':
+                success, error_msg, testExecution = RepoTests.instance().addtf2tg( data_=testExecution )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test global: %s' % error_msg )
+                
+                testData = { 'test-definition': '', 
+                             'test-execution': testExecution, 
+                             'test-properties': testProperties,
+                             'test-extension': testExtension } 
+                             
+            else:
+                raise HTTP_403('Test extension not supported: %s' % testExtension)
+                
+        tabId = 0
+        backgroundMode = True
+        stepMode = False
+        breakpointMode = False
+        notificationsEnabled = False
+        logsEnabled = True
+        debugEnabled = False
+        probesEnabled = False
+        fromTime = (0,0,0,0,0,0)
+        toTime = (0,0,0,0,0,0)
+        message = "success" 
+
+        if _tabId is not None: tabId = _tabId
+        if _backgroundMode is not None: backgroundMode=_backgroundMode
+        if _stepMode is not None: stepMode=_stepMode
+        if _breakpointMode is not None: breakpointMode=_breakpointMode
+        if _notificationsEnabled is not None: notificationsEnabled=_notificationsEnabled
+        if _logsEnabled is not None: logsEnabled=_logsEnabled
+        if _debugEnabled is not None: debugEnabled=_debugEnabled
+        if _probesEnabled is not None: probesEnabled=_probesEnabled
+        if _fromTime is not None: fromTime=_fromTime
+        if _toTime is not None: toTime=_toTime
+        
+        task = TaskManager.instance().registerTask( 
+                                                testData=testData, 
+                                                testName=testName, 
+                                                testPath=testPath, 
+                                                testUserId=user_profile['id'],
+                                                testUser=user_profile['login'],
+                                                testId=tabId, 
+                                                testBackground=backgroundMode,
+                                                runAt=scheduleAt, 
+                                                runType=scheduleId, 
+                                                runNb=scheduleRepeat, 
+                                                withoutProbes=probesEnabled,
+                                                debugActivated=debugEnabled, 
+                                                withoutNotif=notificationsEnabled, 
+                                                noKeepTr=logsEnabled,
+                                                testProjectId=projectId, 
+                                                runFrom=fromTime, 
+                                                runTo=toTime, 
+                                                stepByStep=stepMode, 
+                                                breakpoint=breakpointMode, 
+                                                channelId=channelId
+                                            )
+  
+        if task.lastError is not None:
+            raise HTTP_500('Unable to run the test: %s' % task.lastError)
+  
+        if task.isRecursive(): message = "recursive"
+        if task.isRecursive() and backgroundMode: message = "recursive-background"
+        if task.isPostponed(): message = "postponed"
+        if task.isPostponed() and backgroundMode: message = "postponed-background"
+        if task.isSuccessive(): message = "successive"
+        if task.isSuccessive() and backgroundMode: message = "successive-background"
+        if not task.isSuccessive() and not task.isPostponed() and not task.isRecursive() and backgroundMode:
+            message = "background"
+        
+        return { "cmd": self.request.path, 
+                 "message": message,
+                 "task-id": task.getId(),
+                 "test-id": task.getTestID(),
+                 "tab-id": tabId,
+                 "test-name": testName
+               }
+               
 class TestsListing(Handler):
     """
     /rest/tests/listing
@@ -6976,20 +8305,18 @@ class TestsListing(Handler):
             _forruns = forruns
              
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        _, _, listing, _ = RepoTests.instance().getTree(b64=True, project=prjId)
+        _, _, listing, _ = RepoTests.instance().getTree(b64=True, project=projectId)
 
-        return { "cmd": self.request.path, "tests-listing": listing, "project-id": prjId, 
+        return { "cmd": self.request.path, "tests-listing": listing, "project-id": projectId, 
                  "for-saveas": _forsaveas, "for-runs": _forruns }
 
 class TestsFileUnlockAll(Handler):
@@ -7043,6 +8370,57 @@ class TestsFileUnlockAll(Handler):
             raise HTTP_500("Unable to unlock all tests")
             
         return { "cmd": self.request.path, "message": "unlocked" }
+        
+class TestsFileDefaultAll(Handler):
+    """
+    /rest/tests/file/default/all
+    """   
+    @_to_yaml
+    def get(self):
+        """
+        tags:
+          - tests
+        summary: set all tests with the default adapters and libraries version
+        description: ''
+        operationId: testsFileDefaultAll
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/file/unlock/all", 
+                  "message": "unlocked"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        
+        success = RepoTests.instance().setTestsWithDefault()
+        if not success:
+            raise HTTP_500("Unable to set default version of adapters and libraries for all tests")
+            
+        return { "cmd": self.request.path, "message": "default version configured" }
 
 class TestsBuild(Handler):
     """
@@ -7169,7 +8547,444 @@ class TestsStatistics(Handler):
         _, _, _, statistics = RepoTests.instance().getTree(b64=True,  project=prjId )
         
         return { "cmd": self.request.path, "statistics": statistics, "project-id": prjId }
+
+class TestsCheckSyntax(Handler):
+    """
+    /rest/tests/check/syntax
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: check the syntax of a test (unit, abstract and suite)
+        description: ''
+        operationId: testsCheckSyntax
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ test-definition, test-execution, test-properties, test-name, test-path, test-extension ]
+              properties:
+                test-definition:
+                  type: string
+                test-execution:
+                  type: string
+                test-properties:
+                  type: string
+                test-name:
+                  type: string
+                test-path:
+                  type: string
+                test-extension:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                status:
+                  type: boolean
+                error-msg:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/check/syntax/string", 
+                  "status": True,
+                  "error-msg": "...."
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            testDefinition = self.request.data.get("test-definition")
+            if testDefinition is None: raise EmptyValue("Please specify a test definition")
+            
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        if testExtension not in [ "tax", "tux", "tsx" ]:
+            raise HTTP_400("Bad test extension provided (%s)" % testExtension)
+            
+        task = TaskManager.getObjectTask(   
+                                            testData=self.request.data, testName=testName, 
+                                            testPath=testPath,  testUser=user_profile["login"], 
+                                            testId=0, testBackground=False ,
+                                            statsmgr=StatsManager.instance(),
+                                            context=Context
+                                        )
+        status, error_msg = task.parseTest()        
+        del task
+
+        return { "cmd": self.request.path, "status": status, "error-msg": error_msg }
         
+class TestsCheckSyntaxTpg(Handler):
+    """
+    /rest/tests/check/syntax/tpg
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: check the syntax of a test (plan and global)
+        description: ''
+        operationId: testsCheckSyntaxTpg
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ test-execution, test-properties, test-name, test-path, test-extension ]
+              properties:
+                test-execution:
+                  type: array
+                test-properties:
+                  type: string
+                test-name:
+                  type: string
+                test-path:
+                  type: string
+                test-extension:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                status:
+                  type: boolean
+                error-msg:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/check/syntax/tpg", 
+                  "status": True,
+                  "error-msg": "...."
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        if testExtension not in [ "tgx", "tpx" ]:
+            raise HTTP_400("Bad test extension provided (%s)" % testExtension)
+            
+        if testExtension == "tgx":  
+            success, error_msg, self.request.data["test-execution"] = RepoTests.instance().addtf2tg( 
+                                data_=self.request.data["test-execution"]
+                              )
+            if success != Context.instance().CODE_OK:
+                return { "cmd": self.request.path, "status": False, "error-msg": error_msg }
+                
+        if testExtension == "tpx":       
+            success, error_msg = RepoTests.instance().addtf2tp( 
+                                data_=self.request.data["test-execution"]
+                             )
+            if success != Context.instance().CODE_OK:
+                return { "cmd": self.request.path, "status": False, "error-msg": error_msg }
+ 
+        task = TaskManager.getObjectTask(   
+                                            testData=self.request.data, testName=testName, 
+                                            testPath=testPath,  testUser=user_profile["login"], 
+                                            testId=0, testBackground=False ,
+                                            statsmgr=StatsManager.instance(),
+                                            context=Context
+                                        )
+        status, error_msg = task.parseTest()        
+        del task
+
+        return { "cmd": self.request.path, "status": status, "error-msg": error_msg }
+    
+class TestsCreateDesign(Handler):
+    """
+    /rest/tests/create/design
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: create the design of a test (unit, abstract and suite)
+        description: ''
+        operationId: testsCreateDesign
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-id, test-definition, test-execution, test-properties, test-name, test-path, test-extension ]
+              properties:
+                project-id:
+                  type: integer
+                test-definition:
+                  type: string
+                test-execution:
+                  type: string
+                test-properties:
+                  type: string
+                test-name:
+                  type: string
+                test-path:
+                  type: string
+                test-extension:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                status:
+                  type: boolean
+                error-msg:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/check/design", 
+                  "status": True,
+                  "error-msg": "...."
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectId = self.request.data.get("project-id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            testDefinition = self.request.data.get("test-definition")
+            if testDefinition is None: raise EmptyValue("Please specify a test definition")
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        if testExtension not in [ "tax", "tux", "tsx" ]:
+            raise HTTP_400("Bad test extension provided (%s)" % testExtension)
+            
+        task = TaskManager.getObjectTask(   
+                                            testData=self.request.data, testName=testName, 
+                                            testPath=testPath,  testUser=user_profile["login"], 
+                                            testId=0, testBackground=False ,
+                                            projectId=projectId,
+                                            statsmgr=StatsManager.instance(),
+                                            context=Context
+                                        )
+        parsed = task.parseTestDesign()        
+        del task
+
+        return { "cmd": self.request.path, 
+                 "error": parsed["error"], 
+                 "error-msg": parsed["error-details"],
+                 "design": parsed["design"],
+                 "xml-design": parsed["design-xml"],
+                 }
+
+class TestsCreateDesignTpg(Handler):
+    """
+    /rest/tests/create/design/tpg
+    """   
+    @_to_yaml 
+    def post(self):
+        """
+        tags:
+          - tests
+        summary: create the design of a test (plan and global)
+        description: ''
+        operationId: testsCreateDesignTree
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-id, test-execution, test-properties, test-name, test-path, test-extension ]
+              properties:
+                project-id:
+                  type: integer
+                test-execution:
+                  type: array
+                test-properties:
+                  type: string
+                test-name:
+                  type: string
+                test-path:
+                  type: string
+                test-extension:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                status:
+                  type: boolean
+                error-msg:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/tests/check/design/tpg", 
+                  "status": True,
+                  "error-msg": "...."
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectId = self.request.data.get("project-id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            testExecution = self.request.data.get("test-execution")
+            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            testProperties = self.request.data.get("test-properties")
+            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            testName = self.request.data.get("test-name")
+            if testName is None: raise EmptyValue("Please specify a test name")
+            testPath = self.request.data.get("test-path")
+            if testPath is None: raise EmptyValue("Please specify a test path")
+            testExtension = self.request.data.get("test-extension")
+            if testExtension is None: raise EmptyValue("Please specify a test extension")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        if testExtension not in [ "tgx", "tpx" ]:
+            raise HTTP_400("Bad test extension provided (%s)" % testExtension)
+            
+        if testExtension == "tgx":  
+            success, error_msg, self.request.data["test-execution"] = RepoTests.instance().addtf2tg( 
+                                data_=self.request.data["test-execution"]
+                              )
+            if success != Context.instance().CODE_OK:
+                return { "cmd": self.request.path, "status": False, "error-msg": error_msg }
+                
+        if testExtension == "tpx":       
+            success, error_msg = RepoTests.instance().addtf2tp( 
+                                data_=self.request.data["test-execution"]
+                             )
+            if success != Context.instance().CODE_OK:
+                return { "cmd": self.request.path, "status": False, "error-msg": error_msg }
+ 
+        task = TaskManager.getObjectTask(   
+                                            testData=self.request.data, testName=testName, 
+                                            testPath=testPath,  testUser=user_profile["login"], 
+                                            testId=0, testBackground=False ,
+                                            projectId=projectId,
+                                            statsmgr=StatsManager.instance(),
+                                            context=Context
+                                        )
+        parsed = task.parseTestDesign()        
+        del task
+
+        return { "cmd": self.request.path, 
+                 "error": parsed["error"], 
+                 "error-msg": parsed["error-details"],
+                 "design": parsed["design"],
+                 "xml-design": parsed["design-xml"],
+                 }
+
 class TestsFileDownload(Handler):
     """
     /rest/tests/file/download
@@ -7237,9 +9052,8 @@ class TestsFileDownload(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -7295,6 +9109,12 @@ class TestsFileOpen(Handler):
                   type: boolean
                 read-only:
                   type: boolean
+                custom-param:
+                  type: integer
+                destination-id:
+                  type: integer
+                action-id:
+                  type: integer
         responses:
           '200':
             schema :
@@ -7327,15 +9147,18 @@ class TestsFileOpen(Handler):
             
             _ignoreLock = self.request.data.get("ignore-lock")
             _readOnly = self.request.data.get("read-only")
+            
+            _customParam = self.request.data.get("custom-param")
+            _actId = self.request.data.get("action-id")
+            _destId = self.request.data.get("destination-id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -7349,16 +9172,23 @@ class TestsFileOpen(Handler):
         
         readOnly = False
         if _readOnly is not None:
-            _readOnly = readOnly
+            readOnly = _readOnly
            
         # avoid directory traversal
         filePath = os.path.normpath("/" + filePath )
         
+        addLock = True
+        if _destId is not None and _actId is not None:
+            addLock = False
+            ignoreLock = False
+            readOnly = False
+            
         resultGetFile = RepoTests.instance().getFile(pathFile=filePath, 
                                                     project=projectId, 
                                                     login=user_profile['login'],
                                                     forceOpen=ignoreLock, 
-                                                    readOnly=readOnly)  
+                                                    readOnly=readOnly,
+                                                    addLock=addLock)  
         success, path_file, name_file, ext_file, project, data_base64, locked, locked_by = resultGetFile
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to open test file")
@@ -7370,7 +9200,10 @@ class TestsFileOpen(Handler):
                  "file-extension": ext_file,
                  "locked": locked,
                  "locked-by": locked_by,
-                 "project-id": project }
+                 "project-id": project,
+                 "custom-param": _customParam,
+                 "action-id": _actId,
+                 "destination-id": _destId}
 
 class TestsFileUpload(Handler):
     """
@@ -7398,28 +9231,37 @@ class TestsFileUpload(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, directory-name, directory-path ]
+              required: [ project-id, file-path, file-name, file-extension, file-content ]
               properties:
                 project-id:
                   type: integer
-                directory-name:
+                file-path:
                   type: string
-                directory-path:
+                file-name:
                   type: string
+                file-extension:
+                  type: string
+                file-content:
+                  type: string
+                overwrite:
+                  type: boolean
+                close-after:
+                  type: boolean
+                add-folders:
+                  type: boolean
         responses:
           '200':
-            description: rename response
             schema :
               properties:
                 cmd:
                   type: string
-                message:
-                  type: string
+                code:
+                  type: integer
             examples:
               application/json: |
                 {
-                  "cmd": "/tests/directory/rename", 
-                  "message": "directory successfully renamed"
+                  "cmd": "/tests/file/upload", 
+                  "code": 200
                 }
           '400':
             description: Bad request provided
@@ -7451,9 +9293,8 @@ class TestsFileUpload(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -7484,17 +9325,17 @@ class TestsFileUpload(Handler):
                                                          lockMode=True, 
                                                          binaryMode=True,
                                                          closeAfter=closeAfter )
-        success, pathFile, nameFile, extFile, project, overwriteFile, closeAfter, lockedBy = putFileReturn
-        if success != Context.instance().CODE_OK:
-            raise HTTP_500("Unable to upload file")
+        success, pathFile, nameFile, extFile, project, overwriteFile, closeAfter, isLocked, lockedBy = putFileReturn
 
-        return { "cmd": self.request.path, "message": "file successfully imported",
+        return { "cmd": self.request.path, 
+                 "code": success,
                  "file-path": pathFile,
                  "file-name": nameFile,
                  "file-extension": extFile,
                  "project-id":  project,
                  "overwrite":  overwriteFile,
                  "close-after": closeAfter,
+                 "locked": isLocked,
                  "locked-by": lockedBy }
 
 class TestsFileRemove(Handler):
@@ -7564,9 +9405,8 @@ class TestsFileRemove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -7663,9 +9503,8 @@ class TestsFileUnlock(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -7776,10 +9615,9 @@ class TestsFileRename(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-                
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+            
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
                                                                                   projectId=projectId)
@@ -7912,13 +9750,10 @@ class TestsFileDuplicate(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-        # checking input    
-        if newProjectId is not None:
-            if not isinstance(newProjectId, int):
-                raise HTTP_400("Bad new project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(newProjectId, int):
+            raise HTTP_400("Bad new project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -8051,13 +9886,10 @@ class TestsFileMove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-        # checking input    
-        if newProjectId is not None:
-            if not isinstance(newProjectId, int):
-                raise HTTP_400("Bad new project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(newProjectId, int):
+            raise HTTP_400("Bad new project id provided in request, int expected")
 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -8218,28 +10050,26 @@ class TestsDirectoryAdd(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
         # avoid directory traversal
         folderPath = os.path.normpath("/" + folderPath )
         
-        success = RepoTests.instance().addDir(pathFolder=folderPath, folderName=folderName, project=prjId)  
+        success = RepoTests.instance().addDir(pathFolder=folderPath, folderName=folderName, project=projectId)  
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to add directory")
         if success == Context.instance().CODE_ALLREADY_EXISTS:
             raise HTTP_403("Directory already exists")
             
         return { "cmd": self.request.path, "message": "directory successfully added", 
-                 "project-id": prjId }
+                 "project-id": projectId }
         
 class TestsDirectoryRename(Handler):
     """
@@ -8332,9 +10162,8 @@ class TestsDirectoryRename(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -8460,13 +10289,10 @@ class TestsDirectoryDuplicate(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-        # checking input    
-        if newProjectId is not None:
-            if not isinstance(newProjectId, int):
-                raise HTTP_400("Bad new project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(newProjectId, int):
+            raise HTTP_400("Bad new project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -8597,13 +10423,10 @@ class TestsDirectoryMove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-        # checking input    
-        if newProjectId is not None:
-            if not isinstance(newProjectId, int):
-                raise HTTP_400("Bad new project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(newProjectId, int):
+            raise HTTP_400("Bad new project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         prjId = projectId
@@ -8708,9 +10531,8 @@ class TestsDirectoryRemove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -8799,21 +10621,19 @@ class TestsDirectoryRemoveAll(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
 
         # avoid directory traversal
         folderPath = os.path.normpath("/" + folderPath )
 
-        success = RepoTests.instance().delDirAll(folderPath, prjId)  
+        success = RepoTests.instance().delDirAll(folderPath, projectId)  
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to remove directory")
         if success == Context.instance().CODE_NOT_FOUND:
@@ -8822,7 +10642,7 @@ class TestsDirectoryRemoveAll(Handler):
             raise HTTP_403("Removing directory denied")
 
         return { "cmd": self.request.path, "message": "all directories successfully removed",
-                 "project-id": prjId }
+                 "project-id": projectId }
 
 class TestsBackup(Handler):
     """
@@ -9189,9 +11009,8 @@ class TestsSnapshotAdd(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -9282,9 +11101,8 @@ class TestsSnapshotRemove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -9380,9 +11198,8 @@ class TestsSnapshotRemoveAll(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -9473,9 +11290,8 @@ class TestsSnapshotRestore(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
@@ -10366,11 +12182,9 @@ class ResultsCompressZip(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -10403,8 +12217,7 @@ class ResultsCompressZip(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
             testId = self.request.data.get("test-id")
             if not testId: raise EmptyValue("Please specify a project id and test id")
@@ -10414,29 +12227,26 @@ class ResultsCompressZip(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
         # extract the real test path according the test id
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId, 
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId, 
                                                                   returnProject=False)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
-        success = RepoArchives.instance().createZip(trPath=testPath, projectId=prjId)
+        success = RepoArchives.instance().createZip(trPath=testPath, projectId=projectId)
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500('Unable to create zip file')
             
-        return { "cmd": self.request.path, 'project-id': prjId, "message": "zip created" }
+        return { "cmd": self.request.path, 'project-id': projectId, "message": "zip created" }
                  
 class ResultsListingFiles(Handler):
     """
@@ -10464,12 +12274,10 @@ class ResultsListingFiles(Handler):
             in: body
             required: true
             schema:
-              required: [ ]
+              required: [ project-id ]
               properties:
                 partial-list:
                   type: boolean
-                project-name:
-                  type: string
                 project-id:
                   type: integer
         responses:
@@ -10504,8 +12312,7 @@ class ResultsListingFiles(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
             _partial = self.request.data.get("partial-list")
         except EmptyValue as e:
@@ -10514,15 +12321,12 @@ class ResultsListingFiles(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
@@ -10533,9 +12337,9 @@ class ResultsListingFiles(Handler):
         
         nb_archs, nb_archs_f, archs, stats_archs = RepoArchives.instance().getTree(b64=False, 
                                                                                    fullTree=not partialListing, 
-                                                                                   project=prjId)       
+                                                                                   project=projectId)       
         return { "cmd": self.request.path, "listing": archs, "nb-folders": nb_archs, "nb-files": nb_archs_f, 
-                 "statistics": stats_archs, 'project-id': prjId }
+                 "statistics": stats_archs, 'project-id': projectId }
 
 class ResultsListingIdByDateTime(Handler):
     """
@@ -10563,10 +12367,8 @@ class ResultsListingIdByDateTime(Handler):
             in: body
             required: true
             schema:
-              required: [ ]
+              required: [ project-id ]
               properties:
-                project-name:
-                  type: string
                 project-id:
                   type: integer
                 date:
@@ -10603,8 +12405,7 @@ class ResultsListingIdByDateTime(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
             dateFilter = self.request.data.get("date")
             timeFilter = self.request.data.get("time")
@@ -10614,22 +12415,20 @@ class ResultsListingIdByDateTime(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        listing = RepoArchives.instance().getBasicListing(projectId=prjId, 
+        listing = RepoArchives.instance().getBasicListing(projectId=projectId, 
                                                         dateFilter=dateFilter, 
                                                         timeFilter=timeFilter)  
         
-        return { "cmd": self.request.path, "listing": listing, 'project-id': prjId }
+        return { "cmd": self.request.path, "listing": listing, 'project-id': projectId }
 
 class ResultsDownloadResult(Handler):
     """
@@ -10657,11 +12456,9 @@ class ResultsDownloadResult(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id, file-name ]
+              required: [ test-id, project-id, file-name ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -10715,13 +12512,13 @@ class ResultsDownloadResult(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            
             fileName = self.request.data.get("file-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
-            if not fileName: raise EmptyValue("Please specify a file name")
-			
+            if fileName is None: raise EmptyValue("Please specify a file name")
+
             testId = self.request.data.get("test-id")
-            if not testId: raise EmptyValue("Please specify a project id and test id")
+            if testId is None: raise EmptyValue("Please specify a project id and test id")
             
             _saveAs = self.request.data.get("save-as")
             _saveAsDest = self.request.data.get("save-as-name")
@@ -10732,20 +12529,18 @@ class ResultsDownloadResult(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
         # extract the real test path according the test id
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId, returnProject=False)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, 
+                                                                  testId=testId, returnProject=False)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result by id not found')
 
@@ -10755,7 +12550,7 @@ class ResultsDownloadResult(Handler):
         if _saveAsDest is not None: saveAsDest = _saveAsDest
             
         trxPath = "%s/%s" % (testPath, fileName)
-        success, _, nameFile, extFile, b64result, _, _ = RepoArchives.instance().getFile( pathFile=trxPath, 
+        success, _, nameFile, extFile, _, b64result, _, _ = RepoArchives.instance().getFile( pathFile=trxPath, 
                                                                                           project=projectId, 
                                                                                           addLock=False)
         if success == Context.instance().CODE_NOT_FOUND:
@@ -10763,7 +12558,7 @@ class ResultsDownloadResult(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to get file, check log in server side")
             
-        return { "cmd": self.request.path, 'test-id': testId, 'project-id': prjId, 
+        return { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId, 
                  'result': b64result, 'result-name': nameFile, "result-extension": extFile,
                  'save-as': saveAs, 'save-as-name': saveAsDest }
                  
@@ -10793,11 +12588,9 @@ class ResultsDownloadResultUncomplete(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -10843,31 +12636,27 @@ class ResultsDownloadResultUncomplete(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
             testId = self.request.data.get("test-id")
-            if not testId: raise EmptyValue("Please specify a project id and test id")
+            if testId is None: raise EmptyValue("Please specify a test id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
-        # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        # checking input
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
         # extract the real test path according the test id
-        success, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        success, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if success == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result by id not found')
 
@@ -10877,7 +12666,7 @@ class ResultsDownloadResultUncomplete(Handler):
             
         testPath = testPath.split("/", 1)[1]
         trxPath = "%s/%s" % (testPath, trName)
-        success, _, nameFile, extFile, b64result, _, _ = RepoArchives.instance().getFile( pathFile=trxPath, 
+        success, _, nameFile, extFile, _, b64result, _, _ = RepoArchives.instance().getFile( pathFile=trxPath, 
                                                                                           project=projectId, 
                                                                                           addLock=False)
         if success == Context.instance().CODE_NOT_FOUND:
@@ -10885,7 +12674,7 @@ class ResultsDownloadResultUncomplete(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to get file, check log in server side")
             
-        return { "cmd": self.request.path, 'test-id': testId, 'project-id': prjId, 
+        return { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId, 
                  'result': b64result, 'result-name': nameFile, "result-extension": extFile }
                  
 class ResultsDownloadImage(Handler):
@@ -10914,11 +12703,9 @@ class ResultsDownloadImage(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id, image-name ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -10956,38 +12743,36 @@ class ResultsDownloadImage(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            
             imageName = self.request.data.get("image-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
-            if not imageName: raise EmptyValue("Please specify a image name")
+            if imageName is None: raise EmptyValue("Please specify a image name")
 			
             testId = self.request.data.get("test-id")
-            if not testId: raise EmptyValue("Please specify a project id and test id")
+            if testId is None: raise EmptyValue("Please specify a project id and test id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
         # extract the real test path according the test id
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId, returnProject=False)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, 
+                                                                  testId=testId, returnProject=False)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('test not found')
 
         imagePath = "%s/%s" % (testPath, imageName)
-        success, _, _, _, b64img, _, _ = RepoArchives.instance().getFile(pathFile=imagePath, 
+        success, _, _, _, _, b64img, _, _ = RepoArchives.instance().getFile(pathFile=imagePath, 
                                                                          project=projectId, 
                                                                          addLock=False)
         if success == Context.instance().CODE_NOT_FOUND:
@@ -10995,8 +12780,99 @@ class ResultsDownloadImage(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to get file, check logs in server side")
             
-        return { "cmd": self.request.path, 'test-id': testId, 'project-id': prjId, 'image': b64img }
+        return { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId, 'image': b64img }
 
+class ResultsUploadFile(Handler):
+    """
+    /rest/results/upload/file
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - results
+        summary: Upload a file in the test result
+        description: ''
+        operationId: resultsUploadFile
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ result-path, file-name, file-content ]
+              properties:
+                result-path:
+                  type: string
+                file-name:
+                  type: string
+                file-content:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/results/upload/file", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Extension file refused
+          '404':
+            description: Test result not found
+          '500':
+            description: Server error 
+        """
+        user_profile = _get_user(request=self.request)
+        
+        try:
+            resultPath = self.request.data.get("result-path")
+            if resultPath is None: raise EmptyValue("Please specify a result path")
+            
+            fileName = self.request.data.get("file-name")
+            if fileName is None: raise EmptyValue("Please specify a file name")
+            
+            fileContent = self.request.data.get("file-content")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        # we can upload only zip file
+        if not fileName.endswith(".zip") and not fileName.endswith(".png") \
+                and not fileName.endswith(".jpg") and not fileName.endswith(".mp4") :
+            raise HTTP_403('Extension file not authorized')
+            
+        archiveRepo='%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
+        if not os.path.exists( "%s/%s" % (archiveRepo, resultPath )):
+            raise HTTP_404('test result path not found')
+        
+        success = RepoArchives.instance().createResultLog(testsPath=archiveRepo , 
+                                                          logPath=resultPath,
+                                                          logName=fileName, 
+                                                          logData=fileContent )
+        if not success:
+            raise HTTP_500("Unable to upload file in testresult")
+            
+        return { "cmd": self.request.path, 'message': 'success' }
+       
 class ResultsRemove(Handler):
     """
     /rest/results/reset
@@ -11023,10 +12899,8 @@ class ResultsRemove(Handler):
             in: body
             required: true
             schema:
-              required: [ ]
+              required: [ project-id ]
               properties:
-                project-name:
-                  type: string
                 project-id:
                   type: integer
         responses:
@@ -11057,33 +12931,30 @@ class ResultsRemove(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
                     
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        success = RepoArchives.instance().emptyRepo(projectId=prjId)  
+        success = RepoArchives.instance().emptyRepo(projectId=projectId)  
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to reset test results")
         if success == Context.instance().CODE_FORBIDDEN:
             raise HTTP_403("Reset results forbidden")
             
-        return { "cmd": self.request.path, "message": "results successfully reseted", 'project-id': prjId }
+        return { "cmd": self.request.path, "message": "results successfully reseted", 
+                 'project-id': projectId }
         
 class ResultsRemoveById(Handler):
     """
@@ -11111,11 +12982,9 @@ class ResultsRemoveById(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: string
@@ -11151,31 +13020,27 @@ class ResultsRemoveById(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
             
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
                     
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
         
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('test not found')
             
@@ -11187,7 +13052,8 @@ class ResultsRemoveById(Handler):
         if success == Context.instance().CODE_FORBIDDEN:
             raise HTTP_403("Cannot remove test result")
             
-        return { "cmd": self.request.path, "message": "test result successfully removed", 'project-id': prjId }
+        return { "cmd": self.request.path, "message": "test result successfully removed", 
+                 'project-id': projectId }
 
 class ResultsRemoveByDate(Handler):
     """
@@ -11215,11 +13081,9 @@ class ResultsRemoveByDate(Handler):
             in: body
             required: true
             schema:
-              required: [ date ]
+              required: [ date, project-id ]
               properties:
                 date:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: string
@@ -11255,30 +13119,26 @@ class ResultsRemoveByDate(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
             
             byDate = self.request.data.get("date")
-            if not byDate: raise HTTP_400("Please specify a date")
+            if byDate is None: raise HTTP_400("Please specify a date")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
                     
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
 
-        success = RepoArchives.instance().delDirAll(pathFolder="%s/%s/" % (prjId, byDate), project='')  
+        success = RepoArchives.instance().delDirAll(pathFolder="%s/%s/" % (projectId, byDate), project='')  
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to remove all tests results")
         if success == Context.instance().CODE_NOT_FOUND:
@@ -11286,7 +13146,8 @@ class ResultsRemoveByDate(Handler):
         if success == Context.instance().CODE_FORBIDDEN:
             raise HTTP_403("Cannot remove all tests results")
             
-        return { "cmd": self.request.path, "message": "all tests results successfully removed", 'project-id': prjId }
+        return { "cmd": self.request.path, "message": "all tests results successfully removed", 
+                 'project-id': projectId }
 
 class ResultsFollow(Handler):
     """
@@ -11309,8 +13170,7 @@ class ResultsFollow(Handler):
             if not testIds: raise HTTP_400("Please specify a project id and a list of test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
@@ -11318,21 +13178,19 @@ class ResultsFollow(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
         results = []
         for testId in testIds:
             result = { "id": testId }
-            founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+            founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
             if founded == Context.instance().CODE_NOT_FOUND: raise HTTP_404('test not found')
 
             state = RepoArchives.instance().getTrState(trPath=testPath)
@@ -11344,7 +13202,7 @@ class ResultsFollow(Handler):
             result.update(description)
             
             results.append(result)
-        return { "cmd": self.request.path, "results": results, 'project-id': prjId}
+        return { "cmd": self.request.path, "results": results, 'project-id': projectId}
     
 class ResultsStatus(Handler):
     """
@@ -11372,11 +13230,9 @@ class ResultsStatus(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: string
@@ -11416,11 +13272,10 @@ class ResultsStatus(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a list of test id")
+            if testId is None: raise HTTP_400("Please specify a list of test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
@@ -11428,24 +13283,23 @@ class ResultsStatus(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
             
         state = RepoArchives.instance().getTrState(trPath=testPath)
         progress = RepoArchives.instance().getTrProgress(trPath=testPath)
-        return { "cmd": self.request.path, 'test-id': testId, 'test-status': state, 'test-progress': progress['percent'] }
+        return { "cmd": self.request.path, 'test-id': testId, 'test-status': state, 
+                 'test-progress': progress['percent'] }
     
 class ResultsVerdict(Handler):
     """
@@ -11473,11 +13327,9 @@ class ResultsVerdict(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: string
@@ -11513,30 +13365,26 @@ class ResultsVerdict(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a list of test id")
+            if testId is None: raise HTTP_400("Please specify a list of test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
             
@@ -11569,11 +13417,9 @@ class ResultsReportReviews(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -11612,12 +13458,11 @@ class ResultsReportReviews(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: 
+                raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -11626,15 +13471,12 @@ class ResultsReportReviews(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -11643,7 +13485,7 @@ class ResultsReportReviews(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -11654,22 +13496,16 @@ class ResultsReportReviews(Handler):
                                                                          trExt="tbrp")
         if success == Context.instance().CODE_OK:
             ret["basic-review"] = report
-        else:
-            self.error("Error to get basic report from test result")
-            
+ 
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId,
                                                                          trExt="trp")
         if success == Context.instance().CODE_OK:
             ret["review"] = report
-        else:
-            self.error("Error to get report from test result")
-            
+ 
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId, 
                                                                          trExt="trpx")
         if success == Context.instance().CODE_OK:
             ret["xml-review"] = report
-        else:
-            self.error("Error to get xml report from test result")
 
         return ret
 
@@ -11699,11 +13535,9 @@ class ResultsReportVerdicts(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -11742,12 +13576,11 @@ class ResultsReportVerdicts(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: 
+                raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -11756,15 +13589,12 @@ class ResultsReportVerdicts(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -11773,7 +13603,7 @@ class ResultsReportVerdicts(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -11821,11 +13651,9 @@ class ResultsReportDesigns(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -11864,12 +13692,10 @@ class ResultsReportDesigns(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -11878,15 +13704,12 @@ class ResultsReportDesigns(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -11895,7 +13718,7 @@ class ResultsReportDesigns(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -11944,11 +13767,9 @@ class ResultsReportComments(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -11986,12 +13807,10 @@ class ResultsReportComments(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -12000,15 +13819,12 @@ class ResultsReportComments(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12017,7 +13833,7 @@ class ResultsReportComments(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -12058,11 +13874,9 @@ class ResultsReportEvents(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -12100,12 +13914,10 @@ class ResultsReportEvents(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -12114,15 +13926,12 @@ class ResultsReportEvents(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12131,7 +13940,7 @@ class ResultsReportEvents(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -12172,11 +13981,9 @@ class ResultsReports(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -12221,12 +14028,10 @@ class ResultsReports(Handler):
         
         try:
             testId = self.request.data.get("test-id")
-            if not testId: raise HTTP_400("Please specify a test id")
+            if testId is None: raise HTTP_400("Please specify a test id")
                 
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: 
-                raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
                 
             _replayId = self.request.data.get("replay-id")    
         except EmptyValue as e:
@@ -12235,15 +14040,12 @@ class ResultsReports(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12252,7 +14054,7 @@ class ResultsReports(Handler):
         else:
             replayId = _replayId
             
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result not found')
         
@@ -12263,67 +14065,49 @@ class ResultsReports(Handler):
                                                                          trExt="tbrp")
         if success == Context.instance().CODE_OK:
             ret["basic-review"] = report
-        else:
-            self.error("Error to get basic report from test result")
-            
+
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId,
                                                                          trExt="trp")
         if success == Context.instance().CODE_OK:
             ret["review"] = report
-        else:
-            self.error("Error to get report from test result")
-            
+
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId, 
                                                                          trExt="trpx")
         if success == Context.instance().CODE_OK:
             ret["xml-review"] = report
-        else:
-            self.error("Error to get xml report from test result")
-        
+
         # verdicts
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId,
                                                                          trExt="trv")
         if success == Context.instance().CODE_OK:
             ret["verdict"] = report
-        else:
-            self.error("Error to get csv verdict report from test result")
-            
+
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId,
                                                                          trExt="tvrx")
         if success == Context.instance().CODE_OK:
             ret["xml-verdict"] = report
-        else:
-            self.error("Error to get csv verdict report from test result")
 
         # designs
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId, 
                                                                          trExt="trd")
         if success == Context.instance().CODE_OK:
             ret["design"] = report
-        else:
-            self.error("Error to get xml report from test result")
-            
+  
         success, report = RepoArchives.instance().getTrReportByExtension(trPath=testPath, replayId=replayId, 
                                                                          trExt="tdsx")
         if success == Context.instance().CODE_OK:
             ret["xml-design"] = report
-        else:
-            self.error("Error to get xml report from test result")
-        
+
         # comments
         success, report = RepoArchives.instance().getTrComments(trPath=testPath, replayId=replayId)
         if success == Context.instance().CODE_OK:
             ret["comments"] = report
-        else:
-            self.error("Error to get comments from test result")
-         
+
         # events
         success, report = RepoArchives.instance().getTrResume(trPath=testPath, replayId=replayId)
         if success == Context.instance().CODE_OK:
             ret["events"] = report
-        else:
-            self.error("Error to get events from test result")
-            
+ 
         return ret
 
 class ResultsCommentAdd(Handler):
@@ -12352,11 +14136,9 @@ class ResultsCommentAdd(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id, comment, timestamp ]
+              required: [ test-id, comment, timestamp, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -12403,15 +14185,14 @@ class ResultsCommentAdd(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
             comment = self.request.data.get("comment")
             timestamp = self.request.data.get("timestamp")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
-            if not comment: raise EmptyValue("Please specify the comment to add")
-            if not timestamp: raise EmptyValue("Please specify a timestamp")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            if comment is None: raise EmptyValue("Please specify the comment to add")
+            if timestamp is None: raise EmptyValue("Please specify a timestamp")
 
             testId = self.request.data.get("test-id")
-            if not testId: raise EmptyValue("Please specify a project id and test id")
+            if testId is None: raise EmptyValue("Please specify a project id and test id")
 
             _replayId = self.request.data.get("replay-id")  
             _returnAll = self.request.data.get("return-all")  
@@ -12421,15 +14202,12 @@ class ResultsCommentAdd(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12444,7 +14222,7 @@ class ResultsCommentAdd(Handler):
             returnAll = _returnAll
             
         # extract the real test path according the test id
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result by id not found')
 
@@ -12459,7 +14237,7 @@ class ResultsCommentAdd(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to add comment")
         
-        rsp = { "cmd": self.request.path, 'test-id': testId, 'project-id': prjId }
+        rsp = { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId }
         if returnAll:
             rsp["comments"] = comments
         else:
@@ -12492,11 +14270,9 @@ class ResultsCommentsRemove(Handler):
             in: body
             required: true
             schema:
-              required: [ test-id ]
+              required: [ test-id, project-id ]
               properties:
                 test-id:
-                  type: string
-                project-name:
                   type: string
                 project-id:
                   type: integer
@@ -12539,11 +14315,10 @@ class ResultsCommentsRemove(Handler):
         
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
 
             testId = self.request.data.get("test-id")
-            if not testId: raise EmptyValue("Please specify a project id and test id")
+            if testId is None: raise EmptyValue("Please specify a project id and test id")
 
             _replayId = self.request.data.get("replay-id")  
 
@@ -12553,15 +14328,12 @@ class ResultsCommentsRemove(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
                 
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
         projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=prjId)
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12571,7 +14343,7 @@ class ResultsCommentsRemove(Handler):
             replayId = _replayId
 
         # extract the real test path according the test id
-        founded, testPath = RepoArchives.instance().findTrInCache(projectId=prjId, testId=testId)
+        founded, testPath = RepoArchives.instance().findTrInCache(projectId=projectId, testId=testId)
         if founded == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404('Test result by id not found')
 
@@ -12583,10 +14355,8 @@ class ResultsCommentsRemove(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to delete all comments")
             
-        return  { "cmd": self.request.path, 'test-id': testId, 'project-id': prjId, "message": "all comments deleted" }
-"""
-Metriscs handlers
-"""
+        return  { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId, 
+                  "message": "all comments deleted" }
 
 class ResultsBackup(Handler):
     """
@@ -12614,6 +14384,7 @@ class ResultsBackup(Handler):
             in: body
             required: true
             schema:
+              required: [ backup-name ]
               properties:
                 backup-name:
                   type: string
@@ -12679,6 +14450,7 @@ class ResultsBackupDownload(Handler):
             in: body
             required: true
             schema:
+              required: [ backup-name, dest-name ]
               properties:
                 backup-name:
                   type: string
@@ -12852,9 +14624,8 @@ class ResultsStatistics(Handler):
             in: body
             required: true
             schema:
+              required: [ project-id ]
               properties:
-                project-name:
-                  type: string
                 project-id:
                   type: string
         responses:
@@ -12879,22 +14650,19 @@ class ResultsStatistics(Handler):
 
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-                
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+            
         # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
@@ -12904,25 +14672,7 @@ class ResultsStatistics(Handler):
 
 """
 Metrics handlers
-"""
-class MetricsScriptsStatistics(Handler):
-    """
-    Get statistics for scripts
-    """   
-    def post(self):
-        """
-        Get statistics for scripts
-        Send POST request (uri /rest/metrics/scripts/statistics) with the following body JSON 
-        { "user-id": <integer>}
-        Cookie session_id is mandatory. Available only for administrator.
-
-        @return: success message
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-            
+"""      
 class MetricsTestsReset(Handler):
     """
     /rest/metrics/tests/reset
@@ -12953,7 +14703,7 @@ class MetricsTestsReset(Handler):
                 cmd:
                   type: string
                 message:
-                  type: message
+                  type: string
             examples:
               application/json: |
                 {
@@ -12974,6 +14724,121 @@ class MetricsTestsReset(Handler):
             raise HTTP_500("Unable to reset statistics for tests")
             
         return { "cmd": self.request.path, 'message': 'tests statistics reseted' }
+
+class MetricsTestsWritingDuration(Handler):
+    """
+    /rest/metrics/tests/duration/writing
+    """
+    @_to_yaml      
+    def post(self):
+        """
+        tags:
+          - metrics
+        summary: add the duration of developpement for a test
+        description: ''
+        operationId: metricsTestsDurationWriting
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-id, duration, is-ta, is-tu, is-ts, is-tp, is-tg ]
+              properties:
+                project-id:
+                  type: integer
+                duration:
+                  type: integer
+                is-ta:
+                  type: boolean
+                is-tu:
+                  type: boolean
+                is-ts:
+                  type: boolean    
+                is-tp:
+                  type: boolean      
+                is-tg:
+                  type: boolean                        
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/metrics/tests/duration/writing", 
+                  "message": "duration added"
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectId = self.request.data.get("project-id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
+            
+            duration = self.request.data.get("duration")
+            if duration is None: raise EmptyValue("Please specify a duration")
+            
+            isTs = self.request.data.get("is-ts")
+            if isTs is None: raise EmptyValue("Please specify a source is ts")
+            
+            isTu = self.request.data.get("is-tu")
+            if isTu is None: raise EmptyValue("Please specify a source is tu")
+            
+            isTa = self.request.data.get("is-ta")
+            if isTa is None: raise EmptyValue("Please specify a source is ta")
+            
+            isTp = self.request.data.get("is-tp")
+            if isTp is None: raise EmptyValue("Please specify a source is tp")
+            
+            isTg = self.request.data.get("is-tg")
+            if isTg is None: raise EmptyValue("Please specify a source is tg")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        # checking input    
+        if projectId is not None:
+            if not isinstance(projectId, int):
+                raise HTTP_400("Bad project id provided in request, int expected")
+                
+        # get the project id according to the name and checking authorization
+        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
+                                                                                  projectId=projectId)
+        if not projectAuthorized:
+            raise HTTP_403('Access denied to this project')
+
+        success = StatsManager.instance().addWritingDuration(   
+                                                                fromUser=user_profile['id'], 
+                                                                prjId=projectId,
+                                                                writingDuration=duration, 
+                                                                isTs=isTs,
+                                                                isTp=isTp, 
+                                                                isTu=isTu, 
+                                                                isTg=isTg,
+                                                                isTa=isTa
+                                                            )
+        if not success:
+            raise HTTP_500("unable to save duration in table")
+            
+        return { "cmd": self.request.path, 'message': 'duration added' }
 
 """
 Clients Handler
@@ -13980,143 +15845,44 @@ class ProbesRemove(Handler):
             raise HTTP_500("unable to remove default probe")
             
         return { "cmd": self.request.path, "message": "probe successfully removed" } 
-          
-"""
-Release notes handlers
-"""
-class AboutChangesCore(Handler):
-    """
-    Get the release notes of the product
-    """   
-    def get(self):
-        """
-        Get the release notes of the product
-        Send GET request (uri /rest/releasenotes/core)
-        Cookie session_id is mandatory.
-
-        @return: release notes
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        rn = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=False) 
-        return { "cmd": self.request.path, "releasenotes-core": rn }
-        
-class AboutChangesAdapters(Handler):
-    """
-    Get the release notes of the adapters
-    """   
-    def get(self):
-        """
-        Get the release notes of the adapters
-        Send GET request (uri /rest/releasenotes/adapters)
-        Cookie session_id is mandatory.
-
-        @return: release notes
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        rn = RepoAdapters.instance().getRn(b64=False)
-        return { "cmd": self.request.path, "releasenotes-adapters": rn }
-        
-class AboutChangesLibraries(Handler):
-    """
-    Get the release notes of the libraries
-    """   
-    def get(self):
-        """
-        Get the release notes of the libraries
-        Send GET request (uri /rest/releasenotes/libraries)
-        Cookie session_id is mandatory.
-
-        @return: release notes
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        rn = RepoLibraries.instance().getRn(b64=False)
-        return { "cmd": self.request.path, "releasenotes-libraries": rn }
-        
-class AboutChangesToolbox(Handler):
-    """
-    Get the release notes of the toolbox
-    """   
-    def get(self):
-        """
-        Get the release notes of the toolbox
-        Send GET request (uri /rest/releasenotes/toolbox)
-        Cookie session_id is mandatory.
-
-        @return: release notes
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        rn = ToolboxManager.instance().getRn(b64=False)
-        return { "cmd": self.request.path, "releasenotes-toolbox": rn }
 
 """
 System handlers
 """
-class SystemVersions(Handler):
-    """
-    Get information about versions
-    """   
-    def get(self):
-        """
-        Get information about versions
-        Send GET request (uri /rest/system/versions)
-        Cookie session_id is mandatory.
-
-        @return: version of python, php, etc..
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-            
-        versions = {}
-        versions["core"] = Settings.getVersion()
-        versions["python"] = platform.python_version()
-        versions["php"] = Context.instance().phpVersion
-        versions["database"] = Context.instance().mysqlVersion
-        versions["web"] = Context.instance().apacheVersion
-        
-        return { "cmd": self.request.path, "versions": versions }
-        
-class SystemNetworking(Handler):
-    """
-    Get information about the network
-    """   
-    def get(self):
-        """
-        Get information about the network
-        Send GET request (uri /rest/system/networking)
-        Cookie session_id is mandatory.
-
-        @return: version
-        @rtype: dict 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-            
-        networking = Context.instance().networkInterfaces
-        return { "cmd": self.request.path, "networking": networking }
-        
 class SystemStatus(Handler):
     """
-    Get information about the status of the server
-    """   
+    /rest/system/status
+    """
+    @_to_yaml  
     def get(self):
         """
-        Get information about the status of the server
-        Send GET request (uri /rest/system/status)
-        Cookie session_id is mandatory.
-
-        @return: version
-        @rtype: dict 
+        tags:
+          - system
+        summary: get system status
+        description: ''
+        operationId: systemStatus
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "status": {...},
+                  "cmd": "/system/status"
+                }
+          '401':
+            description: Access denied
         """
         user_profile = _get_user(request=self.request)
         
@@ -14151,7 +15917,6 @@ class SystemUsages(Handler):
             type: string
         responses:
           '200':
-            description: usages
             schema :
               properties:
                 cmd:
@@ -14160,19 +15925,75 @@ class SystemUsages(Handler):
               application/json: |
                 {
                   "disk": {...},
-                  "cmd": "/tasks/running"
+                  "cmd": "/system/usages"
                 }
           '401':
             description: Access denied
         """
         user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-        
+ 
         usages = {}
-        usages["disk"] = Context.instance().getUsage()
+        usages["disk"] = Context.instance().getUsage(b64=False)
         
         return { "cmd": self.request.path, "usages": usages }
+
+class SystemAbout(Handler):
+    """
+    /rest/system/about
+    """
+    @_to_yaml
+    def get(self):
+        """
+        tags:
+          - system
+        summary: get system about
+        description: ''
+        operationId: systemAbout
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "about": {...},
+                  "cmd": "/system/about"
+                }
+          '401':
+            description: Access denied
+        """
+        user_profile = _get_user(request=self.request)
+ 
+        about = {}
+        
+        rn = {}
+        rn['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
+        rn['adapter'] = RepoAdapters.instance().getRn(b64=True)
+        rn['libraries'] = RepoLibraries.instance().getRn(b64=True)
+        rn['toolbox'] = ToolboxManager.instance().getRn(b64=True)
+            
+        versions = {}
+        versions["core"] = Settings.getVersion()
+        versions["python"] = platform.python_version()
+        versions["php"] = Context.instance().phpVersion
+        versions["database"] = Context.instance().mysqlVersion
+        versions["web"] = Context.instance().apacheVersion
+        
+        about["rn"] = rn
+        about["versions"] = versions
+        about["network"] = Context.instance().networkInterfaces
+        
+        return { "cmd": self.request.path, "about": about }
 
 
 """
@@ -14875,6 +16696,75 @@ class AdminUsersSearch(Handler):
         else:
             return { "cmd": self.request.path, "users": details }
 
+class AdminTimeShift(Handler):
+    """
+    /rest/admin/time/shift
+    """
+    @_to_yaml   
+    def post(self):
+        """
+        tags:
+          - admin
+        summary: Shift the local time
+        description: ''
+        operationId: adminTimeShift
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ shift ]
+              properties:
+                shift:
+                  type: integer
+        responses:
+          '200':
+            description: 
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/probes/disconnect", 
+                  "message: "probe successfully disconnected"
+                }
+          '400':
+            description: Bad request provided
+          '404':
+            description: Probe not found
+        """
+        user_profile = _get_user(request=self.request)
+        
+        if not user_profile['administrator']: raise HTTP_401("Access refused")
+           
+        try:
+            shift = self.request.data.get("shift")
+            if shift is None: raise EmptyValue("Please specify the shift value")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        f = open("%s/%s/timeshift" % ( Settings.getDirExec(), 
+                                       Settings.get('Paths', 'templates')), "w")
+        f.write("%s" % shift)
+        f.close()
+        
+        return { "cmd": self.request.path, "users": details }
+
 """
 Logger
 """
@@ -14952,6 +16842,9 @@ class _WebServices(WSGI):
         
         # tests
         ('/tests/run',                                  TestsRun()),
+        ('/tests/schedule',                             TestsSchedule()),
+        ('/tests/schedule/tpg',                         TestsScheduleTpg()),
+        ('/tests/schedule/group',                       TestsScheduleGroup()),
         ('/tests/basic/listing',                        TestsBasicListing()),
         ('/tests/listing',                              TestsListing()),
         ('/tests/statistics',                           TestsStatistics()),
@@ -14969,6 +16862,7 @@ class _WebServices(WSGI):
         ('/tests/file/duplicate',                       TestsFileDuplicate()),
         ('/tests/file/move',                            TestsFileMove()),
         ('/tests/file/instance',                        TestsFileInstance()),
+        ('/tests/file/default/all',                     TestsFileDefaultAll()),
         ('/tests/file/unlock/all',                      TestsFileUnlockAll()),
         ('/tests/file/unlock',                          TestsFileUnlock()),
         ('/tests/build/samples',                        TestsBuild()),
@@ -14981,6 +16875,10 @@ class _WebServices(WSGI):
         ('/tests/snapshot/restore',                     TestsSnapshotRestore()),
         ('/tests/snapshot/remove',                      TestsSnapshotRemove()),
         ('/tests/snapshot/remove/all',                  TestsSnapshotRemoveAll()),
+        ('/tests/check/syntax',                         TestsCheckSyntax()),
+        ('/tests/check/syntax/tpg',                     TestsCheckSyntaxTpg()),
+        ('/tests/create/design',                        TestsCreateDesign()),
+        ('/tests/create/design/tpg',                    TestsCreateDesignTpg()),
         
         # variables
         ('/variables/listing',                          VariablesListing()),
@@ -15008,6 +16906,7 @@ class _WebServices(WSGI):
         ('/results/report/events',                      ResultsReportEvents()),
         ('/results/reports',                            ResultsReports()),
         ('/results/compress/zip',                       ResultsCompressZip()),
+        ('/results/upload/file',                        ResultsUploadFile()),
         ('/results/download/image',                     ResultsDownloadImage()),
         ('/results/download/result',                    ResultsDownloadResult()),
         ('/results/download/uncomplete',                ResultsDownloadResultUncomplete()),
@@ -15021,13 +16920,18 @@ class _WebServices(WSGI):
         
         # metrics for test 
         ('/metrics/tests/reset',                        MetricsTestsReset()),
+        ('/metrics/tests/duration/writing',             MetricsTestsWritingDuration()),
         
         # adapters
-        ( '/adapters/add',                              AdaptersAdd()),
         ( '/adapters/statistics',                       AdaptersStatistics()),
-        ( '/adapters/syntax/all',                       AdaptersCheckSyntaxAll()),
-        ( '/adapters/set/default',                      AdaptersSetDefault()),
-        ( '/adapters/set/generic',                      AdaptersSetGeneric()),
+        ( '/adapters/check/syntax/all',                 AdaptersCheckSyntaxAll()),
+        ( '/adapters/check/syntax',                     AdaptersCheckSyntax()),
+        ( '/adapters/adapter/add',                      AdaptersAdapterAdd()),
+        ( '/adapters/package/add',                      AdaptersPackageAdd()),
+        ( '/adapters/adapter/add/by/wsdl/url',          AdaptersAdapterAddByWsdlUrl()),
+        ( '/adapters/adapter/add/by/wsdl/file',         AdaptersAdapterAddByWsdlFile()),
+        ( '/adapters/package/default',                  AdaptersPackageDefault()),
+        ( '/adapters/package/generic',                  AdaptersPackageGeneric()),
         ( '/adapters/build',                            AdaptersBuild()),
         ( '/adapters/backup',                           AdaptersBackup()),
         ( '/adapters/backup/listing',                   AdaptersBackupListing()),
@@ -15052,11 +16956,13 @@ class _WebServices(WSGI):
         ( '/adapters/directory/add',                    AdaptersDirectoryAdd()),
         
         # libraries
-        ( '/libraries/add',                             LibrariesAdd()),
         ( '/libraries/statistics',                      LibrariesStatistics()),
-        ( '/libraries/syntax/all',                      LibrariesCheckSyntaxAll()),
-        ( '/libraries/set/default',                     LibrariesSetDefault()),
-        ( '/libraries/set/generic',                     LibrariesSetGeneric()),
+        ( '/libraries/check/syntax/all',                LibrariesCheckSyntaxAll()),
+        ( '/libraries/check/syntax',                    LibrariesCheckSyntax()),
+        ( '/libraries/library/add',                     LibrariesLibraryAdd()),
+        ( '/libraries/package/add',                     LibrariesPackageAdd()),
+        ( '/libraries/package/default',                 LibrariesPackageDefault()),
+        ( '/libraries/package/generic',                 LibrariesPackageGeneric()),
         ( '/libraries/build',                           LibrariesBuild()),
         ( '/libraries/backup',                          LibrariesBackup()),
         ( '/libraries/backup/listing',                  LibrariesBackupListing()),
@@ -15085,10 +16991,9 @@ class _WebServices(WSGI):
         ( '/documentations/build',                      DocumentationsBuild()),
         
         # system
-        ( '/system/versions',                           SystemVersions()),
-        ( '/system/networking',                         SystemNetworking()),
         ( '/system/status',                             SystemStatus()),
         ( '/system/usages',                             SystemUsages()),
+        ( '/system/about',                              SystemAbout()),
 
         # administration
         ( '/administration/configuration/listing',      AdminConfigListing()),
@@ -15113,6 +17018,7 @@ class _WebServices(WSGI):
         ( '/administration/projects/rename',            AdminProjectsRename()),
         ( '/administration/projects/search',            AdminProjectsSearch()),
         ( '/administration/projects/statistics',        AdminProjectsStatistics()),
+        ( '/administration/time/shift',                 AdminTimeShift()),
         
         # client
         ( '/clients/available',                         ClientsAvailable()),
@@ -15120,15 +17026,6 @@ class _WebServices(WSGI):
 
         # toolbox
         ('/tools/authenticate',                         ToolsAuthenticate()),
-        
-        # plugins
-        # /plugins/available
-        
-        # about
-        ('/about/changes/core',                         AboutChangesCore()),
-        ('/about/changes/adapters',                     AboutChangesAdapters()),
-        ('/about/changes/libraries',                    AboutChangesLibraries()),
-        ('/about/changes/toolbox',                      AboutChangesToolbox()),
     ]
 
 class _RestServerInterface(Logger.ClassLogger, threading.Thread):

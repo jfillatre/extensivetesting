@@ -62,9 +62,12 @@ class Repository(RemoteRepository.Repository):
         """
         txt, ok = QInputDialog.getText(self, "Main adapters name", "Enter name:", QLineEdit.Normal)
         if ok and txt:
-            pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-            UCI.instance().addAdapterRepo( pathFolder=pathFolder, adapterName = txt, mainAdapters=True)
+            # pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
 
+            # rest call
+            # UCI.instance().addAdapterRepo( pathFolder=pathFolder, adapterName = txt, mainAdapters=True)
+            RCI.instance().addPackageAdapters(packageName=txt)
+            
     def addAdapter(self):
         """
         Add one adapter
@@ -72,8 +75,11 @@ class Repository(RemoteRepository.Repository):
         txt, ok = QInputDialog.getText(self, "Adapter name", "Enter name:", QLineEdit.Normal)
         if ok and txt:
             pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-            UCI.instance().addAdapterRepo( pathFolder=pathFolder, adapterName = txt)
+            # UCI.instance().addAdapterRepo( pathFolder=pathFolder, adapterName = txt)
 
+            # rest call
+            RCI.instance().addPackageAdapter(packageName=pathFolder, adapterName=txt)
+            
     def checkSyntaxAdapters(self):
         """
         Check the syntax of all adapters

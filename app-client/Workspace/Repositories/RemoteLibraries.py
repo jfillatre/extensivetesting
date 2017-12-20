@@ -63,9 +63,12 @@ class Repository(RemoteRepository.Repository):
         """
         txt, ok = QInputDialog.getText(self, "Main libraries name", "Enter name:", QLineEdit.Normal)
         if ok and txt:
-            pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-            UCI.instance().addLibraryRepo( pathFolder=pathFolder, libraryName = txt, mainLibraries=True)
-
+            # pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
+            
+            # rest call
+            # UCI.instance().addLibraryRepo( pathFolder=pathFolder, libraryName = txt, mainLibraries=True)
+            RCI.instance().addPackageLibraries(packageName=txt)
+            
     def addLibrary(self):
         """
         Add one library
@@ -73,8 +76,11 @@ class Repository(RemoteRepository.Repository):
         txt, ok = QInputDialog.getText(self, "Library name", "Enter name:", QLineEdit.Normal)
         if ok and txt:
             pathFolder = self.itemCurrent.getPath(withFileName = False, withFolderName=True)
-            UCI.instance().addLibraryRepo( pathFolder=pathFolder, libraryName = txt)
-
+            # UCI.instance().addLibraryRepo( pathFolder=pathFolder, libraryName = txt)
+            
+            # rest call
+            RCI.instance().addPackageLibrary(packageName=pathFolder, libraryName=txt)
+            
     def checkSyntaxLibraries(self):
         """
         Check syntax of all libraries

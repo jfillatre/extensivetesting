@@ -32,7 +32,7 @@ Main module
 from __future__ import print_function 
 
 # define the current version
-__VERSION__ = '16.0.0'
+__VERSION__ = '18.0.0'
 # name of the main developer
 __AUTHOR__ = 'Denis Machard'
 # email of the main developer
@@ -871,7 +871,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                         self.tr("You are connected to the test center.\nAre you really sure to quit?"),
                         QMessageBox.Yes | QMessageBox.Cancel )
             if reply == QMessageBox.Yes:
-                # TCI.instance().closeAll()
                 UCI.instance().closeConnection()
             else:
                 event.ignore()
@@ -1663,9 +1662,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                     newImageName = tmp[0].rsplit(".", 1)[0]
 
                 # call the ws
-                # UCI.instance().importFileRepo( contentFile=imageData, extensionFile=imageExtension, 
-                                                # nameFile=newImageName, pathFile=newImagePath, 
-                                                # repo=UCI.REPO_TESTS, project=projectid)
                 content_encoded = base64.b64encode(imageData)
                 if sys.version_info > (3,): # python3 support
                     content_encoded = content_encoded.decode("utf8")
@@ -1964,11 +1960,9 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         WWorkspace.instance().BusyCursor.connect(self.setCursorBusy)
         WWorkspace.instance().ArrowCursor.connect(self.setCursorWait)
 
-        # new in v10.1
         WWorkspace.WDocumentViewer.instance().LinkConnect.connect(self.onLinkConnectClicked)
         WWorkspace.WDocumentViewer.instance().LinkDisconnect.connect(self.onLinkDisconnectClicked)
 
-        # new in v11
         WWorkspace.WDocumentViewer.instance().LinkMacro.connect(self.onLinkMacroClicked)
         WWorkspace.WDocumentViewer.instance().LinkWebMacro.connect(self.onLinkWebMacroClicked)
         WWorkspace.WDocumentViewer.instance().LinkBasicMacro.connect(self.onLinkBasicMacroClicked)
@@ -1976,16 +1970,11 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         WWorkspace.WDocumentViewer.instance().OpenWeb.connect(self.onOpenWebsite)
         WWorkspace.WDocumentViewer.instance().OpenWebProduct.connect(self.onOpenProductWebsite)
         WWorkspace.WDocumentViewer.instance().GoMacroMode.connect(self.onMacroMode)
-        
-        # new in v15
+
         WWorkspace.WDocumentViewer.instance().LinkSysMacro.connect(self.onLinkSysMacroClicked)
         WWorkspace.WDocumentViewer.instance().LinkPlugin.connect(self.onLinkPluginClicked)
-        
-        # new in v12.1
         WWorkspace.WDocumentViewer.instance().NbReplaced.connect(self.onTextNbReplaced)
-        # end of new
 
-        # new in v13.1
         RCI.instance().CriticalMsg.connect(self.displayCriticalMsg)
         RCI.instance().WarningMsg.connect(self.displayWarningMsg)
         RCI.instance().InformationMsg.connect(self.displayInformationMsg)
@@ -1993,74 +1982,34 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         RCI.instance().IdleCursor.connect(self.setCursorWait)
         RCI.instance().WebCall.connect(WServerExplorer.instance().onRestCall)
         RCI.instance().CloseConnection.connect(UCI.instance().closeConnection)
-        # RCI.instance().Authenticated.connect(UCI.instance().onRestAuthenticated)
-        # end if new
-        
-        UCI.instance().AddTestTab.connect(self.addTab)
+
         UCI.instance().CriticalMsg.connect(self.displayCriticalMsg)
         UCI.instance().WarningMsg.connect(self.displayWarningMsg)
         UCI.instance().InformationMsg.connect(self.displayInformationMsg)
-        
-        RCI.instance().Connected.connect(self.onConnection)
-        # UCI.instance().Connected.connect(self.onConnection)
+
         UCI.instance().Disconnected.connect(self.onDisconnection)
         UCI.instance().Notify.connect(self.onNotify)
-        # UCI.instance().OpenTestResult.connect(self.openLog)
-        
+
         self.Notify.connect(self.onNotify)
         self.LoadLocalTestResult.connect(self.onLoadLocalTestResult)
         self.LoadLocalTestResultTerminated.connect(self.onLoadLocalTestResultTerminated)
 
-        # UCI.instance().RefreshHelper.connect(WWorkspace.WHelper.instance().onRefresh)
-        # UCI.instance().RefreshRepo.connect( self.onRefreshRepo )
-        RCI.instance().RefreshTestsRepo.connect( self.onRefreshTestsRepo )
-        RCI.instance().RefreshAdaptersRepo.connect( self.onRefreshAdaptersRepo ) 
-        RCI.instance().RefreshLibrariesRepo.connect( self.onRefreshLibrariesRepo ) 
-        # UCI.instance().RefreshStatsRepo.connect( WServerExplorer.instance().onRefreshStatsRepo )
-        # UCI.instance().RefreshStatsRepoAdapters.connect(WServerExplorer.instance().onRefreshStatsRepoAdapters )
-        # UCI.instance().RefreshStatsRepoLibraries.connect( WServerExplorer.instance().onRefreshStatsRepoLibraries )
-        # UCI.instance().RefreshStatsRepoArchives.connect( WServerExplorer.instance().onRefreshStatsRepoArchives)
-        # UCI.instance().RefreshStatsServer.connect( WServerExplorer.instance().onRefreshStatsServer)
-        # UCI.instance().RefreshContextServer.connect( WServerExplorer.instance().onRefreshContextServer)
-        # UCI.instance().RefreshRunningProbes.connect( WServerExplorer.instance().onRefreshRunningProbes )
-        # UCI.instance().RefreshDefaultProbes.connect( WServerExplorer.instance().onRefreshDefaultProbes )
-        # UCI.instance().RefreshTasksWaiting.connect(WServerExplorer.instance().onRefreshTasksWaiting)
-        # UCI.instance().RefreshTasksRunning.connect(WServerExplorer.instance().onRefreshTasksRunning)
-        # UCI.instance().RefreshTasksHistory.connect(WServerExplorer.instance().onRefreshTasksHistory)
-        UCI.instance().GetFileRepo.connect(self.onGetFileRepo)
-        # UCI.instance().OpenFileRepo.connect(self.onOpenFileRepo)
-        # UCI.instance().PutFileRepo.connect(WWorkspace.WDocumentViewer.instance().remoteFileSaved)
-        # UCI.instance().PutFileErrRepo.connect(WWorkspace.WDocumentViewer.instance().remoteFileSaveErr)
-        # UCI.instance().TestKilled.connect(self.onTestKilled)
-        # UCI.instance().TestsKilled.connect(self.onTestsKilled) # new in v12.1
-        # UCI.instance().RenameFileRepo.connect( WWorkspace.WDocumentViewer.instance().remoteFileRenamed)
-        # UCI.instance().RenameDirRepo.connect(WWorkspace.WDocumentViewer.instance().remoteDirRenamed)
-        # UCI.instance().CommentArchiveAdded.connect( WServerExplorer.Archives.instance().comments().onCommentAdded)
-        # UCI.instance().CommentsArchiveLoaded.connect( WServerExplorer.Archives.instance().comments().onLoadComments)
-        # UCI.instance().CommentsArchiveDeleted.connect(WServerExplorer.Archives.instance().comments().onDeleteComments)
-        # UCI.instance().TestresultVerdictLoaded.connect(self.onTestVerdictLoaded)
-        # UCI.instance().TestresultReportLoaded.connect(self.onTestReportLoaded)
-        # UCI.instance().TestresultDesignLoaded.connect(self.onTestDesignLoaded)
         UCI.instance().Interact.connect(self.onInteractCalled )
         UCI.instance().Pause.connect(self.onPauseCalled )
         UCI.instance().BreakPoint.connect(self.onBreakPointCalled )
         UCI.instance().BusyCursor.connect(self.setCursorBusy)
         UCI.instance().ArrowCursor.connect(self.setCursorWait)
-        # UCI.instance().ResetStatistics.connect(self.onStatisticsResetted)
-        # new in v12.1
-        UCI.instance().WebCall.connect(WServerExplorer.instance().onWebCall)
-        
+
         WServerExplorer.instance().BusyCursor.connect(self.setCursorBusy)
         WServerExplorer.instance().BusyCursorChannel.connect(self.setCursorChannelBusy)
         WServerExplorer.instance().ArrowCursor.connect(self.setCursorWait)
         WServerExplorer.instance().Disconnect.connect(self.closeConnection)
         WServerExplorer.instance().ConnectCancelled.connect(self.onConnectionCancelled)
-        
-        # new in v12
-        # UCI.instance().GetImagePreview.connect(WServerExplorer.Archives.instance().images().onGetImagePreview)
-        # UCI.instance().GetTestPreview.connect(WServerExplorer.Archives.instance().onGetTestPreview)
-        
+
         # new in v18
+        RCI.instance().Connected.connect(self.onConnection)
+        
+        RCI.instance().AddTestTab.connect(self.addTab)
         RCI.instance().OpenTestResult.connect(self.openLog)
         RCI.instance().GetTrReports.connect(WServerExplorer.Archives.instance().onGetTestPreview)
         RCI.instance().GetTrImage.connect(WServerExplorer.Archives.instance().images().onGetImagePreview)
@@ -2111,6 +2060,12 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         RCI.instance().FileTestsRenamed.connect( WWorkspace.WDocumentViewer.instance().remoteTestsFileRenamed)
         RCI.instance().FileAdaptersRenamed.connect( WWorkspace.WDocumentViewer.instance().remoteAdaptersFileRenamed)
         RCI.instance().FileLibrariesRenamed.connect( WWorkspace.WDocumentViewer.instance().remoteLibrariesFileRenamed)
+        
+        RCI.instance().GetFileRepo.connect(self.onGetFileRepo)
+        
+        RCI.instance().RefreshTestsRepo.connect( self.onRefreshTestsRepo )
+        RCI.instance().RefreshAdaptersRepo.connect( self.onRefreshAdaptersRepo ) 
+        RCI.instance().RefreshLibrariesRepo.connect( self.onRefreshLibrariesRepo ) 
         
     def onTextNbReplaced(self, counter):
         """
@@ -2614,13 +2569,30 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
             except IndexError as e:
                 self.error( "open recent file: %s" % e )
             else:
-                if tplFile['type']==UCI.REPO_TESTS or tplFile['type']==UCI.REPO_ADAPTERS or tplFile['type']==UCI.REPO_LIBRARIES:
+                if tplFile['type']==UCI.REPO_TESTS:
                     if RCI.instance().isAuthenticated():
                         cur_prj_id = Repositories.instance().remote().getProjectId(tplFile['project'])
-                        UCI.instance().openFileRepo( pathFile = tplFile['file'], 
-                                                    repo=tplFile['type'], project=cur_prj_id )
+                        RCI.instance().openFileTests( projectId=int(cur_prj_id), filePath=tplFile['file'])
                     else:
-                        QMessageBox.warning(self, self.tr("Open file") , self.tr("Connect you to the test center!") )
+                        QMessageBox.warning(self, self.tr("Open file") , 
+                                            self.tr("Connect you to the test center!") )
+                        
+                elif tplFile['type']==UCI.REPO_ADAPTERS:
+                    if RCI.instance().isAuthenticated():
+                        cur_prj_id = Repositories.instance().remote().getProjectId(tplFile['project'])
+                        RCI.instance().openFileAdapters(filePath=tplFile['file'])
+                    else:
+                        QMessageBox.warning(self, self.tr("Open file") , 
+                                            self.tr("Connect you to the test center!") )
+                        
+                elif tplFile['type']==UCI.REPO_LIBRARIES:
+                    if RCI.instance().isAuthenticated():
+                        cur_prj_id = Repositories.instance().remote().getProjectId(tplFile['project'])
+                        RCI.instance().openFileLibraries(filePath=tplFile['file'])
+                    else:
+                        QMessageBox.warning(self, self.tr("Open file") , 
+                                            self.tr("Connect you to the test center!") )
+                           
                 elif tplFile['type']==UCI.REPO_TESTS_LOCAL or tplFile['type']==UCI.REPO_UNDEFINED :
                     if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
                         QMessageBox.warning(self, self.tr("Authorization") , 
@@ -2631,7 +2603,8 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                         path = tmp[0]
                         filename = tmp[1].rsplit(".", 1)[0]
                         WWorkspace.WDocumentViewer.instance().newTab( path = path, filename = filename, 
-                                                                    extension = extension, repoDest=tplFile['type'])
+                                                                      extension = extension, 
+                                                                      repoDest=tplFile['type'])
                 else:
                     self.error('type unkwnown')
 
@@ -3220,7 +3193,7 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         """
         """
         if forRuns:
-            WWorkspace.WDocumentViewer.instance().onRefreshRepositoryRuns(data, projectid)
+            WWorkspace.WDocumentViewer.instance().onRefreshRepositoryRuns(data, projectId)
         else:
             WWorkspace.WRepositories.instance().onRefreshRemoteTests(data, projectId, forSaveAs)
 
@@ -3234,7 +3207,7 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         """
         WWorkspace.WRepositories.instance().onRefreshRemoteLibraries(data)
         
-    def onGetFileRepo(self, repoType, path_file, name_file, ext_file, encoded_data, 
+    def onGetFileRepo(self, path_file, name_file, ext_file, encoded_data, 
                         project, forDest, actionId, testId):
         """
         Called on get file from remote repository
@@ -3343,15 +3316,13 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         """
         Called when a test is killed
         """
-        # WServerExplorer.TestManager.instance().testKilled()
         TestResults.instance().killWidgetTest(tid=data)
 
-    def onTestsKilled(self, data):
+    def onTestsKilled(self):
         """
         Called when a test is killed
         """
         WServerExplorer.TestManager.instance().testKilled()
-        # TestResults.instance().killWidgetTests(tids=data)
 
     def onTestVerdictLoaded(self, data, dataXml):
         """

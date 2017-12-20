@@ -412,6 +412,7 @@ class WServerInformation(QWidget, Logger.ClassLogger):
         """
         Load statistics
         """
+
         self.nbSizeLogsOnDiskLabel.setText( str( QtHelper.bytes2human(data['disk-usage-logs']) ) )
         self.nbSizeTmpOnDiskLabel.setText( str( QtHelper.bytes2human(data['disk-usage-tmp']) ) )
 

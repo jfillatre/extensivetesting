@@ -321,218 +321,218 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
         # rsp = TaskManager.instance().replayTask( tid = data['tid'] )
         # return (code,rsp)
 
-    @authentication
-    def xmlrpc_addDevTime (self, login, password, data={}, fromGui=False, projectId=0, userId=0, duration=0, 
-                                isTs=False, isTp=False, isTu=False, isTg=False, isTa=False, rights=[]):
-        """
-        Replay a test if existing in the task manager
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_addDevTime (self, login, password, data={}, fromGui=False, projectId=0, userId=0, duration=0, 
+                                # isTs=False, isTp=False, isTu=False, isTg=False, isTa=False, rights=[]):
+        # """
+        # Replay a test if existing in the task manager
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'prj-id': int, 'user-id': int, 'duration': int, 'is-ts': bool, 'is-tp': bool, 'is-tu': bool, 'is-tg': bool, 'is-ta': bool }
-        @type data: dict
+        # @param data: example { 'prj-id': int, 'user-id': int, 'duration': int, 'is-ts': bool, 'is-tp': bool, 'is-tu': bool, 'is-tg': bool, 'is-ta': bool }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        if not len(data): data = {'prj-id': projectId, 'user-id': userId, 'duration': duration,
-                                  'is-ts': isTs, 'is-ta': isTa, 'is-tg': isTg, 'is-tp': isTp, 'is-tu': isTu}
+        # if not len(data): data = {'prj-id': projectId, 'user-id': userId, 'duration': duration,
+                                  # 'is-ts': isTs, 'is-ta': isTa, 'is-tg': isTg, 'is-tp': isTp, 'is-tu': isTu}
         
         # test not save; change the project id to the default
-        prjId = int(data['prj-id'])
-        if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
+        # prjId = int(data['prj-id'])
+        # if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
         
         # checking authorization    
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=prjId)
-        self.trace( "project is authorized ? %s" % projectAuthorized)
-        if not projectAuthorized:
-            code = Context.instance().CODE_FORBIDDEN
-        else:
-            rsp = StatsManager.instance().addWritingDuration(   
-                                                                fromUser=data['user-id'], prjId=prjId,
-                                                                writingDuration=data['duration'], isTs=data['is-ts'],
-                                                                isTp=data['is-tp'], isTu=data['is-tu'], isTg=data['is-tg'],
-                                                                isTa=data['is-ta']
-                                                            )
-        return (code,rsp)
+        # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=prjId)
+        # self.trace( "project is authorized ? %s" % projectAuthorized)
+        # if not projectAuthorized:
+            # code = Context.instance().CODE_FORBIDDEN
+        # else:
+            # rsp = StatsManager.instance().addWritingDuration(   
+                                                                # fromUser=data['user-id'], prjId=prjId,
+                                                                # writingDuration=data['duration'], isTs=data['is-ts'],
+                                                                # isTp=data['is-tp'], isTu=data['is-tu'], isTg=data['is-tg'],
+                                                                # isTa=data['is-ta']
+                                                            # )
+        # return (code,rsp)
 
-    @authentication
-    def xmlrpc_checkDesignTest (self, login, password, data, fromGui=False, rights=[]):
-        """
-        Check the syntax of a test
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_checkDesignTest (self, login, password, data, fromGui=False, rights=[]):
+        # """
+        # Check the syntax of a test
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: json compressed {'testglobal': list, 'testplan': list, 'testunit': list, 'testabstract': list, 'properties': dict, 'src': str, 'str2': str, 'testname': str, 'testpath': str, 'background': bool, 'test-id': int, 'user': str}
-        @type data: binary
+        # @param data: json compressed {'testglobal': list, 'testplan': list, 'testunit': list, 'testabstract': list, 'properties': dict, 'src': str, 'str2': str, 'testname': str, 'testpath': str, 'background': bool, 'test-id': int, 'user': str}
+        # @type data: binary
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        try:
-            self.trace('decompressing data')
-            decompressed_data = zlib.decompress(data.data)
-        except Exception as e:
-            self.error( "unable to decompress: %s" % e)
-        else:
-            try:
-                data_ = json.loads( decompressed_data )
-            except Exception as e:
-                self.error( "unable to decode json: %s" % e)
-            else:
+        # try:
+            # self.trace('decompressing data')
+            # decompressed_data = zlib.decompress(data.data)
+        # except Exception as e:
+            # self.error( "unable to decompress: %s" % e)
+        # else:
+            # try:
+                # data_ = json.loads( decompressed_data )
+            # except Exception as e:
+                # self.error( "unable to decode json: %s" % e)
+            # else:
                 # try:
-                if 'testglobal' in data_:   
-                    rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
-                    if rslt is not None:
-                        return rslt
-                    testData = { 'testglobal': alltests, 'properties': data_['properties'] }
-                elif 'testplan' in data_:
-                    rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
-                    if rslt is not None:
-                        return rslt
-                    testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
-                else:
-                    if 'testunit' in data_:
-                        testData = { 'testunit': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                    elif 'testabstract' in data_:
-                        testData = { 'testabstract': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                    else:
-                        testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
+                # if 'testglobal' in data_:   
+                    # rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
+                    # if rslt is not None:
+                        # return rslt
+                    # testData = { 'testglobal': alltests, 'properties': data_['properties'] }
+                # elif 'testplan' in data_:
+                    # rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
+                    # if rslt is not None:
+                        # return rslt
+                    # testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
+                # else:
+                    # if 'testunit' in data_:
+                        # testData = { 'testunit': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                    # elif 'testabstract' in data_:
+                        # testData = { 'testabstract': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                    # else:
+                        # testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
                 
-                task = TaskManager.getObjectTask(   testData=testData, testName=data_['testname'], 
-                                                    testPath=data_['testpath'] ,  testUser=data_['user'], 
-                                                    testId=data_['test-id'], testBackground=data_['background'],
-                                                    projectId=data_['prj-id'],
-                                                    statsmgr=StatsManager.instance(),
-                                                    context=Context
-                                                )
-                rsp['result'] = task.parseTestDesign()
-                del task
-        return (code,rsp)
+                # task = TaskManager.getObjectTask(   testData=testData, testName=data_['testname'], 
+                                                    # testPath=data_['testpath'] ,  testUser=data_['user'], 
+                                                    # testId=data_['test-id'], testBackground=data_['background'],
+                                                    # projectId=data_['prj-id'],
+                                                    # statsmgr=StatsManager.instance(),
+                                                    # context=Context
+                                                # )
+                # rsp['result'] = task.parseTestDesign()
+                # del task
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_checkSyntaxTest (self, login, password, data, fromGui=False, rights=[]):
-        """
-        Check the syntax of a test
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_checkSyntaxTest (self, login, password, data, fromGui=False, rights=[]):
+        # """
+        # Check the syntax of a test
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: json compressed {'testglobal': list, 'testplan': list, 'testunit': list, 'testabstract': list, 'properties': dict, 'src': str, 'str2': str, 'testname': str, 'testpath': str, 'background': bool, 'test-id': int, 'user': str}
-        @type data: binary
+        # @param data: json compressed {'testglobal': list, 'testplan': list, 'testunit': list, 'testabstract': list, 'properties': dict, 'src': str, 'str2': str, 'testname': str, 'testpath': str, 'background': bool, 'test-id': int, 'user': str}
+        # @type data: binary
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        ret = {}
-        msg_ = ""
-        try:
-            self.trace('decompressing data')
-            decompressed_data = zlib.decompress(data.data)
-        except Exception as e:
-            self.error( "unable to decompress: %s" % e)
-        else:
-            try:
-                data_ = json.loads( decompressed_data )
-            except Exception as e:
-                self.error( "unable to decode json: %s" % e)
-            else:
+        # ret = {}
+        # msg_ = ""
+        # try:
+            # self.trace('decompressing data')
+            # decompressed_data = zlib.decompress(data.data)
+        # except Exception as e:
+            # self.error( "unable to decompress: %s" % e)
+        # else:
+            # try:
+                # data_ = json.loads( decompressed_data )
+            # except Exception as e:
+                # self.error( "unable to decode json: %s" % e)
+            # else:
                 # try:
-                if 'testglobal' in data_:   
-                    rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
-                    if rslt is not None:
-                        return rslt
-                    testData = { 'testglobal': alltests, 'properties': data_['properties'] }
-                elif 'testplan' in data_:       
-                    rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
-                    if rslt is not None:
-                        return rslt
-                    testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
-                else:
-                    if 'testunit' in data_: 
-                        testData = { 'testunit':True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                    elif 'testabstract' in data_: 
-                        testData = { 'testabstract':True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                    else:
-                        testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
+                # if 'testglobal' in data_:   
+                    # rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
+                    # if rslt is not None:
+                        # return rslt
+                    # testData = { 'testglobal': alltests, 'properties': data_['properties'] }
+                # elif 'testplan' in data_:       
+                    # rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
+                    # if rslt is not None:
+                        # return rslt
+                    # testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
+                # else:
+                    # if 'testunit' in data_: 
+                        # testData = { 'testunit':True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                    # elif 'testabstract' in data_: 
+                        # testData = { 'testabstract':True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                    # else:
+                        # testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
                 
-                task = TaskManager.getObjectTask(   testData=testData, testName=data_['testname'], 
-                                                    testPath=data_['testpath'] ,  testUser=data_['user'], 
-                                                    testId=data_['test-id'], testBackground=data_['background'] ,
-                                                    statsmgr=StatsManager.instance(),
-                                                    context=Context
-                                                )
-                ret, msg_ = task.parseTest()        
-                del task
+                # task = TaskManager.getObjectTask(   testData=testData, testName=data_['testname'], 
+                                                    # testPath=data_['testpath'] ,  testUser=data_['user'], 
+                                                    # testId=data_['test-id'], testBackground=data_['background'] ,
+                                                    # statsmgr=StatsManager.instance(),
+                                                    # context=Context
+                                                # )
+                # ret, msg_ = task.parseTest()        
+                # del task
 
-        rsp =  (ret , msg_ )
-        return (code,rsp)
+        # rsp =  (ret , msg_ )
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_checkSyntaxAdapter (self, login, password, data={}, fromGui=False, path='', ext='', filename='', content='', rights=[]):
-        """
-        Check the syntax of one adapter
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_checkSyntaxAdapter (self, login, password, data={}, fromGui=False, path='', ext='', filename='', content='', rights=[]):
+        # """
+        # Check the syntax of one adapter
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'path': str, 'extension': str, 'filename': str, 'content': str}
-        @type data: dict
+        # @param data: example {'path': str, 'extension': str, 'filename': str, 'content': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        if not len(data): data = {'path': path, 'extension': ext, 'filename': filename, 'content': content}
+        # if not len(data): data = {'path': path, 'extension': ext, 'filename': filename, 'content': content}
         
-        pathFile = data['path']
-        extFile = data['extension']
-        nameFile = data['filename']
-        contentFile = str(data['content'])
-        ret, ret_msg = RepoAdapters.instance().checkSyntax(content=contentFile)
+        # pathFile = data['path']
+        # extFile = data['extension']
+        # nameFile = data['filename']
+        # contentFile = str(data['content'])
+        # ret, ret_msg = RepoAdapters.instance().checkSyntax(content=contentFile)
         
         # set the result
-        rsp['ret'] = ret
-        rsp['syntax-error'] = ret_msg
+        # rsp['ret'] = ret
+        # rsp['syntax-error'] = ret_msg
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_checkSyntaxAdapters (self, login, password, data={}, fromGui=False, rights=[]):
@@ -560,41 +560,41 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_checkSyntaxLibrary (self, login, password, data={}, fromGui=False, path='', ext='', filename='', content='', rights=[]):
-        """
-        Check the syntax of one library
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_checkSyntaxLibrary (self, login, password, data={}, fromGui=False, path='', ext='', filename='', content='', rights=[]):
+        # """
+        # Check the syntax of one library
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'path': str, 'extension': str, 'filename': str, 'content': str}
-        @type data: dict
+        # @param data: example {'path': str, 'extension': str, 'filename': str, 'content': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        if not len(data): data = {'path': path, 'extension': ext, 'filename': filename, 'content': content}
+        # if not len(data): data = {'path': path, 'extension': ext, 'filename': filename, 'content': content}
         
-        pathFile = data['path']
-        extFile = data['extension']
-        nameFile = data['filename']
-        contentFile = str(data['content'])
-        ret, ret_msg = RepoLibraries.instance().checkSyntax(content=contentFile)
+        # pathFile = data['path']
+        # extFile = data['extension']
+        # nameFile = data['filename']
+        # contentFile = str(data['content'])
+        # ret, ret_msg = RepoLibraries.instance().checkSyntax(content=contentFile)
         
-        rsp['ret'] = ret
-        rsp['syntax-error'] = ret_msg
+        # rsp['ret'] = ret
+        # rsp['syntax-error'] = ret_msg
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_checkSyntaxLibraries (self, login, password, data={}, fromGui=False, rights=[]):
@@ -622,298 +622,298 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_scheduleTests(self, login, password, data={}, fromGui=False, simultaneous=False, later=False, runAt=(0,0,0,0,0,0), tests=[], rights=[]):
-        """
-        Schedule several tests on the task manager
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_scheduleTests(self, login, password, data={}, fromGui=False, simultaneous=False, later=False, runAt=(0,0,0,0,0,0), tests=[], rights=[]):
+        # """
+        # Schedule several tests on the task manager
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'simultaneous': bool, 'later': later, 'run-at': (0,0,0,0,0,0), 'tests': [ prjname:test, ... ] }
-        @type data: dict
+        # @param data: example { 'simultaneous': bool, 'later': later, 'run-at': (0,0,0,0,0,0), 'tests': [ prjname:test, ... ] }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        if not len(data): data = { 'simultaneous': simultaneous, 'later': later, 'run-at': runAt, 'tests': tests }
+        # if not len(data): data = { 'simultaneous': simultaneous, 'later': later, 'run-at': runAt, 'tests': tests }
         
-        runSimultaneous = False
-        if 'simultaneous' in data: runSimultaneous = data['simultaneous']
-        runLater = data['later']
-        runAt = data['run-at']
-        testsRun = []
-        for t in data['tests']:
-            try:
-                prjName, absPath = t.split(':', 1)
-            except Exception as e:
-                self.error("unable to extract project name: %s" % str(e) )
-                code = Context.instance().CODE_FAILED
-            else:
-                prjID = ProjectsManager.instance().getProjectID(name=prjName)
-                testPath, testExtension = absPath.rsplit('.', 1)
-                if len(testPath.rsplit('/', 1)) > 1:
-                    testName = testPath.rsplit('/', 1)[1]
-                else:
-                    testName = testPath.rsplit('/', 1)[0]
+        # runSimultaneous = False
+        # if 'simultaneous' in data: runSimultaneous = data['simultaneous']
+        # runLater = data['later']
+        # runAt = data['run-at']
+        # testsRun = []
+        # for t in data['tests']:
+            # try:
+                # prjName, absPath = t.split(':', 1)
+            # except Exception as e:
+                # self.error("unable to extract project name: %s" % str(e) )
+                # code = Context.instance().CODE_FAILED
+            # else:
+                # prjID = ProjectsManager.instance().getProjectID(name=prjName)
+                # testPath, testExtension = absPath.rsplit('.', 1)
+                # if len(testPath.rsplit('/', 1)) > 1:
+                    # testName = testPath.rsplit('/', 1)[1]
+                # else:
+                    # testName = testPath.rsplit('/', 1)[0]
 
-                if testExtension == 'tsx':
-                    doc = TestSuite.DataModel()
-                    res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
-                    if not res:
-                        self.error('unable to read test suite:%s' % testExtension)
-                        code = Context.instance().CODE_FAILED
-                    else:
-                        testData = { 'src-test': doc.testdef, 'src-exec': doc.testexec, 'properties': doc.properties['properties'] }
-                        testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
-                                            'test-path': testPath, 'test-data': testData } )
+                # if testExtension == 'tsx':
+                    # doc = TestSuite.DataModel()
+                    # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
+                    # if not res:
+                        # self.error('unable to read test suite:%s' % testExtension)
+                        # code = Context.instance().CODE_FAILED
+                    # else:
+                        # testData = { 'src-test': doc.testdef, 'src-exec': doc.testexec, 'properties': doc.properties['properties'] }
+                        # testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
+                                            # 'test-path': testPath, 'test-data': testData } )
 
-                elif testExtension == 'tux':
-                    doc = TestUnit.DataModel()
-                    res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
-                    if not res:
-                        self.error('unable to schedule test unit:%s' % testExtension)
-                        code = Context.instance().CODE_FAILED
-                    else:
-                        testData = { 'testunit': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
-                        testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
-                                            'test-path': testPath, 'test-data': testData } )
+                # elif testExtension == 'tux':
+                    # doc = TestUnit.DataModel()
+                    # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
+                    # if not res:
+                        # self.error('unable to schedule test unit:%s' % testExtension)
+                        # code = Context.instance().CODE_FAILED
+                    # else:
+                        # testData = { 'testunit': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
+                        # testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
+                                            # 'test-path': testPath, 'test-data': testData } )
                 
-                elif testExtension == 'tax':
-                    doc = TestAbstract.DataModel()
-                    res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
-                    if not res:
-                        self.error('unable to schedule test abstract:%s' % testExtension)
-                        code = Context.instance().CODE_FAILED
-                    else:
-                        testData = { 'testabstract': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
-                        testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
-                                            'test-path': testPath, 'test-data': testData } )
+                # elif testExtension == 'tax':
+                    # doc = TestAbstract.DataModel()
+                    # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
+                    # if not res:
+                        # self.error('unable to schedule test abstract:%s' % testExtension)
+                        # code = Context.instance().CODE_FAILED
+                    # else:
+                        # testData = { 'testabstract': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
+                        # testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
+                                            # 'test-path': testPath, 'test-data': testData } )
                                             
-                elif testExtension == 'tpx':
-                    doc = TestPlan.DataModel()
-                    res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
-                    if not res:
-                        self.error('unable to schedule test plan:%s' % testExtension)
-                        code = Context.instance().CODE_FAILED
-                    else:
-                        rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
-                        if rslt is not None:
-                            self.error('unable to run several test in test plan')
-                            code = Context.instance().CODE_FAILED
-                        else:
-                            testData = { 'testplan': doc.getSorted(),  'properties': doc.properties['properties'] }
-                            testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName, 
-                                                'test-path': testPath, 'test-data': testData } )
+                # elif testExtension == 'tpx':
+                    # doc = TestPlan.DataModel()
+                    # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
+                    # if not res:
+                        # self.error('unable to schedule test plan:%s' % testExtension)
+                        # code = Context.instance().CODE_FAILED
+                    # else:
+                        # rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
+                        # if rslt is not None:
+                            # self.error('unable to run several test in test plan')
+                            # code = Context.instance().CODE_FAILED
+                        # else:
+                            # testData = { 'testplan': doc.getSorted(),  'properties': doc.properties['properties'] }
+                            # testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName, 
+                                                # 'test-path': testPath, 'test-data': testData } )
 
-                elif testExtension == 'tgx':
-                    doc = TestPlan.DataModel()
-                    res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
-                    if not res:
-                         self.error('unable to schedule test plan:%s' % testExtension)
-                         code = Context.instance().CODE_FAILED
-                    else:
-                        self.trace('reading the test global to run several tests')
-                        rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
-                        self.trace('reading test global finished to run several tests')
-                        if rslt is not None:
-                            self.error('unable to run several test in test global')
-                            code = Context.instance().CODE_FAILED
-                        else:
-                            testData = { 'testglobal': alltests, 'properties': doc.properties['properties'] }
-                            testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
-                                                'test-path': testPath, 'test-data': testData } )
-                else:
-                    self.error('test not supported: %s' % testExtension )
-                    code = Context.instance().CODE_FAILED
+                # elif testExtension == 'tgx':
+                    # doc = TestPlan.DataModel()
+                    # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjID, testPath, testExtension) )
+                    # if not res:
+                         # self.error('unable to schedule test plan:%s' % testExtension)
+                         # code = Context.instance().CODE_FAILED
+                    # else:
+                        # self.trace('reading the test global to run several tests')
+                        # rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
+                        # self.trace('reading test global finished to run several tests')
+                        # if rslt is not None:
+                            # self.error('unable to run several test in test global')
+                            # code = Context.instance().CODE_FAILED
+                        # else:
+                            # testData = { 'testglobal': alltests, 'properties': doc.properties['properties'] }
+                            # testsRun.append( {  'prj-id': prjID, 'test-extension': testExtension, 'test-name': testName,
+                                                # 'test-path': testPath, 'test-data': testData } )
+                # else:
+                    # self.error('test not supported: %s' % testExtension )
+                    # code = Context.instance().CODE_FAILED
 
-        if len(testsRun):
-            ret = TaskManager.instance().addTasks(userName=login, tests=testsRun, runAt=runAt,
-                                                    queueAt=runLater, simultaneous=runSimultaneous )
-            rsp['ret'] = ret
+        # if len(testsRun):
+            # ret = TaskManager.instance().addTasks(userName=login, tests=testsRun, runAt=runAt,
+                                                    # queueAt=runLater, simultaneous=runSimultaneous )
+            # rsp['ret'] = ret
 
-        return (code,rsp)
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_scheduleTest (self, login, password, data, fromGui=False, returnPath=False, projectId=0, projectName='', testName='', testPath='', testExtension='', userId=0, userName='', 
-                                    testId=0, inBackground=False, runType=0, runAt=(0,0,0,0,0,0), runNb=0, noContent=False, 
-                                    testProperties={}, testSrc='', testSrcExec='', testGlobal=[], testPlan=[], testUnit=[], testAbstract=[],
-                                    withoutProbes=False, debugActivated=False, withoutNotif=False, 
-                                    noKeepTr=False, fromTime=(0,0,0,0,0,0), toTime=(0,0,0,0,0,0), stepByStep=False, withBreakpoint=False, rights=[]):
-        """
-        Schedule a test on the task manager
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_scheduleTest (self, login, password, data, fromGui=False, returnPath=False, projectId=0, projectName='', testName='', testPath='', testExtension='', userId=0, userName='', 
+                                    # testId=0, inBackground=False, runType=0, runAt=(0,0,0,0,0,0), runNb=0, noContent=False, 
+                                    # testProperties={}, testSrc='', testSrcExec='', testGlobal=[], testPlan=[], testUnit=[], testAbstract=[],
+                                    # withoutProbes=False, debugActivated=False, withoutNotif=False, 
+                                    # noKeepTr=False, fromTime=(0,0,0,0,0,0), toTime=(0,0,0,0,0,0), stepByStep=False, withBreakpoint=False, rights=[]):
+        # """
+        # Schedule a test on the task manager
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: json compressed in base64 {'prj-id': int, 'prj-name': str, 'nocontent': bool, 'testname': str, 'testpath': str, 'testextension': str, 'runType': int, 'runAt': tuple, 'runNb': int, 'withoutProbes': bool, 'debugActivated': bool, 'withoutNotif': bool, 'noKeepTr': bool, 'fromTime': tuple, 'toTime': tuple, 'breakpoint':bool, 'step-by-step': bool }
-        @type data: binary
+        # @param data: json compressed in base64 {'prj-id': int, 'prj-name': str, 'nocontent': bool, 'testname': str, 'testpath': str, 'testextension': str, 'runType': int, 'runAt': tuple, 'runNb': int, 'withoutProbes': bool, 'debugActivated': bool, 'withoutNotif': bool, 'noKeepTr': bool, 'fromTime': tuple, 'toTime': tuple, 'breakpoint':bool, 'step-by-step': bool }
+        # @type data: binary
 
-        @return: ws function name, response code, response data=(task-id , test-id, test-name, is-background, is-recursive, is-postponed, is-successive)
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data=(task-id , test-id, test-name, is-background, is-recursive, is-postponed, is-successive)
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        ret_ = rsp
-        try:
-            self.trace('schedule test - decompressing data...')
-            decompressed_data = zlib.decompress(data.data)
-        except Exception as e:
-            self.error( "unable to decompress: %s" % e)
-            code = Context.instance().CODE_FAILED
-        else:
-            try:
-                data_ = json.loads( decompressed_data )
-            except Exception as e:
-                self.error( "unable to decode json: %s" % e)
-                code = Context.instance().CODE_FAILED
-            else:
-                recursive = False
-                postponed = False
-                successive = False
-                tsnotfound = False
+        # ret_ = rsp
+        # try:
+            # self.trace('schedule test - decompressing data...')
+            # decompressed_data = zlib.decompress(data.data)
+        # except Exception as e:
+            # self.error( "unable to decompress: %s" % e)
+            # code = Context.instance().CODE_FAILED
+        # else:
+            # try:
+                # data_ = json.loads( decompressed_data )
+            # except Exception as e:
+                # self.error( "unable to decode json: %s" % e)
+                # code = Context.instance().CODE_FAILED
+            # else:
+                # recursive = False
+                # postponed = False
+                # successive = False
+                # tsnotfound = False
 
                 # extract project info
-                prjId = data_['prj-id']
-                prjName = data_['prj-name']
-                if prjId == 0 and len(prjName): prjId = ProjectsManager.instance().getProjectID(name=prjName)  
-                self.trace('schedule test in project (name=%s, id=%s) ...' % (prjName, prjId) )
+                # prjId = data_['prj-id']
+                # prjName = data_['prj-name']
+                # if prjId == 0 and len(prjName): prjId = ProjectsManager.instance().getProjectID(name=prjName)  
+                # self.trace('schedule test in project (name=%s, id=%s) ...' % (prjName, prjId) )
                
                 # checking project authorization ? if the test is not saved; change the project id to the default
-                __prjId = int(prjId)
-                if __prjId == 0: __prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
-                projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=int(__prjId))
-                self.trace( "project is authorized ? %s" % projectAuthorized)
-                if not projectAuthorized:
-                    code = Context.instance().CODE_FORBIDDEN
-                    return (code,ret_)
+                # __prjId = int(prjId)
+                # if __prjId == 0: __prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
+                # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=int(__prjId))
+                # self.trace( "project is authorized ? %s" % projectAuthorized)
+                # if not projectAuthorized:
+                    # code = Context.instance().CODE_FORBIDDEN
+                    # return (code,ret_)
                     
                 # no test content
-                if 'nocontent' in data_:
-                    self.trace( 'cli: schedule the following test - %s/%s.%s' % (prjId, data_['testpath'], data_['testextension']) )
-                    if data_['testextension'] == 'tsx':
-                        doc = TestSuite.DataModel()
-                        res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
-                        if not res:
-                            raise Exception('unable to schedule test suite:%s' % data_['testextension'])
-                        else:
-                            testData = { 'src-test': doc.testdef, 'src-exec': doc.testexec, 'properties': doc.properties['properties'] }
+                # if 'nocontent' in data_:
+                    # self.trace( 'cli: schedule the following test - %s/%s.%s' % (prjId, data_['testpath'], data_['testextension']) )
+                    # if data_['testextension'] == 'tsx':
+                        # doc = TestSuite.DataModel()
+                        # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
+                        # if not res:
+                            # raise Exception('unable to schedule test suite:%s' % data_['testextension'])
+                        # else:
+                            # testData = { 'src-test': doc.testdef, 'src-exec': doc.testexec, 'properties': doc.properties['properties'] }
     
-                    elif data_['testextension'] == 'tux':
-                        doc = TestUnit.DataModel()
-                        res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
-                        if not res:
-                            raise Exception('unable to schedule test unit:%s' % data_['testextension'])
-                        else:
-                            testData = { 'testunit': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
+                    # elif data_['testextension'] == 'tux':
+                        # doc = TestUnit.DataModel()
+                        # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
+                        # if not res:
+                            # raise Exception('unable to schedule test unit:%s' % data_['testextension'])
+                        # else:
+                            # testData = { 'testunit': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
                     
-                    elif data_['testextension'] == 'tax':
-                        doc = TestAbstract.DataModel()
-                        res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
-                        if not res:
-                            raise Exception('unable to schedule test abstract:%s' % data_['testextension'])
-                        else:
-                            testData = { 'testabstract': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
+                    # elif data_['testextension'] == 'tax':
+                        # doc = TestAbstract.DataModel()
+                        # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
+                        # if not res:
+                            # raise Exception('unable to schedule test abstract:%s' % data_['testextension'])
+                        # else:
+                            # testData = { 'testabstract': True, 'src-test': doc.testdef, 'src-exec': '', 'properties': doc.properties['properties'] }
 
-                    elif data_['testextension'] == 'tpx':
-                        doc = TestPlan.DataModel()
-                        res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
-                        if not res:
-                            raise Exception('unable to schedule test plan:%s' % data_['testextension'])
-                        else:
-                            rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
-                            if rslt is not None:
-                                return rslt
-                            testData = { 'testplan': doc.getSorted(),  'properties': doc.properties['properties'] }
+                    # elif data_['testextension'] == 'tpx':
+                        # doc = TestPlan.DataModel()
+                        # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
+                        # if not res:
+                            # raise Exception('unable to schedule test plan:%s' % data_['testextension'])
+                        # else:
+                            # rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
+                            # if rslt is not None:
+                                # return rslt
+                            # testData = { 'testplan': doc.getSorted(),  'properties': doc.properties['properties'] }
                     
-                    elif data_['testextension'] == 'tgx':
-                        doc = TestPlan.DataModel()
-                        res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
-                        if not res:
-                            raise Exception('unable to schedule test plan:%s' % data_['testextension'])
-                        else:
-                            self.trace('reading the test global')
-                            rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
-                            self.trace('reading test global finished')
-                            if rslt is not None:
-                                return rslt
-                            testData = { 'testglobal': alltests, 'properties': doc.properties['properties'] }
-                    else:
-                        raise Exception('test extension not supported: %s' % data_['testextension'])
+                    # elif data_['testextension'] == 'tgx':
+                        # doc = TestPlan.DataModel()
+                        # res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, prjId, data_['testpath'], data_['testextension']) )
+                        # if not res:
+                            # raise Exception('unable to schedule test plan:%s' % data_['testextension'])
+                        # else:
+                            # self.trace('reading the test global')
+                            # rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
+                            # self.trace('reading test global finished')
+                            # if rslt is not None:
+                                # return rslt
+                            # testData = { 'testglobal': alltests, 'properties': doc.properties['properties'] }
+                    # else:
+                        # raise Exception('test extension not supported: %s' % data_['testextension'])
 
                 # content passed as argument
-                else:
-                    if 'testglobal' in data_:
-                        rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
-                        if rslt is not None:
-                            return rslt
-                        testData = { 'testglobal': alltests, 'properties': data_['properties'] }
+                # else:
+                    # if 'testglobal' in data_:
+                        # rslt, alltests = RepoTests.instance().addtf2tg( data_=data_['testglobal'] )
+                        # if rslt is not None:
+                            # return rslt
+                        # testData = { 'testglobal': alltests, 'properties': data_['properties'] }
 
-                    elif 'testplan' in data_:
-                        rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
-                        if rslt is not None:
-                            return rslt
-                        testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
+                    # elif 'testplan' in data_:
+                        # rslt = RepoTests.instance().addtf2tp( data_=data_['testplan'] )
+                        # if rslt is not None:
+                            # return rslt
+                        # testData = { 'testplan': data_['testplan'], 'properties': data_['properties'] }
                     
-                    else:
-                        if 'testunit' in data_:
-                            testData = { 'testunit': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                        elif 'testabstract' in data_:
-                            testData = { 'testabstract': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
-                        else:
-                            testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
+                    # else:
+                        # if 'testunit' in data_:
+                            # testData = { 'testunit': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                        # elif 'testabstract' in data_:
+                            # testData = { 'testabstract': True, 'src-test': data_['src'], 'src-exec': '', 'properties': data_['properties'] }
+                        # else:
+                            # testData = { 'src-test': data_['src'], 'src-exec': data_['src2'], 'properties': data_['properties'] }
                 
-                #run a test not save; change the project id to the default
-                if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
+                # run a test not save; change the project id to the default
+                # if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
                 
                 # register the test
-                channelId = False
-                if 'channel-id' in data_: channelId = data_['channel-id']
-                task = TaskManager.instance().registerTask( 
-                                                testData=testData, testName=data_['testname'], testPath=data_['testpath'], testUserId=data_['user-id'],
-                                                testUser=data_['user'], testId=data_['test-id'], testBackground=data_['background'],
-                                                runAt=data_['runAt'], runType=data_['runType'], runNb=data_['runNb'], withoutProbes=data_['withoutProbes'],
-                                                debugActivated=data_['debugActivated'], withoutNotif=data_['withoutNotif'], noKeepTr=data_['noKeepTr'],
-                                                testProjectId=prjId, runFrom=data_['fromTime'], runTo=data_['toTime'], stepByStep=data_['step-by-step'], 
-                                                breakpoint=data_['breakpoint'], channelId=channelId
-                                            )
-                taskPath = ""   
-                if task.lastError is None:
-                    ret = task.getId()
-                    taskPath = task.getTestPath(withDate=True)
-                    if task.isRecursive():
-                        recursive = True
-                    if task.isPostponed():
-                        postponed = True
-                    if task.isSuccessive():
-                        successive = True
-                else:
-                    ret = task.lastError
-                    if ret.startswith('No more space left on'):
-                        code = Context.instance().CODE_FORBIDDEN
+                # channelId = False
+                # if 'channel-id' in data_: channelId = data_['channel-id']
+                # task = TaskManager.instance().registerTask( 
+                                                # testData=testData, testName=data_['testname'], testPath=data_['testpath'], testUserId=data_['user-id'],
+                                                # testUser=data_['user'], testId=data_['test-id'], testBackground=data_['background'],
+                                                # runAt=data_['runAt'], runType=data_['runType'], runNb=data_['runNb'], withoutProbes=data_['withoutProbes'],
+                                                # debugActivated=data_['debugActivated'], withoutNotif=data_['withoutNotif'], noKeepTr=data_['noKeepTr'],
+                                                # testProjectId=prjId, runFrom=data_['fromTime'], runTo=data_['toTime'], stepByStep=data_['step-by-step'], 
+                                                # breakpoint=data_['breakpoint'], channelId=channelId
+                                            # )
+                # taskPath = ""   
+                # if task.lastError is None:
+                    # ret = task.getId()
+                    # taskPath = task.getTestPath(withDate=True)
+                    # if task.isRecursive():
+                        # recursive = True
+                    # if task.isPostponed():
+                        # postponed = True
+                    # if task.isSuccessive():
+                        # successive = True
+                # else:
+                    # ret = task.lastError
+                    # if ret.startswith('No more space left on'):
+                        # code = Context.instance().CODE_FORBIDDEN
 
-                if returnPath:
-                    ret_ = (ret,taskPath)
-                else:
-                    ret_ =  (ret, data_['test-id'], data_['testname'], data_['background'], recursive, postponed, successive )
+                # if returnPath:
+                    # ret_ = (ret,taskPath)
+                # else:
+                    # ret_ =  (ret, data_['test-id'], data_['testname'], data_['background'], recursive, postponed, successive )
 
-        return (code,ret_)
+        # return (code,ret_)
     
     # @authentication
     # def xmlrpc_rescheduleTest (self, login, password, data={}, fromGui=False, taskId=0, runType=0, runEnabled=False, runAt=(0,0,0,0,0,0), 
@@ -998,107 +998,107 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
                                     
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_unauthenticateClient(self, login, password, data={}, fromGui=False, userLogin='', rights=[]):
-        """
-        Disconnect client
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_unauthenticateClient(self, login, password, data={}, fromGui=False, userLogin='', rights=[]):
+        # """
+        # Disconnect client
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
         
-        @param data: example {'login': str}
-        @type data: dict
+        # @param data: example {'login': str}
+        # @type data: dict
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param userLogin: user login
-        @type userLogin: boolean
+        # @param userLogin: user login
+        # @type userLogin: boolean
         
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
-        if not len(data): data = {'login': userLogin}
-        rsp = Context.instance().unregisterUserFromXmlrpc( login=data['login'] )
-        return (code,rsp)
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
+        # if not len(data): data = {'login': userLogin}
+        # rsp = Context.instance().unregisterUserFromXmlrpc( login=data['login'] )
+        # return (code,rsp)
 
-    @authentication
-    def xmlrpc_getServerUsage(self, login, password, data={}, fromGui=False, rights=[]):
-        """
-        Return server usage
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_getServerUsage(self, login, password, data={}, fromGui=False, rights=[]):
+        # """
+        # Return server usage
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
-        rsp['usage'] = Context.instance().getUsage(b64=True)
-        return (code,rsp)
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
+        # rsp['usage'] = Context.instance().getUsage(b64=True)
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_getServerInformations(self, login, password, data={}, fromGui=False, rights=[]):
-        """
-        Return server information
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_getServerInformations(self, login, password, data={}, fromGui=False, rights=[]):
+        # """
+        # Return server information
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
-        rsp['informations'] = Context.instance().getInformations(user=login, b64=True)
-        return (code,rsp)
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
+        # rsp['informations'] = Context.instance().getInformations(user=login, b64=True)
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_getReleaseNotes(self, login, password, data={}, fromGui=False, rights=[]):
-        """
-        Return release notes
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_getReleaseNotes(self, login, password, data={}, fromGui=False, rights=[]):
+        # """
+        # Return release notes
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={};
 
-        rsp['rn'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
-        rsp['rnAdp'] = RepoAdapters.instance().getRn(b64=True)
-        rsp['rnLib'] = RepoLibraries.instance().getRn(b64=True)
-        rsp['rnToolbox'] = ToolboxManager.instance().getRn(b64=True)
-        rsp['rnProbes'] = '' # for backward compatibility
-        rsp['rnAgents'] = '' # for backward compatibility
+        # rsp['rn'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
+        # rsp['rnAdp'] = RepoAdapters.instance().getRn(b64=True)
+        # rsp['rnLib'] = RepoLibraries.instance().getRn(b64=True)
+        # rsp['rnToolbox'] = ToolboxManager.instance().getRn(b64=True)
+        # rsp['rnProbes'] = '' # for backward compatibility
+        # rsp['rnAgents'] = '' # for backward compatibility
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_getAdvancedInformations (self, login, password, data={}, fromGui=False, rights=[]):
@@ -1550,115 +1550,115 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_getFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
-                                    forDest=0, actionId=0, testId=0, rights=[]):
-        """
-        Get file 
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_getFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
+                                    # forDest=0, actionId=0, testId=0, rights=[]):
+        # """
+        # Get file 
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'repo-dst': int, 'projectid': int, 'path': str, 'for-dest': int, 'action-id': int, 'test-id': int}
-        @type data: dict
+        # @param data: example {'repo-dst': int, 'projectid': int, 'path': str, 'for-dest': int, 'action-id': int, 'test-id': int}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = { 'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
-                                    'for-dest': forDest, 'action-id': actionId, 'test-id': testId}
+        # if not len(data): data = { 'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
+                                    # 'for-dest': forDest, 'action-id': actionId, 'test-id': testId}
         
-        repoType = data['repo-dst']
-        rsp['repo-dst'] = repoType
-        self.trace('repo dest %s' % str(repoType) )
-        pathFile = data['path']
-        if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights):
-            projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
-            self.trace( "project is authorized ? %s" % projectAuthorized)
-            if not projectAuthorized:
-                code = Context.instance().CODE_FORBIDDEN
-            else:
-                forDest = data['for-dest']
-                actionId = data['action-id']
-                testId = data['test-id']
-                ret = RepoTests.instance().getFile(pathFile=pathFile, project=data['projectid'], addLock=False)
-                if isinstance( ret, list):
-                    ret.append(forDest)
-                    ret.append(actionId)
-                    ret.append(testId)
-                rsp['ret'] = ret
-        else:
-            if repoType != RepoTests.REPO_TYPE:
-                raise Exception('repo type unknown %s' % repoType)
-            else:
-                code = Context.instance().CODE_FORBIDDEN
+        # repoType = data['repo-dst']
+        # rsp['repo-dst'] = repoType
+        # self.trace('repo dest %s' % str(repoType) )
+        # pathFile = data['path']
+        # if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights):
+            # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
+            # self.trace( "project is authorized ? %s" % projectAuthorized)
+            # if not projectAuthorized:
+                # code = Context.instance().CODE_FORBIDDEN
+            # else:
+                # forDest = data['for-dest']
+                # actionId = data['action-id']
+                # testId = data['test-id']
+                # ret = RepoTests.instance().getFile(pathFile=pathFile, project=data['projectid'], addLock=False)
+                # if isinstance( ret, list):
+                    # ret.append(forDest)
+                    # ret.append(actionId)
+                    # ret.append(testId)
+                # rsp['ret'] = ret
+        # else:
+            # if repoType != RepoTests.REPO_TYPE:
+                # raise Exception('repo type unknown %s' % repoType)
+            # else:
+                # code = Context.instance().CODE_FORBIDDEN
 
-        return (code, rsp)
+        # return (code, rsp)
     
-    @authentication
-    def xmlrpc_importFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
-                                    extFile='', nameFile='', contentFile='', rights=[], makeDirs=False):
-        """
-        Import file 
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_importFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
+                                    # extFile='', nameFile='', contentFile='', rights=[], makeDirs=False):
+        # """
+        # Import file 
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
 
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example  { 'repo-dst': int, 'projectid': int, 'path': str, 'extension': str, 'filename': str, 'content': str}
-        @type data: dict
+        # @param data: example  { 'repo-dst': int, 'projectid': int, 'path': str, 'extension': str, 'filename': str, 'content': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = { 'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
-                                    'extension': extFile, 'filename': nameFile, 'content': contentFile,
-                                    'make-dirs': makeDirs}
+        # if not len(data): data = { 'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
+                                    # 'extension': extFile, 'filename': nameFile, 'content': contentFile,
+                                    # 'make-dirs': makeDirs}
         
-        repoType = data['repo-dst']
-        rsp['repo-dst'] = repoType
-        self.trace('repo dest %s' % str(repoType) )
+        # repoType = data['repo-dst']
+        # rsp['repo-dst'] = repoType
+        # self.trace('repo dest %s' % str(repoType) )
         
-        pathFile = data['path']
-        extFile = data['extension']
-        nameFile = data['filename']
-        makeDirs = data['make-dirs']
-        contentFile = str(data['content'])
+        # pathFile = data['path']
+        # extFile = data['extension']
+        # nameFile = data['filename']
+        # makeDirs = data['make-dirs']
+        # contentFile = str(data['content'])
 
-        if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights ):
-            projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
-            self.trace( "project is authorized ? %s" % projectAuthorized)
-            if not projectAuthorized:
-                code = Context.instance().CODE_FORBIDDEN
-            else:
-                rsp['ret']  = RepoTests.instance().importFile(pathFile=pathFile, nameFile=nameFile, 
-                                                            extFile=extFile,contentFile=contentFile, 
-                                                            project=data['projectid'], makeDirs=makeDirs )
+        # if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights ):
+            # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
+            # self.trace( "project is authorized ? %s" % projectAuthorized)
+            # if not projectAuthorized:
+                # code = Context.instance().CODE_FORBIDDEN
+            # else:
+                # rsp['ret']  = RepoTests.instance().importFile(pathFile=pathFile, nameFile=nameFile, 
+                                                            # extFile=extFile,contentFile=contentFile, 
+                                                            # project=data['projectid'], makeDirs=makeDirs )
                                                             
-        else:
-            if repoType != RepoTests.REPO_TYPE and repoType != RepoAdapters.REPO_TYPE:
-                raise Exception('repo type unknown %s' % repoType)
-            else:
-                code = Context.instance().CODE_FORBIDDEN
+        # else:
+            # if repoType != RepoTests.REPO_TYPE and repoType != RepoAdapters.REPO_TYPE:
+                # raise Exception('repo type unknown %s' % repoType)
+            # else:
+                # code = Context.instance().CODE_FORBIDDEN
 
-        return (code,rsp)
+        # return (code,rsp)
             
     # @authentication
     # def xmlrpc_unlockFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
@@ -1720,73 +1720,73 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
             
-    @authentication
-    def xmlrpc_putFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
-                                    extFile='', nameFile='', contentFile='', updateFile=False, rights=[]):
-        """
-        Put file in repositories tests or adapters or libraries
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_putFileRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFile='', 
+                                    # extFile='', nameFile='', contentFile='', updateFile=False, rights=[]):
+        # """
+        # Put file in repositories tests or adapters or libraries
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'repo-dst': int, 'projectid': int, 'path': str, 'extension': str, 'filename': str, 'content': str, 'update': bool }
-        @type data: dict
+        # @param data: example { 'repo-dst': int, 'projectid': int, 'path': str, 'extension': str, 'filename': str, 'content': str, 'update': bool }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = {'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
-                                    'extension': extFile, 'filename': nameFile, 'content': contentFile, 'update': updateFile }
+        # if not len(data): data = {'repo-dst': repoDst, 'projectid': projectId, 'path': pathFile, 
+                                    # 'extension': extFile, 'filename': nameFile, 'content': contentFile, 'update': updateFile }
         
-        repoType = data['repo-dst']
-        rsp['repo-dst'] = repoType
-        self.trace('repo dest %s' % str(repoType) )
+        # repoType = data['repo-dst']
+        # rsp['repo-dst'] = repoType
+        # self.trace('repo dest %s' % str(repoType) )
         
-        pathFile = data['path']
-        extFile = data['extension']
-        nameFile = data['filename'].replace("'", "") # no more authorized ' in folder name
-        contentFile = str(data['content'])
-        updateFile = data['update']
+        # pathFile = data['path']
+        # extFile = data['extension']
+        # nameFile = data['filename'].replace("'", "") # no more authorized ' in folder name
+        # contentFile = str(data['content'])
+        # updateFile = data['update']
 
-        if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights ):
-            projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
-            self.trace( "project is authorized ? %s" % projectAuthorized)
-            if not projectAuthorized:
-                code = Context.instance().CODE_FORBIDDEN
-            else:
-                rsp['ret']  = RepoTests.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
-                                                        updateFile=updateFile, project=data['projectid'], closeAfter=data['close'], login=login )
+        # if repoType == RepoTests.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-tester') in rights ):
+            # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=data['projectid'])
+            # self.trace( "project is authorized ? %s" % projectAuthorized)
+            # if not projectAuthorized:
+                # code = Context.instance().CODE_FORBIDDEN
+            # else:
+                # rsp['ret']  = RepoTests.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
+                                                        # updateFile=updateFile, project=data['projectid'], closeAfter=data['close'], login=login )
                                                         
-        elif repoType == RepoAdapters.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights ):
-            if Settings.getInt( 'WebServices', 'remote-dev-adapters' ):
-                rsp['ret'] = RepoAdapters.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
-                                                                    updateFile=updateFile, closeAfter=data['close'], login=login )
-            else:
-                code = Context.instance().CODE_FORBIDDEN
+        # elif repoType == RepoAdapters.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights ):
+            # if Settings.getInt( 'WebServices', 'remote-dev-adapters' ):
+                # rsp['ret'] = RepoAdapters.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
+                                                                    # updateFile=updateFile, closeAfter=data['close'], login=login )
+            # else:
+                # code = Context.instance().CODE_FORBIDDEN
                 
-        elif repoType == RepoLibraries.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights ):
-            if Settings.getInt( 'WebServices', 'remote-dev-libraries' ):
-                rsp['ret'] = RepoLibraries.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
-                                            updateFile=updateFile, closeAfter=data['close'], login=login )
-            else:
-                code = Context.instance().CODE_FORBIDDEN
+        # elif repoType == RepoLibraries.REPO_TYPE and ( Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights ):
+            # if Settings.getInt( 'WebServices', 'remote-dev-libraries' ):
+                # rsp['ret'] = RepoLibraries.instance().putFile(pathFile=pathFile, nameFile=nameFile, extFile=extFile,contentFile=contentFile,
+                                            # updateFile=updateFile, closeAfter=data['close'], login=login )
+            # else:
+                # code = Context.instance().CODE_FORBIDDEN
                 
-        else:
-            if repoType != RepoTests.REPO_TYPE and repoType != RepoAdapters.REPO_TYPE:
-                raise Exception('repo type unknown %s' % repoType)
-            else:
-                code = Context.instance().CODE_FORBIDDEN
+        # else:
+            # if repoType != RepoTests.REPO_TYPE and repoType != RepoAdapters.REPO_TYPE:
+                # raise Exception('repo type unknown %s' % repoType)
+            # else:
+                # code = Context.instance().CODE_FORBIDDEN
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_addDirRepo(self, login, password, data={}, fromGui=False, repoDst=0, projectId=0, pathFolder='', folderName='', rights=[]):
@@ -3266,75 +3266,75 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_addLibraryRepo(self, login, password, data={}, fromGui=False, pathFolder='', libraryName='', mainLibraries='', rights=[]):
-        """
-        Add library
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_addLibraryRepo(self, login, password, data={}, fromGui=False, pathFolder='', libraryName='', mainLibraries='', rights=[]):
+        # """
+        # Add library
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'path': str, 'name': str, 'main-libraries': str}
-        @type data: dict
+        # @param data: example {'path': str, 'name': str, 'main-libraries': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={"ret": False};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={"ret": False};
         
-        if not len(data): data = {'path': pathFolder, 'name': libraryName, 'main-libraries': mainLibraries}
+        # if not len(data): data = {'path': pathFolder, 'name': libraryName, 'main-libraries': mainLibraries}
         
-        pathFolder = data['path']
-        libraryName = data['name']
-        mainLibraries = data['main-libraries']
-        if Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights:
-            rsp['ret'] = RepoLibraries.instance().addLibrary(pathFolder, libraryName, mainLibraries)
-        else:
-            code = Context.instance().CODE_FORBIDDEN
+        # pathFolder = data['path']
+        # libraryName = data['name']
+        # mainLibraries = data['main-libraries']
+        # if Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights:
+            # rsp['ret'] = RepoLibraries.instance().addLibrary(pathFolder, libraryName, mainLibraries)
+        # else:
+            # code = Context.instance().CODE_FORBIDDEN
 
-        return (code,rsp)
+        # return (code,rsp)
     
-    @authentication
-    def xmlrpc_addAdapterRepo(self, login, password, data={}, fromGui=False, pathFolder='', adapterName='', mainAdapters='', rights=[]):
-        """
-        Add adapter
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_addAdapterRepo(self, login, password, data={}, fromGui=False, pathFolder='', adapterName='', mainAdapters='', rights=[]):
+        # """
+        # Add adapter
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'path': str, 'name': str, 'main-adapters': str}
-        @type data: dict
+        # @param data: example { 'path': str, 'name': str, 'main-adapters': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={"ret": False};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={"ret": False};
 
-        if not len(data): data = { 'path': pathFolder, 'name': adapterName, 'main-adapters': mainAdapters}
+        # if not len(data): data = { 'path': pathFolder, 'name': adapterName, 'main-adapters': mainAdapters}
         
-        pathFolder = data['path']
-        adapterName = data['name']
-        mainAdapters = data['main-adapters']
-        if Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights:
-            rsp['ret'] = RepoAdapters.instance().addAdapter(pathFolder, adapterName, mainAdapters)
-        else:
-            code = Context.instance().CODE_FORBIDDEN
+        # pathFolder = data['path']
+        # adapterName = data['name']
+        # mainAdapters = data['main-adapters']
+        # if Settings.get('Server', 'level-admin') in rights or Settings.get('Server', 'level-developer') in rights:
+            # rsp['ret'] = RepoAdapters.instance().addAdapter(pathFolder, adapterName, mainAdapters)
+        # else:
+            # code = Context.instance().CODE_FORBIDDEN
 
-        return (code,rsp)
+        # return (code,rsp)
             
     # @authentication
     # def xmlrpc_setGenericAdapter(self, login, password, data={}, fromGui=False, packageName='', rights=[]):
@@ -3749,56 +3749,56 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
         
-    @authentication
-    def xmlrpc_generateAdapterFromWSDL(self, login, password, data={}, fromGui=False, rights=[]):
-        """
-        Generate adapter from WSDL file
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_generateAdapterFromWSDL(self, login, password, data={}, fromGui=False, rights=[]):
+        # """
+        # Generate adapter from WSDL file
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={"result": False};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={"result": False};
 
-        rsp['result'] = RepoAdapters.instance().generateFromWSDL(
-                                                    wsdlUrl=data['wsdl-url'],
-                                                    wsdlFile=data['wsdl-file'].data,
-                                                    pkg=data['pkg'],
-                                                    overwrite=data['overwrite']
-                                                )
+        # rsp['result'] = RepoAdapters.instance().generateFromWSDL(
+                                                    # wsdlUrl=data['wsdl-url'],
+                                                    # wsdlFile=data['wsdl-file'].data,
+                                                    # pkg=data['pkg'],
+                                                    # overwrite=data['overwrite']
+                                                # )
 
-        return (code,rsp)
+        # return (code,rsp)
             
-    @authentication
-    def xmlrpc_setDefaultVersionForTests(self, login, password, data={}, fromGui=False, rights=[]):
-        """
-        Set the default version of adapter and libraries for all tests
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_setDefaultVersionForTests(self, login, password, data={}, fromGui=False, rights=[]):
+        # """
+        # Set the default version of adapter and libraries for all tests
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={"result": False};
-        rsp['result'] = RepoTests.instance().setTestsWithDefault()
-        return (code,rsp)
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={"result": False};
+        # rsp['result'] = RepoTests.instance().setTestsWithDefault()
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_genAllPackages(self, login, password, data={}, fromGui=False, rights=[]):
@@ -3925,61 +3925,61 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
         # rsp = Context.instance().refreshTestEnvironment()
         # return (code,rsp)
     
-    @authentication
-    def xmlrpc_exportTestDesign(self, login, password, data={}, fromGui=False, testId=0, projectId=0, archivePath='', 
-                                        archiveName='', rights=[]):
-        """
-        Export test result design
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_exportTestDesign(self, login, password, data={}, fromGui=False, testId=0, projectId=0, archivePath='', 
+                                        # archiveName='', rights=[]):
+        # """
+        # Export test result design
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'project-id': int, 'testid': int, 'testpath': str, 'testfilename': str }
-        @type data: dict
+        # @param data: example { 'project-id': int, 'testid': int, 'testpath': str, 'testfilename': str }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False };
 
-        if not len(data): data = { 'project-id': projectId, 'testid': testId, 'testpath': archivePath, 'testfilename': archiveName }
+        # if not len(data): data = { 'project-id': projectId, 'testid': testId, 'testpath': archivePath, 'testfilename': archiveName }
         
-        prjId = data['project-id']
+        # prjId = data['project-id']
         # test not name, project = 0 so change it to the default
-        if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
+        # if prjId == 0: prjId = ProjectsManager.instance().getDefaultProjectForUser(user=login)
         
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=prjId)
-        self.trace( "project is authorized ? %s" % projectAuthorized)
-        if not projectAuthorized:
-            code = Context.instance().CODE_FORBIDDEN
-        else:
-            testId = data['testid']
-            rsp['design'] = ''
-            if testId > 0:
-                task = TaskManager.instance().getTask( taskId = testId )
-                if task is None:
-                    code = Context.instance().CODE_NOT_FOUND
-                    self.info( 'task %s not found' % testId )
-                else:
-                    rsp['design'] = task.getTestDesign()
-                    rsp['design-xml'] = task.getTestDesign(returnXml=True)
-            if 'testpath' in data:
-                code, reports = RepoArchives.instance().getTestDesign(archivePath=data['testpath'], 
-                                                                        archiveName=data['testfilename'], projectId=prjId)
-                rsp['design'] = reports
-                code, reportsXml = RepoArchives.instance().getTestDesign(archivePath=data['testpath'], 
-                                                                        archiveName=data['testfilename'],
-                                                                        returnXml=True, projectId=prjId)
-                rsp['design-xml'] = reportsXml
+        # projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=login, projectId=prjId)
+        # self.trace( "project is authorized ? %s" % projectAuthorized)
+        # if not projectAuthorized:
+            # code = Context.instance().CODE_FORBIDDEN
+        # else:
+            # testId = data['testid']
+            # rsp['design'] = ''
+            # if testId > 0:
+                # task = TaskManager.instance().getTask( taskId = testId )
+                # if task is None:
+                    # code = Context.instance().CODE_NOT_FOUND
+                    # self.info( 'task %s not found' % testId )
+                # else:
+                    # rsp['design'] = task.getTestDesign()
+                    # rsp['design-xml'] = task.getTestDesign(returnXml=True)
+            # if 'testpath' in data:
+                # code, reports = RepoArchives.instance().getTestDesign(archivePath=data['testpath'], 
+                                                                        # archiveName=data['testfilename'], projectId=prjId)
+                # rsp['design'] = reports
+                # code, reportsXml = RepoArchives.instance().getTestDesign(archivePath=data['testpath'], 
+                                                                        # archiveName=data['testfilename'],
+                                                                        # returnXml=True, projectId=prjId)
+                # rsp['design-xml'] = reportsXml
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_disconnectAgent(self, login, password, data={}, fromGui=False, agentName='', rights=[]):
@@ -4047,141 +4047,141 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
         
-    @authentication
-    def xmlrpc_createSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotTimestamp='', snapshotName='', 
-                                        testPath='', rights=[]):
-        """
-        Create snapshot
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_createSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotTimestamp='', snapshotName='', 
+                                        # testPath='', rights=[]):
+        # """
+        # Create snapshot
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'test-prjid': int, 'snapshot-name': str, 'snapshot-timestamp': str, 'test-path': str}
-        @type data: dict
+        # @param data: example { 'test-prjid': int, 'snapshot-name': str, 'snapshot-timestamp': str, 'test-path': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = { 'test-prjid': projectId, 'snapshot-name': snapshotName, 
-                                    'snapshot-timestamp': snapshotTimestamp, 'test-path': testPath}
+        # if not len(data): data = { 'test-prjid': projectId, 'snapshot-name': snapshotName, 
+                                    # 'snapshot-timestamp': snapshotTimestamp, 'test-path': testPath}
         
-        rsp['projectid'] = data['test-prjid']
-        rsp['ret'] =  RepoTests.instance().addSnapshot(snapshotName=data['snapshot-name'], 
-                                                snapshotTimestamp=data['snapshot-timestamp'],
-                                                testPath=data['test-path'], testPrjId=data['test-prjid'] )
+        # rsp['projectid'] = data['test-prjid']
+        # rsp['ret'] =  RepoTests.instance().addSnapshot(snapshotName=data['snapshot-name'], 
+                                                # snapshotTimestamp=data['snapshot-timestamp'],
+                                                # testPath=data['test-path'], testPrjId=data['test-prjid'] )
 
-        return (code,rsp)
+        # return (code,rsp)
             
-    @authentication
-    def xmlrpc_deleteSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotPath='', snapshotName='', rights=[]):
-        """
-        Delete snapshot
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_deleteSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotPath='', snapshotName='', rights=[]):
+        # """
+        # Delete snapshot
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example { 'test-prjid': int, 'snapshot-path': str, 'snapshot-name': str}
-        @type data: dict
+        # @param data: example { 'test-prjid': int, 'snapshot-path': str, 'snapshot-name': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = { 'test-prjid': projectId, 'snapshot-path': snapshotPath, 'snapshot-name': snapshotName}
+        # if not len(data): data = { 'test-prjid': projectId, 'snapshot-path': snapshotPath, 'snapshot-name': snapshotName}
         
-        rsp['projectid'] = data['test-prjid']
-        rsp['ret'] =  RepoTests.instance().deleteSnapshot( 
-                                                                snapshotPath=data['snapshot-path'],
-                                                                snapshotName=data['snapshot-name'],
-                                                                snapshotPrjId=data['test-prjid']
-                                                            )
+        # rsp['projectid'] = data['test-prjid']
+        # rsp['ret'] =  RepoTests.instance().deleteSnapshot( 
+                                                                # snapshotPath=data['snapshot-path'],
+                                                                # snapshotName=data['snapshot-name'],
+                                                                # snapshotPrjId=data['test-prjid']
+                                                            # )
 
-        return (code,rsp)
+        # return (code,rsp)
             
-    @authentication
-    def xmlrpc_restoreSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotPath='', snapshotName='', rights=[]):
-        """
-        Restore snapshot
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_restoreSnapshotTest(self, login, password, data={}, fromGui=False, projectId=0, snapshotPath='', snapshotName='', rights=[]):
+        # """
+        # Restore snapshot
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'test-prjid': int, 'snapshot-path': str, 'snapshot-name': str}
-        @type data: dict
+        # @param data: example {'test-prjid': int, 'snapshot-path': str, 'snapshot-name': str}
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = {'test-prjid': projectId, 'snapshot-path': snapshotPath, 'snapshot-name': snapshotName}
+        # if not len(data): data = {'test-prjid': projectId, 'snapshot-path': snapshotPath, 'snapshot-name': snapshotName}
         
-        rsp['projectid'] = data['test-prjid']
-        rsp['ret'] =  RepoTests.instance().restoreSnapshot( 
-                                                                snapshotPath=data['snapshot-path'],
-                                                                snapshotName=data['snapshot-name'],
-                                                                snapshotPrjId=data['test-prjid']
-                                                            )
+        # rsp['projectid'] = data['test-prjid']
+        # rsp['ret'] =  RepoTests.instance().restoreSnapshot( 
+                                                                # snapshotPath=data['snapshot-path'],
+                                                                # snapshotName=data['snapshot-name'],
+                                                                # snapshotPrjId=data['test-prjid']
+                                                            # )
 
-        return (code,rsp)
+        # return (code,rsp)
             
-    @authentication
-    def xmlrpc_deleteAllSnapshotsTest(self, login, password, data={}, fromGui=False, projectId=0, testPath='', testName='', testExt='', rights=[]):
-        """
-        Delete all snapshots
-        Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
+    # @authentication
+    # def xmlrpc_deleteAllSnapshotsTest(self, login, password, data={}, fromGui=False, projectId=0, testPath='', testName='', testExt='', rights=[]):
+        # """
+        # Delete all snapshots
+        # Granted levels: ADMIN, TESTER, DEVELOPER, LEADER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example  {'test-prjid': int, 'test-path': str, 'test-name': str, 'test-ext': str }
-        @type data: dict
+        # @param data: example  {'test-prjid': int, 'test-path': str, 'test-name': str, 'test-ext': str }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={ 'ret': False  };
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={ 'ret': False  };
 
-        if not len(data): data = {'test-prjid': projectId, 'test-path': testPath, 'test-name': testName, 'test-ext': testExt}
+        # if not len(data): data = {'test-prjid': projectId, 'test-path': testPath, 'test-name': testName, 'test-ext': testExt}
         
-        rsp['projectid'] = data['test-prjid']
-        rsp['ret'] =  RepoTests.instance().deleteAllSnapshots( testPath=data['test-path'], 
-                                                                    testPrjId=data['test-prjid'],
-                                                                    testName=data['test-name'],
-                                                                    testExt=data['test-ext']
-                                                                    )
+        # rsp['projectid'] = data['test-prjid']
+        # rsp['ret'] =  RepoTests.instance().deleteAllSnapshots( testPath=data['test-path'], 
+                                                                    # testPrjId=data['test-prjid'],
+                                                                    # testName=data['test-name'],
+                                                                    # testExt=data['test-ext']
+                                                                    # )
 
-        return (code,rsp)
+        # return (code,rsp)
             
     # @authentication
     # def xmlrpc_disconnectProbe(self, login, password, data={}, fromGui=False, probeName='', rights=[]):
@@ -4350,82 +4350,82 @@ class WebServicesUsers(xmlrpc.XMLRPC, Logger.ClassLogger):
 
         # return (code,rsp)
     
-    @unauthenticated
-    def xmlrpc_uploadLogs(self, login, password, data={}, fromGui=False, logPath='', logName='', logData='', rights=[]):
-        """
-        Upload logs, only zip, png, jpg and mp4 files are authorized!
+    # @unauthenticated
+    # def xmlrpc_uploadLogs(self, login, password, data={}, fromGui=False, logPath='', logName='', logData='', rights=[]):
+        # """
+        # Upload logs, only zip, png, jpg and mp4 files are authorized!
 
-        @param login: login name expected (anonymous)
-        @type login: string
+        # @param login: login name expected (anonymous)
+        # @type login: string
 
-        @param password: pasword expected (anonymous)
-        @type password: string
+        # @param password: pasword expected (anonymous)
+        # @type password: string
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
         
-        @param data: example {'filename': str, 'result-path': str, 'file-data': binary }
-        @type data: dict
+        # @param data: example {'filename': str, 'result-path': str, 'file-data': binary }
+        # @type data: dict
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={'ret': False};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={'ret': False};
 
-        if login != "anonymous" and password != "anonymous":
-            self.error("authentication failed: anonymous login expected")
-            return ( Context.instance().CODE_FORBIDDEN, rsp)
+        # if login != "anonymous" and password != "anonymous":
+            # self.error("authentication failed: anonymous login expected")
+            # return ( Context.instance().CODE_FORBIDDEN, rsp)
 
-        if not len(data): data = {'filename': logName, 'result-path': logPath, 'file-data': logData }
+        # if not len(data): data = {'filename': logName, 'result-path': logPath, 'file-data': logData }
         
         # we can upload only zip file
-        if not data['filename'].endswith(".zip") and not data['filename'].endswith(".png") and not data['filename'].endswith(".jpg") \
-            and not data['filename'].endswith(".mp4") :
-            self.error("unable to upload log, bad file extension: %s" % data['filename'])
-            return ( Context.instance().CODE_FORBIDDEN, rsp)
+        # if not data['filename'].endswith(".zip") and not data['filename'].endswith(".png") and not data['filename'].endswith(".jpg") \
+            # and not data['filename'].endswith(".mp4") :
+            # self.error("unable to upload log, bad file extension: %s" % data['filename'])
+            # return ( Context.instance().CODE_FORBIDDEN, rsp)
             
         # checking if testresult path exist!
-        archiveRepo='%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
-        if os.path.exists( "%s/%s" % (archiveRepo, data['result-path']) ):
-            ret = RepoArchives.instance().createResultLog(testsPath=archiveRepo , 
-                                                        logPath=data['result-path'],
-                                                        logName=data['filename'], logData=data['file-data'].data )
-            rsp['ret'] = ret
-        else:
-            raise Exception("result path does not exist")
+        # archiveRepo='%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
+        # if os.path.exists( "%s/%s" % (archiveRepo, data['result-path']) ):
+            # ret = RepoArchives.instance().createResultLog(testsPath=archiveRepo , 
+                                                        # logPath=data['result-path'],
+                                                        # logName=data['filename'], logData=data['file-data'].data )
+            # rsp['ret'] = ret
+        # else:
+            # raise Exception("result path does not exist")
 
-        return (code,rsp)
+        # return (code,rsp)
             
-    @authentication
-    def xmlrpc_shiftLocalTime(self, login, password, shift, fromGui=False, rights=[]):
-        """
-        Shift local time for test
-        Granted levels: ADMIN, TESTER, SYSTEM
+    # @authentication
+    # def xmlrpc_shiftLocalTime(self, login, password, shift, fromGui=False, rights=[]):
+        # """
+        # Shift local time for test
+        # Granted levels: ADMIN, TESTER, SYSTEM
         
-        @param login: login name
-        @type login: string
+        # @param login: login name
+        # @type login: string
 
-        @param password: sha1 of the password 
-        @type password: string
+        # @param password: sha1 of the password 
+        # @type password: string
         
-        @param shift: shift time
-        @type shift: integer
+        # @param shift: shift time
+        # @type shift: integer
 
-        @param fromGui: call from gui (default=False)
-        @type fromGui: boolean
+        # @param fromGui: call from gui (default=False)
+        # @type fromGui: boolean
 
-        @return: ws function name, response code, response data
-        @rtype: tuple 
-        """
-        code = Context.instance().CODE_OK; rsp={'ret': False};
+        # @return: ws function name, response code, response data
+        # @rtype: tuple 
+        # """
+        # code = Context.instance().CODE_OK; rsp={'ret': False};
 
-        if not isintance(shift, int): raise Exception("integer expected: %s" % type(shift))
+        # if not isintance(shift, int): raise Exception("integer expected: %s" % type(shift))
         
-        f = open("%s/%s/timeshift" % ( Settings.getDirExec(), Settings.get('Paths', 'templates')), "w")
-        f.write("%s" % shift)
-        f.close()
+        # f = open("%s/%s/timeshift" % ( Settings.getDirExec(), Settings.get('Paths', 'templates')), "w")
+        # f.write("%s" % shift)
+        # f.close()
 
-        return (code,rsp)
+        # return (code,rsp)
     
     # @authentication
     # def xmlrpc_getImagePreview(self, login, password, data={}, fromGui=False, trPath='', imageName='', projectId=0, rights=[]):

@@ -264,14 +264,21 @@ class Task(Logger.ClassLogger):
         self.runSimultaneous = runSimultaneous
 
         self.testType = 'TestSuite'
-        if 'testglobal' in self.dataTest:
+        # if 'testglobal' in self.dataTest:
+            # self.testType = 'TestGlobal'
+        # if 'testplan' in self.dataTest:
+            # self.testType = 'TestPlan'
+        # if 'testunit' in self.dataTest:
+            # self.testType = 'TestUnit'
+        if self.dataTest['test-extension'] == 'tgx':
             self.testType = 'TestGlobal'
-        if 'testplan' in self.dataTest:
+        if self.dataTest['test-extension'] == 'tpx':
             self.testType = 'TestPlan'
-        if 'testunit' in self.dataTest:
+        if self.dataTest['test-extension'] == 'tux':
             self.testType = 'TestUnit'
-
-        
+        if self.dataTest['test-extension'] == 'tax':
+            self.testType = 'TestAbstract'
+            
         self.replayId = 0
         self.recurId = 0
         
@@ -979,13 +986,13 @@ class Task(Logger.ClassLogger):
                                                     Settings.get( 'Paths', 'tmp' ), 
                                                     self.testName,
                                                     self.userName, 
-                                                    self.testId  )
+                                                    self.getTestID()  )
         if subTest:
             fileName = '%s%s/Parsed/SubTE_%s_%s_%s.BAD' % ( Settings.getDirExec(), 
                                                             Settings.get( 'Paths', 'tmp' ), 
                                                             self.testName, 
                                                             self.userName, 
-                                                            self.testId  )
+                                                            self.getTestID()  )
         f = open( fileName ,  'w')
         f.write(te)
         f.close()
@@ -1034,14 +1041,19 @@ class Task(Logger.ClassLogger):
                 self.trace("Parse test design: creating the test executable for test design check")
                 try:
                     te = TestModel.createTestDesign(    
-                                                        dataTest = self.dataTest, userName=self.userName, testName=self.testName, 
-                                                        trPath=self.getTestPath(withDate=True), logFilename=self.completeId(), 
+                                                        dataTest = self.dataTest, 
+                                                        userName=self.userName, 
+                                                        testName=self.testName, 
+                                                        trPath=self.getTestPath(withDate=True), 
+                                                        logFilename=self.completeId(), 
                                                         withoutProbes=self.withoutProbes,
                                                         defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
                                                         defaultAdapter=RepoAdapters.instance().getDefaultV2(),
-                                                        userId=self.userId, projectId=self.projectId, stepByStep=self.stepByStep, 
+                                                        userId=self.userId, projectId=self.projectId, 
+                                                        stepByStep=self.stepByStep, 
                                                         breakpoint=self.breakpoint,
-                                                        testId=self.testId, runningAgents=AgentsManager.instance().getRunning(), 
+                                                        testId=self.testId, 
+                                                        runningAgents=AgentsManager.instance().getRunning(), 
                                                         runningProbes=ProbesManager.instance().getRunning(), 
                                                         testLocation=self.getTestLocation(),
                                                         parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName)
@@ -1192,32 +1204,43 @@ class Task(Logger.ClassLogger):
             isTp = False
             isTg = False
             isTs = False
-            if 'testunit' in self.dataTest:
-                isTu = True
-            elif 'testabstract' in self.dataTest:
-                isTa = True
-            elif 'testplan' in self.dataTest:
-                isTp = True
-            elif 'testglobal' in self.dataTest:
-                isTg = True
-            else:
-                isTs = True
+            # if 'testunit' in self.dataTest:
+                # isTu = True
+            # elif 'testabstract' in self.dataTest:
+                # isTa = True
+            # elif 'testplan' in self.dataTest:
+                # isTp = True
+            # elif 'testglobal' in self.dataTest:
+                # isTg = True
+            # else:
+                # isTs = True
 
+            if self.dataTest["test-extension"] == "tux":
+                isTu = True
+            if self.dataTest["test-extension"] == "tax":
+                isTa = True
+            if self.dataTest["test-extension"] == "tsx":
+                isTs = True
+            if self.dataTest["test-extension"] == "tpx":
+                isTp = True
+            if self.dataTest["test-extension"] == "tgx":
+                isTg = True     
+                
             if  isTu or isTs or isTa:
                 subte = SubTestModel.createSubTest( dataTest = self.dataTest, trPath=self.getTestPath(),
-                                                        descriptions=self.dataTest['properties']['descriptions']['description'],
-                                                        defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                        defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
-                                                        isTestUnit=isTu, isTestAbstract=isTa )
+                                                    descriptions=self.dataTest['test-properties']['descriptions']['description'],
+                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(),
+                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
+                                                    isTestUnit=isTu, isTestAbstract=isTa )
                 sub_tes.append( (isTu, isTa, self.testName, subte) )
 
             if  isTp or isTg:
-                if isTg:
-                    dataTestGen = self.dataTest['testglobal']
-                else:
-                    dataTestGen = self.dataTest['testplan']
+                # if isTg:
+                    # dataTestGen = self.dataTest['testglobal']
+                # else:
+                    # dataTestGen = self.dataTest['testplan']
 
-                for ts in dataTestGen:
+                for ts in self.dataTest['test-execution']:
                     isSubTu=False
                     isSubTa=False
                     if 'extension' in ts:
@@ -1228,7 +1251,7 @@ class Task(Logger.ClassLogger):
                             
                     if ts['enable'] == TestModel.TS_ENABLED:
                         subte = SubTestModel.createSubTest( dataTest = ts, trPath=self.getTestPath(),
-                                                        descriptions=self.dataTest['properties']['descriptions']['description'],
+                                                        descriptions=self.dataTest['test-properties']['descriptions']['description'],
                                                         defaultLibrary=RepoLibraries.instance().getDefaultV2(),
                                                         defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
                                                         isTestUnit=isSubTu, isTestAbstract=isSubTa,
@@ -1413,31 +1436,42 @@ class Task(Logger.ClassLogger):
             isTp = False
             isTg = False
             isTs = False
-            if 'testunit' in dataTest:
+            # if 'testunit' in dataTest:
+                # isTu = True
+            # elif 'testabstract' in dataTest:
+                # isTa = True
+            # elif 'testplan' in dataTest:
+                # isTp = True
+            # elif 'testglobal' in dataTest:
+                # isTg = True
+            # else:
+                # isTs = True
+                
+            if self.dataTest["test-extension"] == "tux":
                 isTu = True
-            elif 'testabstract' in dataTest:
+            if self.dataTest["test-extension"] == "tax":
                 isTa = True
-            elif 'testplan' in dataTest:
-                isTp = True
-            elif 'testglobal' in dataTest:
-                isTg = True
-            else:
+            if self.dataTest["test-extension"] == "tsx":
                 isTs = True
-
+            if self.dataTest["test-extension"] == "tpx":
+                isTp = True
+            if self.dataTest["test-extension"] == "tgx":
+                isTg = True   
+                
             if  isTu or isTs or isTa:
                 subte = SubTestModel.createSubTest( dataTest = dataTest, trPath=self.getTestPath(),
-                                                        descriptions=dataTest['properties']['descriptions']['description'],
+                                                        descriptions=dataTest['test-properties']['descriptions']['description'],
                                                         defaultLibrary=RepoLibraries.instance().getDefaultV2(),
                                                         defaultAdapter=RepoAdapters.instance().getDefaultV2(),
                                                         isTestUnit=isTu, isTestAbstract=isTa )
                 sub_tes.append( subte )
 
             if  isTp or isTg:
-                if isTg:
-                    dataTestGen = dataTest['testglobal']
-                else:
-                    dataTestGen = dataTest['testplan']
-                for ts in dataTestGen:
+                # if isTg:
+                    # dataTestGen = dataTest['testglobal']
+                # else:
+                    # dataTestGen = dataTest['testplan']
+                for ts in dataTest['test-execution']:
                     isSubTu=False
                     isSubTa=False
                     if 'extension' in ts:
@@ -1447,7 +1481,8 @@ class Task(Logger.ClassLogger):
                             isSubTa=True
                             
                     if ts['enable'] == TestModel.TS_ENABLED:
-                        subte = SubTestModel.createSubTest( dataTest = ts, descriptions=dataTest['properties']['descriptions']['description'],
+                        subte = SubTestModel.createSubTest( dataTest = ts, 
+                                                            descriptions=dataTest['test-properties']['descriptions']['description'],
                                                             trPath=self.getTestPath(),
                                                             defaultLibrary=RepoLibraries.instance().getDefaultV2(),
                                                             defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
@@ -2977,10 +3012,14 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                                                                                                         breakpoint, 
                                                                                                         channelId) )
 
-        task = Task( testData=testData, testName=testName, testPath=testPath, testUser=testUser, testId=testId, testUserId=testUserId,
-                     testBackground=testBackground, taskEnabled=runEnabled, withoutProbes=withoutProbes, debugActivated=debugActivated,
-                     withoutNotif=withoutNotif, noKeepTr=noKeepTr, testProjectId=testProjectId, stepByStep=stepByStep, breakpoint=breakpoint,
-                     runSimultaneous=runSimultaneous, channelId=channelId, statsmgr=self.statsmgr, context=self.ctx)
+        task = Task( testData=testData, testName=testName, testPath=testPath, 
+                     testUser=testUser, testId=testId, testUserId=testUserId,
+                     testBackground=testBackground, taskEnabled=runEnabled, 
+                     withoutProbes=withoutProbes, debugActivated=debugActivated,
+                     withoutNotif=withoutNotif, noKeepTr=noKeepTr, testProjectId=testProjectId, 
+                     stepByStep=stepByStep, breakpoint=breakpoint,
+                     runSimultaneous=runSimultaneous, channelId=channelId, 
+                     statsmgr=self.statsmgr, context=self.ctx)
         task.setId( self.getEventId() )
 
         if groupId is not None:
@@ -3316,13 +3355,15 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
 
         # create a new task 
         taskNew = Task(     
-                            testData=task.dataTest, testName=task.testName, testPath=task.testPath, testUser=task.userName, 
+                            testData=task.dataTest, testName=task.testName, 
+                            testPath=task.testPath, testUser=task.userName, 
                             testId=task.testId,  testUserId=task.userId, testBackground=task.background, 
-                            taskEnabled=task.enabled, withoutProbes=task.withoutProbes, withoutNotif=task.withoutNotif,
-                            debugActivated=task.debugActivated, noKeepTr=task.noKeepTr, testProjectId=task.projectId,
+                            taskEnabled=task.enabled, withoutProbes=task.withoutProbes, 
+                            withoutNotif=task.withoutNotif, debugActivated=task.debugActivated, 
+                            noKeepTr=task.noKeepTr, testProjectId=task.projectId,
                             stepByStep=task.stepByStep, breakpoint=task.breakpoint,
                             runSimultaneous=task.runSimultaneous, channelId=task.channelId, 
-                            statsmgr=self.statsmgr, context=self.ctx.instance()
+                            statsmgr=self.statsmgr, context=self.ctx
                         )
         taskNew.taskUuid = task.taskUuid
         taskNew.setId( self.getEventId() )

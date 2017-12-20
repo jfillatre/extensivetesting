@@ -52,6 +52,8 @@ except ImportError:
 from Libs import QtHelper, Logger
 
 import UserClientInterface as UCI
+import RestClientInterface as RCI
+
 import Workspace as WWorkspace
 import Settings
 import DefaultTemplates
@@ -266,7 +268,7 @@ class DHttpReplay(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         self.testType = None
 
         if not self.offlineMode:
-            if not UCI.instance().isAuthenticated():
+            if not RCI.instance().isAuthenticated():
                 self.addLogWarning(txt="<< Connect to the test center in first!" )
                 QMessageBox.warning(self, "Import" , "Connect to the test center in first!")
                 return
@@ -342,7 +344,7 @@ class DHttpReplay(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """
         Export to test
         """
-        if not UCI.instance().isAuthenticated():
+        if not RCI.instance().isAuthenticated():
             self.addLogWarning(txt="<< Connect to the test center in first!" )
             QMessageBox.warning(self, "Import" , "Connect to the test center in first!")
             return

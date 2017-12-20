@@ -311,37 +311,57 @@ class Item(QTreeWidgetItem):
             elif self.parent.itemData['name'] == 'TestTemplates':
                 parentName = self.parent.itemData['name']
                 if not self.returnValue:
-                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, 
+                                                                                                          methodName, 
+                                                                                                          methodArgs) ]
                 else:
-                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, 
+                                                                                                                       methodName, 
+                                                                                                                       methodArgs) ]
                     
             elif self.parent.itemData['name'] == 'SutAdapter':
                 parentName = "SutAdapter"
                 if not self.returnValue:
-                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, 
+                                                                                                          methodName, 
+                                                                                                          methodArgs) ]
                 else:
-                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, 
+                                                                                                                       methodName, 
+                                                                                                                       methodArgs) ]
                     
             elif self.parent.itemData['name'] == 'SutLibrary':
                 parentName = "SutLibrary"
                 if not self.returnValue:
-                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, 
+                                                                                                          methodName, 
+                                                                                                          methodArgs) ]
                 else:
-                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, 
+                                                                                                                       methodName, 
+                                                                                                                       methodArgs) ]
             
             elif self.parent.itemData['name'] == 'TestRepositories':
                 parentName = "TestRepositories"
                 if not self.returnValue:
-                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, 
+                                                                                                          methodName, 
+                                                                                                          methodArgs) ]
                 else:
-                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, 
+                                                                                                                       methodName, 
+                                                                                                                       methodArgs) ]
         
             else:
                 parentName = self.parent.itemData['realname']
                 if not self.returnValue:
-                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '%s.%s(%s)' % (parentName, methodName, methodArgs),  '%s.%s(%s)' % (parentName, 
+                                                                                                          methodName, 
+                                                                                                          methodArgs) ]
                 else:
-                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs) ]
+                    self.metadata = [ '@obj = %s.%s(%s)' % (parentName, methodName, methodArgs), '@obj = %s.%s(%s)' % (parentName, 
+                                                                                                                       methodName, 
+                                                                                                                       methodArgs) ]
         
         elif self.itemData['type'] == 'module':
             pass    
@@ -897,16 +917,13 @@ class WHelper(QWidget, Logger.ClassLogger):
         self.collapseAllAction.setEnabled(False)
         self.generateAdaptersAction.setEnabled(False)
         self.generateLibrariesAction.setEnabled(False)
-        # self.generateAllAction.setEnabled(False)
-        # new in v11.1
-        # self.prepareAssistantAction.setEnabled(False)
         self.generateAdapterWsdlAction.setEnabled(False)
 
     def generateAdapterWSDL(self):
         """
         Generate adapter from WSDL file or url
         """
-        if not UCI.instance().isAuthenticated():
+        if not RCI.instance().isAuthenticated():
             QMessageBox.warning(self, "Capture desktop" , "Connect to the test center in first!")
             return
 
@@ -918,33 +935,20 @@ class WHelper(QWidget, Logger.ClassLogger):
                 # read the file
                 fd = QFile(fileWsdl)
                 if not fd.open(QIODevice.ReadOnly):
-                    QMessageBox.warning(self, self.tr("Error opening file"), self.tr("Could not open the file ") + fileWsdl)
+                    QMessageBox.warning(self, self.tr("Error opening file"), 
+                                        self.tr("Could not open the file ") + fileWsdl)
                 else:
                     wsdlData= fd.readAll()
                     wsdlEncoded = base64.b64encode(wsdlData)
-            
-            UCI.instance().generateAdapterFromWSDL(wsdlUrl=url, wsdlFile=wsdlEncoded, 
-                                                    pkg=pkg, overwrite=overwrite)
-        
-    # def prepareAssistant(self):
-        # """
-        # Generate all packages
-        # """
-        # reply = QMessageBox.question(self, self.tr("Prepare assistant"), 
-                                     # self.tr("Are you sure to prepare assistant?"),
-                                     # QMessageBox.Yes | QMessageBox.Cancel )
-        # if reply == QMessageBox.Yes:
-            # UCI.instance().prepareAssistant()
-            
-    # def generateAll(self):
-        # """
-        # Generate all packages
-        # """
-        # reply = QMessageBox.question(self, self.tr("Generate all"), 
-                                     # self.tr("Are you sure to re-generate all packages?"),
-                                     # QMessageBox.Yes | QMessageBox.Cancel )
-        # if reply == QMessageBox.Yes:
-            # UCI.instance().generateAll()
+
+            if len(url):
+                RCI.instance().addAdapterByWsdlUrl(packageName=pkg, 
+                                                   overwriteAdapter=overwrite, 
+                                                   wsdlUrl=url)
+            else:
+                RCI.instance().addAdapterByWsdlFile(packageName=pkg, 
+                                                    overwriteAdapter=overwrite, 
+                                                    wsdlFile=wsdlEncoded)
 
     def generateAdapters(self):
         """
@@ -954,7 +958,6 @@ class WHelper(QWidget, Logger.ClassLogger):
                                      self.tr("Are you sure to re-generate adapters?"),
                                      QMessageBox.Yes | QMessageBox.Cancel )
         if reply == QMessageBox.Yes:
-            # UCI.instance().generateAdapters()
             RCI.instance().buildAdapters()
 
     def generateLibraries(self):
@@ -965,7 +968,6 @@ class WHelper(QWidget, Logger.ClassLogger):
                                      self.tr("Are you sure to re-generate libraries?"),
                                      QMessageBox.Yes | QMessageBox.Cancel )
         if reply == QMessageBox.Yes:
-            # UCI.instance().generateLibraries()
             RCI.instance().buildLibraries()
             
     def rebuild(self):
@@ -976,14 +978,12 @@ class WHelper(QWidget, Logger.ClassLogger):
                                      self.tr("Are you sure to re-generate the documentation?"),
                         QMessageBox.Yes | QMessageBox.Cancel )
         if reply == QMessageBox.Yes:
-            # UCI.instance().genCacheHelp()
             RCI.instance().buildDocumentations()
             
     def reloadAll(self):
         """
         Reload the tree
         """
-        # UCI.instance().reloadHelper()
         RCI.instance().cacheDocs()
 
     def expandItem(self, itm):
@@ -1113,15 +1113,11 @@ class WHelper(QWidget, Logger.ClassLogger):
             self.rebuildCacheAction.setEnabled(True)
             self.generateAdaptersAction.setEnabled(True)
             self.generateLibrariesAction.setEnabled(True)
-            # self.generateAllAction.setEnabled(True)
-            # self.prepareAssistantAction.setEnabled(True)
             self.generateAdapterWsdlAction.setEnabled(True)
         else:
             self.rebuildCacheAction.setEnabled(False)
             self.generateAdaptersAction.setEnabled(False)
             self.generateLibrariesAction.setEnabled(False)
-            # self.generateAllAction.setEnabled(False)
-            # self.prepareAssistantAction.setEnabled(False)
             self.generateAdapterWsdlAction.setEnabled(False)
             
         self.expandSubtreeAction.setEnabled(True)
@@ -1222,10 +1218,14 @@ class WHelper(QWidget, Logger.ClassLogger):
                     hide = False
                     if dct['name'] == '__init__': # hide __init__ function
                         hide = True
-                    item = Item( parent = parent, data = dct , type = QTreeWidgetItem.UserType+4, icon=QIcon(":/methods.png"), hide=hide )
+                    item = Item( parent = parent, data = dct , 
+                                 type = QTreeWidgetItem.UserType+4, 
+                                 icon=QIcon(":/methods.png"), hide=hide )
                 
                 elif dct["type"] == "function":
-                    item = Item( parent = parent, data = dct , type = QTreeWidgetItem.UserType+4, icon=QIcon(":/functions.png") )
+                    item = Item( parent = parent, data = dct , 
+                                 type = QTreeWidgetItem.UserType+4, 
+                                 icon=QIcon(":/functions.png") )
                 
                 else:
                     self.error( "type not supported: %s" % dct )

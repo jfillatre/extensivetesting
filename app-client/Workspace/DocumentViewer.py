@@ -35,6 +35,7 @@ try:
 except ImportError: # python3 support
     import cPickle as pickle
 import sys
+import copy
 
 try:
     xrange
@@ -51,7 +52,7 @@ try:
                             QIcon, QKeySequence, QMenu, QDialog, QTextDocument, 
                             QPrinter, QPrintPreviewDialog,
                             QFileDialog, QToolButton, QTabBar)
-    from PyQt4.QtCore import (Qt, pyqtSignal, QUrl, QSize)
+    from PyQt4.QtCore import (Qt, pyqtSignal, QUrl, QSize, QFile, QIODevice)
 except ImportError:
     from PyQt5.QtGui import (QCursor, QPixmap, QDesktopServices, QIcon, QKeySequence, QTextDocument)
     from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, QApplication, 
@@ -59,7 +60,7 @@ except ImportError:
                                 QDialog,  QFileDialog, 
                                 QToolButton, QTabBar)
     from PyQt5.QtPrintSupport import (QPrinter, QPrintPreviewDialog)
-    from PyQt5.QtCore import (Qt, pyqtSignal, QUrl, QSize)
+    from PyQt5.QtCore import (Qt, pyqtSignal, QUrl, QSize, QFile, QIODevice)
     
 try:
     from PythonEditor import FindReplace
@@ -100,6 +101,12 @@ import Settings
 import TestResults
 import UserClientInterface as UCI
 import RestClientInterface as RCI
+
+import Workspace.FileModels.TestData as FileModelTestData
+import Workspace.FileModels.TestSuite as FileModelTestSuite
+import Workspace.FileModels.TestUnit as FileModelTestUnit
+import Workspace.FileModels.TestAbstract as FileModelTestAbstract
+import Workspace.FileModels.TestPlan as FileModelTestPlan
 
 try:
     import ScheduleDialog as SchedDialog
@@ -714,7 +721,21 @@ class WorkspaceTab(QTabWidget):
                             remoteFile=False, contentFile=None, repoDest=data['repotype'])
             else: 
                 # open the file from the remote repo
-                UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
+                if data['repotype'] == UCI.REPO_TESTS:
+                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
+                    RCI.instance().openFileTests(projectId=data['projectid'], 
+                                                 filePath=data['pathfile'])
+                elif data['repotype'] == UCI.REPO_ADAPTERS:
+                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
+                    RCI.instance().openFileAdapters(filePath=data['pathfile'], 
+                                                    ignoreLock=False, readOnly=False)
+                elif data['repotype'] == UCI.REPO_LIBRARIES:
+                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
+                    RCI.instance().openFileLibraries(filePath=data['pathfile'], 
+                                                     ignoreLock=False, readOnly=False)
+                else:
+                    pass
+                    
         else:
             QTabWidget.dropEvent(self, event)   
 
@@ -1258,15 +1279,20 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                             defaultProject=Settings.instance().serverContext['default-project'] )
         if self.runsDialog.exec_() == QDialog.Accepted:
             tests, runLater, runAt, runSimultaneous = self.runsDialog.getTests()
-            UCI.instance().scheduleTests(tests=tests, later=runLater, runAt=runAt, runSimultaneous=runSimultaneous)
+            # UCI.instance().scheduleTests(tests=tests, later=runLater, runAt=runAt, runSimultaneous=runSimultaneous)
 
+            # rest call
+            RCI.instance().scheduleTests(tests=tests,
+                                         postponeMode=runLater,
+                                         postponeAt=runAt,
+                                         parallelMode=runSimultaneous)
+                                         
     def onProjectChangedInRuns(self, projectName):
         """
         On project changed for several runs
         """
         projectId = self.iRepo.remote().getProjectId(project=projectName)
-        # UCI.instance().refreshRepo(project=self.iRepo.remote().getProjectId(project=projectName), forRuns=True)
-        
+
         # rest call
         RCI.instance().listingTests(projectId=projectId, forSaveAs=False, forRuns=True)
         
@@ -2478,7 +2504,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         @param wdocument: 
         @type wdocument: 
         """
-        if UCI.instance() is None:
+        if RCI.instance() is None:
             return
             
         if wdocument is None:
@@ -4383,9 +4409,387 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
 
         currentDocument = self.tab.widget(tabId)
         projectName = self.iRepo.remote().getProjectName(project=currentDocument.project)
-        UCI.instance().checkDesignTest(  wdocument = currentDocument,  
-                                        prjId=currentDocument.project, prjName=projectName )
+        
+        # UCI.instance().checkDesignTest(  wdocument = currentDocument,  
+                                        # prjId=currentDocument.project, prjName=projectName )
+        _json = self.prepareTest( wdocument = currentDocument, 
+                                  prjId=currentDocument.project, 
+                                  basicMode=False)    
+            
+        if currentDocument.extension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
+            RCI.instance().createTestDesign( req=_json )
+        elif currentDocument.extension in [ RCI.EXT_TESTPLAN, RCI.EXT_TESTGLOBAL]:
+            RCI.instance().createTestDesignTpg( req=_json )
+        else:
+            pass
+            
+    def prepareTest (self, wdocument=None, tabId=0, background = False, runAt = (0,0,0,0,0,0), 
+                           runType=0, runNb=-1, withoutProbes=False, debugActivated=False, 
+                           withoutNotif=False, noKeepTr=False, prjId=0, testFileExtension=None, 
+                           testFilePath=None, testFileName=None, fromTime=(0,0,0,0,0,0), 
+                           toTime=(0,0,0,0,0,0), prjName='', stepByStep=False, breakpoint=False,
+                           channelId=False, basicMode=False):
+        """
+        Prepare test
 
+        @param testId: 
+        @type testId:
+
+        @param background: 
+        @type background: boolean
+
+        @param runAt: 
+        @type runAt: tuple of integer
+
+        @param runType: 
+        @type runType: Integer
+
+        @param runNb: 
+        @type runNb:
+
+        @param withoutProbes: 
+        @type withoutProbes:
+
+        @param debugActivated: 
+        @type debugActivated:
+
+        @param withoutNotif: 
+        @type withoutNotif:
+
+        @param noKeepTr: 
+        @type noKeepTr:
+
+        @param prjId: 
+        @type prjId:
+
+        @param testFileExtension: 
+        @type testFileExtension:
+
+        @param testFilePath: 
+        @type testFilePath:
+
+        @param testFileName: 
+        @type testFileName:
+        
+        @return:
+        @rtype:
+        """
+        data__ = {}
+        try:
+            if not basicMode:
+                data__ =  { 'project-id': prjId, 
+                            'tab-id': tabId, 
+                            'background-mode': background, 
+                            'schedule-at': runAt, 
+                            'schedule-id': runType, 
+                            'schedule-repeat': runNb, 
+                            'probes-enabled': withoutProbes, 
+                            'debug-enabled': debugActivated, 
+                            'notifications-enabled': withoutNotif, 
+                            'logs-enabled': noKeepTr,
+                            'from-time': fromTime, 
+                            'to-time': toTime, 
+                            'step-mode': stepByStep, 
+                            'breakpoint-mode': breakpoint, 
+                            'channel-id': channelId 
+                            }
+
+            if wdocument is None:
+                self.trace('no content, prepare test, type %s' % testFileExtension)
+                data__.update( { 'test-definition': '', 
+                                 'test-execution': '', 
+                                 'test-properties': '',
+                                 'test-name': testFileName,
+                                 'test-path': testFilePath,
+                                 'test-extension': testFileExtension } )
+            else:
+                self.trace('prepare test, type %s' % wdocument.extension)
+                properties = copy.deepcopy( wdocument.dataModel.properties['properties'] )
+                testfileName = wdocument.getShortName( withAsterisk = False, 
+                                                       withLocalTag=False)
+                testPath = ""
+                if wdocument.isRemote:
+                    testPath = wdocument.getPath(withExtension = False, withLocalTag=False)
+
+                if wdocument.extension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
+                    # load datasets
+                    self.__loadDataset(parameters=properties['inputs-parameters']['parameter'])
+                    self.__loadDataset(parameters=properties['outputs-parameters']['parameter'])
+
+                    # load images
+                    self.__loadImage(parameters=properties['inputs-parameters']['parameter'])
+                    self.__loadImage(parameters=properties['outputs-parameters']['parameter'])
+
+                if wdocument.extension == RCI.EXT_TESTSUITE:
+                    data__.update( { 'test-definition': unicode( wdocument.srcEditor.text() ), 
+                                     'test-execution': unicode( wdocument.execEditor.text() ), 
+                                     'test-properties': properties, 
+                                     'test-name': testfileName,
+                                     'test-path': testPath,
+                                     'test-extension': wdocument.extension } )
+
+                elif wdocument.extension == RCI.EXT_TESTABSTRACT:
+                    data__.update( { 'test-definition': unicode( wdocument.constructTestDef() ), 
+                                     'test-execution': '', 
+                                     'test-properties': properties,
+                                     'test-name': testfileName, 
+                                     'test-path': testPath,
+                                     'test-extension': wdocument.extension } )
+
+                elif wdocument.extension == RCI.EXT_TESTUNIT:
+                    data__.update( { 
+                                        'test-definition': unicode( wdocument.srcEditor.text() ), 
+                                        'test-execution': '', 
+                                        'test-properties': properties,
+                                        'test-name': testfileName, 
+                                        'test-path': testPath,
+                                        'test-extension': wdocument.extension } )
+
+                elif wdocument.extension == RCI.EXT_TESTGLOBAL:
+                    testglobal =  copy.deepcopy( wdocument.getDataModelSorted() )
+                    localConfigured = Settings.instance().readValue( key = 'Common/local-repo' )
+                    alltests = []
+                    all_id = [] 
+                    for ts in testglobal:   
+                        all_id.append(ts['id'])
+                        if ts['type'] == RCI.TESTPLAN_REPO_FROM_LOCAL or ts['type'] == RCI.TESTPLAN_REPO_FROM_LOCAL_REPO_OLD:
+                            if localConfigured != "Undefined":
+                                absPath = '%s/%s' % ( localConfigured, ts['file'] )
+                            else:
+                                raise Exception("local repository not configured")
+                        elif ts['type'] == RCI.TESTPLAN_REPO_FROM_OTHER or ts['type'] == RCI.TESTPLAN_REPO_FROM_HDD:
+                            absPath = ts['file'] 
+                        elif ts['type'] == RCI.TESTPLAN_REPO_FROM_REMOTE:
+                            pass
+                        else:
+                            raise Exception("test type from unknown: %s" % ts['type'])
+                        
+                        # load dataset
+                        self.__loadDataset(parameters=ts['properties']['inputs-parameters']['parameter'])
+                        self.__loadDataset(parameters=ts['properties']['outputs-parameters']['parameter'])
+
+                        # load image
+                        self.__loadImage(parameters=ts['properties']['inputs-parameters']['parameter'])
+                        self.__loadImage(parameters=ts['properties']['outputs-parameters']['parameter'])
+
+                        if ts['type'] != RCI.TESTPLAN_REPO_FROM_REMOTE:
+            
+                            if not os.path.exists( absPath ):
+                                raise Exception("the following test file is missing: %s " % absPath)
+                            
+                            if absPath.endswith(EXT_TESTSUITE):
+                                doc = FileModelTestSuite.DataModel()
+                            elif absPath.endswith(EXT_TESTUNIT):
+                                doc = FileModelTestUnit.DataModel()
+                            elif absPath.endswith(EXT_TESTABSTRACT):
+                                doc = FileModelTestAbstract.DataModel()
+                            elif absPath.endswith(EXT_TESTPLAN):
+                                doc = FileModelTestPlan.DataModel()
+                            else:
+                                raise Exception("the following test extension file is incorrect: %s " % absPath)
+
+                            res = doc.load( absPath = absPath )
+                            if res:
+                                try:
+                                    tmp = str(ts['file']).rsplit("/", 1)
+                                    if len(tmp) ==1:
+                                        filenameTs = tmp[0].rsplit(".", 1)[0]
+                                    else:
+                                        filenameTs = tmp[1].rsplit(".", 1)[0]
+                                except Exception as e:
+                                    self.error( 'fail to parse filename: %s' % e)
+                                    raise Exception('fail to parse filename')                                
+                                # Update current test suite parameters with testplan parameter
+                                self.__updateParameter( currentParam=doc.properties['properties']['inputs-parameters']['parameter'],
+                                                            newParam=ts['properties']['inputs-parameters']['parameter'] )
+                                self.__updateParameter( currentParam=doc.properties['properties']['outputs-parameters']['parameter'],
+                                                            newParam=ts['properties']['outputs-parameters']['parameter'] )
+
+                                ts['properties']['inputs-parameters'] = doc.properties['properties']['inputs-parameters']
+                                ts['properties']['outputs-parameters'] = doc.properties['properties']['outputs-parameters']
+
+                                if absPath.endswith(RCI.EXT_TESTSUITE):
+                                    ts.update( { 'test-definition': doc.testdef, 
+                                                 'test-execution': doc.testexec, 
+                                                 'path': filenameTs } )
+                                    alltests.append( ts )
+                                elif absPath.endswith(RCI.EXT_TESTUNIT):
+                                    ts.update( { 'test-definition': doc.testdef, 
+                                                 'test-execution': '', 
+                                                 'path': filenameTs } ) 
+                                    alltests.append( ts )
+                                elif absPath.endswith(RCI.EXT_TESTABSTRACT):
+                                    ts.update( { 'test-definition': doc.testdef, 
+                                                 'test-execution': '', 
+                                                 'path': filenameTs } ) 
+                                    alltests.append( ts )
+                                elif absPath.endswith(RCI.EXT_TESTPLAN):
+                                    pass #todo
+                        else:
+                            alltests.append( ts )
+                    data__.update( { 
+                                        'test-execution': alltests, 
+                                        'test-properties': properties, 
+                                        'test-name': testfileName, 
+                                        'test-path': testPath,
+                                        'test-extension': wdocument.extension 
+                                     } )
+                    self.trace('TestGlobal, tests id order: %s' % all_id)
+
+                elif wdocument.extension == RCI.EXT_TESTPLAN:
+                    testplan =  copy.deepcopy( wdocument.getDataModelSorted() )                    
+                    self.localConfigured = Settings.instance().readValue( key = 'Common/local-repo' )
+                    all_id = [] 
+                    for ts in testplan: 
+                        all_id.append(ts['id'])
+                        if ts['type'] == RCI.TESTPLAN_REPO_FROM_LOCAL or ts['type'] == RCI.TESTPLAN_REPO_FROM_LOCAL_REPO_OLD:
+                            if self.localConfigured != "Undefined":
+                                absPath = '%s/%s' % ( self.localConfigured, ts['file'] )
+                            else:
+                                raise Exception("local repository not configured")
+                        elif ts['type'] == RCI.TESTPLAN_REPO_FROM_OTHER or ts['type'] == RCI.TESTPLAN_REPO_FROM_HDD:
+                            absPath = ts['file'] 
+                        elif ts['type'] == RCI.TESTPLAN_REPO_FROM_REMOTE:
+                            pass
+                        else:
+                            raise Exception("test type from unknown: %s" % ts['type'])
+                        
+                        # load dataset
+                        self.__loadDataset(parameters=ts['properties']['inputs-parameters']['parameter'])
+                        self.__loadDataset(parameters=ts['properties']['outputs-parameters']['parameter'])
+
+                        # load image
+                        self.__loadImage(parameters=ts['properties']['inputs-parameters']['parameter'])
+                        self.__loadImage(parameters=ts['properties']['outputs-parameters']['parameter'])
+
+                        if ts['type'] != RCI.TESTPLAN_REPO_FROM_REMOTE:
+            
+                            if not os.path.exists( absPath ):
+                                raise Exception("the following test file is missing: %s " % absPath)
+                            
+                            if absPath.endswith(RCI.EXT_TESTSUITE):
+                                doc = FileModelTestSuite.DataModel()
+                            elif absPath.endswith(RCI.EXT_TESTABSTRACT):
+                                doc = FileModelTestAbstract.DataModel()
+                            else:
+                                doc = FileModelTestUnit.DataModel()
+                            res = doc.load( absPath = absPath )
+                            if res:
+                                tmp = str(ts['file']).rsplit("/", 1)
+                                filenameTs = tmp[1].rsplit(".", 1)[0]
+                                
+                                # Update current test suite parameters with testplan parameter
+                                self.__updateParameter( currentParam=doc.properties['properties']['inputs-parameters']['parameter'],
+                                                            newParam=ts['properties']['inputs-parameters']['parameter'] )
+                                self.__updateParameter( currentParam=doc.properties['properties']['outputs-parameters']['parameter'],
+                                                            newParam=ts['properties']['outputs-parameters']['parameter'] )
+
+                                ts['properties']['inputs-parameters'] = doc.properties['properties']['inputs-parameters']
+                                ts['properties']['outputs-parameters'] = doc.properties['properties']['outputs-parameters']
+
+                                ts.update( { 'test-definition': doc.testdef, 
+                                             'test-execution': doc.testexec, 
+                                             'path': filenameTs } )
+            
+                    data__.update( { 
+                                        'test-execution': testplan, 
+                                        'test-properties': properties, 
+                                        'test-name': testfileName, 
+                                        'test-path': testPath,
+                                        'test-extension': wdocument.extension 
+                                        } )
+                    self.trace('TestPlan, tests id order: %s' % all_id)
+
+            # compress
+            self.trace('test prepared')
+        except Exception as e:
+            self.error( e )
+        return data__
+
+    def __loadImage(self, parameters):
+        """
+        Private function
+        Load image
+
+        @param parameters: 
+        @type parameters:
+        """
+        # self.localConfigured = Settings.instance().readValue( key = 'Common/local-repo' )
+        for pr in parameters:
+            if pr['type'] == 'image':
+                if pr['value'].startswith('undefined:/'):
+                    fileName = pr['value'].split('undefined:/')[1]
+                    if not os.path.exists( fileName ):
+                        raise Exception("the following image file is missing: %s " % fileName)
+
+                    file = QFile(fileName)
+                    if not file.open(QIODevice.ReadOnly):
+                        raise Exception("error opening image file %s" % fileName )
+                    else:
+                        imageData= file.readAll()
+                        pr['value'] = "undefined:/%s" % base64.b64encode(imageData)
+                elif pr['value'].startswith('local-tests:/'):
+                    fileName = pr['value'].split('local-tests:/')[1]
+
+                    if not os.path.exists( fileName ):
+                        raise Exception("the following image file is missing: %s " % fileName)
+                    
+                    file = QFile(fileName)
+                    if not file.open(QIODevice.ReadOnly):
+                        raise Exception("error opening image file %s" % fileName )
+                    else:
+                        imageData= file.readAll()
+                        pr['value'] = "local-tests:/%s" % base64.b64encode(imageData)
+                else:
+                    pass
+
+    def __loadDataset(self, parameters):
+        """
+        Private function
+        Load dataset
+
+        @param parameters: 
+        @type parameters:
+        """
+        # self.localConfigured = Settings.instance().readValue( key = 'Common/local-repo' )
+        for pr in parameters:
+            if pr['type'] == 'dataset':
+                if pr['value'].startswith('undefined:/'):
+                    fileName = pr['value'].split('undefined:/')[1]
+                    if not os.path.exists( fileName ):
+                        raise Exception("the following test data file is missing: %s " % fileName)
+
+                    doc = FileModelTestData.DataModel()
+                    res = doc.load( absPath = fileName )
+                    pr['value'] = "undefined:/%s" % doc.getRaw()
+                elif pr['value'].startswith('local-tests:/'):
+                    fileName = pr['value'].split('local-tests:/')[1]
+
+                    if not os.path.exists( fileName ):
+                        raise Exception("the following test data file is missing: %s " % fileName)
+                    
+                    doc = FileModelTestData.DataModel()
+                    res = doc.load( absPath = fileName )
+                    pr['value'] = "local-tests:/%s" % doc.getRaw()
+                else:
+                    pass
+
+    def __updateParameter(self, currentParam, newParam):
+        """
+        Private function
+        Update current test suite parameters with testplan parameter
+
+        @param currentParam: 
+        @type currentParam:
+
+        @param newParam: 
+        @type newParam:
+        """
+        for i in xrange(len(currentParam)):
+            for np in newParam:
+                if np['name'] == currentParam[i]['name']:
+                    currentParam[i] = np
+        
     def checkSyntaxDocument (self):
         """
         Gets the current document and send it the server to check the syntax
@@ -4397,16 +4801,27 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         currentDocument = self.tab.widget(tabId)
         
         if isinstance(currentDocument, TestAdapter.WTestAdapter):
-            UCI.instance().checkSyntaxAdapter(  wdocument = currentDocument )
+            # UCI.instance().checkSyntaxAdapter(  wdocument = currentDocument )
+            RCI.instance().checkSyntaxAdapter( fileContent=currentDocument.getraw_encoded() )
             
         elif isinstance(currentDocument, TestLibrary.WTestLibrary):
-            UCI.instance().checkSyntaxLibrary(  wdocument = currentDocument )
+            # UCI.instance().checkSyntaxLibrary(  wdocument = currentDocument )
+            RCI.instance().checkSyntaxLibrary( fileContent=currentDocument.getraw_encoded() )
             
         else:
             testId = TestResults.instance().getTestId()
-            UCI.instance().checkSyntaxTest(  wdocument = currentDocument, testId = testId, 
-                                            runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW )
-
+            # UCI.instance().checkSyntaxTest(  wdocument = currentDocument, testId = testId, 
+                                            # runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW )
+              
+            _json = self.prepareTest( wdocument = currentDocument, basicMode=True)    
+            
+            if currentDocument.extension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
+                RCI.instance().checkTestSyntax( req=_json )
+            elif currentDocument.extension in [ RCI.EXT_TESTPLAN, RCI.EXT_TESTGLOBAL]:
+                RCI.instance().checkTestSyntaxTpg( req=_json )
+            else:
+                pass
+                
     def schedRunDocument (self):
         """
         Gets the current document, send to the server and schedule the launch
@@ -4530,13 +4945,25 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         testId = TestResults.instance().getTestId()
         
         # if background:
-        UCI.instance().scheduleTest(  
-                                      wdocument = currentDocument, testId = testId, background = background , runAt = runAt, 
-                                      runType=schedType, runNb=runNb, withoutProbes=withoutProbes, debugActivated=debugActivated, 
-                                      withoutNotif=withoutNotif, noKeepTr=noKeepTr, fromTime=fromTime, toTime=toTime, 
-                                      prjId=currentDocument.project, stepByStep=stepByStep, breakpoint=breakpoint
-                                    )
-    
+        # UCI.instance().scheduleTest(  
+                                      # wdocument = currentDocument, testId = testId, background = background , runAt = runAt, 
+                                      # runType=schedType, runNb=runNb, withoutProbes=withoutProbes, debugActivated=debugActivated, 
+                                      # withoutNotif=withoutNotif, noKeepTr=noKeepTr, fromTime=fromTime, toTime=toTime, 
+                                      # prjId=currentDocument.project, stepByStep=stepByStep, breakpoint=breakpoint
+                                    # )
+        _json = self.prepareTest (  wdocument=currentDocument, tabId=testId, background = background, 
+                                    runAt = runAt, runType=schedType, runNb=runNb, withoutProbes=withoutProbes, 
+                                    debugActivated=debugActivated, withoutNotif=withoutNotif, noKeepTr=noKeepTr, 
+                                    prjId=currentDocument.project, fromTime=fromTime, toTime=toTime, 
+                                    stepByStep=stepByStep, breakpoint=breakpoint  )
+
+        if currentDocument.extension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
+            RCI.instance().scheduleTest(req=_json, wdocument=currentDocument)
+        elif currentDocument.extension in [ RCI.EXT_TESTPLAN, RCI.EXT_TESTGLOBAL]:
+            RCI.instance().scheduleTestTpg(req=_json, wdocument=currentDocument)
+        else:
+            pass
+            
     def checkAlreadyOpened (self, path, remoteFile=False, repoType=None, project=0):
         """
         Returns tab id if the document is already opened

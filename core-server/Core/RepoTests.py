@@ -528,7 +528,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         @param data_:
         @type data_:
         """
-        ret = None
+        ret = ( self.context.CODE_OK, "")
         alltests = []
         # read each test files in data
         for ts in data_:
@@ -608,18 +608,18 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                         # end of fix
                         
                         if fileExt == RepoManager.TEST_SUITE_EXT:
-                            ts.update( { 'src': doc.testdef, 'src2': doc.testexec, 'path': filenameTs } )
+                            ts.update( { 'test-definition': doc.testdef, 'test-execution': doc.testexec, 'path': filenameTs } )
                             alltests.append( ts )
                         elif fileExt == RepoManager.TEST_UNIT_EXT:
-                            ts.update( { 'src': doc.testdef, 'path': filenameTs } )
+                            ts.update( { 'test-definition': doc.testdef, 'path': filenameTs } )
                             alltests.append( ts )
                         elif fileExt == RepoManager.TEST_ABSTRACT_EXT:
-                            ts.update( { 'src': doc.testdef, 'path': filenameTs } )
+                            ts.update( { 'test-definition': doc.testdef, 'path': filenameTs } )
                             alltests.append( ts )
                         elif fileExt == RepoManager.TEST_PLAN_EXT:
                             self.trace('Reading sub test plan')
                             sortedTests = doc.getSorted()
-                            ret = self.addtf2tp( data_=sortedTests, tpid=ts['id'] )
+                            ret, error_msg = self.addtf2tp( data_=sortedTests, tpid=ts['id'] )
                             if ret is not None:
                                 del sortedTests
                                 break
@@ -661,7 +661,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                                                     'id': ts['id'], 'testname': filenameTs, 
                                                     'parent': ts['parent'], 'alias': alias_ts }] ) 
 
-        return ( ret, alltests )
+        return ret + (alltests, )
 
     def addtf2tp(self, data_, tpid=0):
         """
@@ -671,7 +671,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         @param data_:
         @type data_:
         """
-        ret = None
+        ret = (self.context.CODE_OK, "")
         for ts in data_:
             # extract project info
             prjName = str(ts['file']).split(":", 1)[0]
@@ -739,11 +739,11 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                         # end of fix
                         
                         if fileExt == RepoManager.TEST_SUITE_EXT:
-                            ts.update( { 'src': doc.testdef, 'src2': doc.testexec, 'path': filenameTs, 'tpid': tpid } )
+                            ts.update( { 'test-definition': doc.testdef, 'test-execution': doc.testexec, 'path': filenameTs, 'tpid': tpid } )
                         elif fileExt == RepoManager.TEST_ABSTRACT_EXT:
-                            ts.update( { 'src': doc.testdef, 'path': filenameTs, 'tpid': tpid } )
+                            ts.update( { 'test-definition': doc.testdef, 'path': filenameTs, 'tpid': tpid } )
                         else:
-                            ts.update( { 'src': doc.testdef, 'path': filenameTs, 'tpid': tpid } )
+                            ts.update( { 'test-definition': doc.testdef, 'path': filenameTs, 'tpid': tpid } )
                 
                         # backward compatibility
                         self.__fixAliasTp(ts=ts)

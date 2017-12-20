@@ -76,6 +76,7 @@ def q(v=""):
         
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 import Workspace
 import Recorder
 
@@ -3330,7 +3331,9 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
                 fileName = row['value'].split('):/', 1)[1]
                 projectName = row['value'].split('remote-tests(', 1)[1].split('):/', 1)[0]
                 projectId = Workspace.WRepositories.instance().remote().getProjectId(projectName)
-                UCI.instance().openFileRepo(pathFile=fileName, repo=UCI.REPO_TESTS, project=projectId)
+                # UCI.instance().openFileRepo(pathFile=fileName, repo=UCI.REPO_TESTS, project=projectId)
+                RCI.instance().openFileTests(projectId=int(projectId), filePath=fileName)
+                                                         
             elif row['value'].startswith('local-tests:/'):
                 fileAll = row['value'].split('local-tests:/')[1]
 
@@ -3339,7 +3342,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
                 fileName = leftdata.rsplit('.', 1)[0]
 
                 Workspace.WDocumentViewer.instance().newTab(path = filePath, filename = fileName, 
-                                                            extension = fileExtension, repoDest=UCI.REPO_TESTS_LOCAL)
+                                                            extension = fileExtension, 
+                                                            repoDest=UCI.REPO_TESTS_LOCAL)
 
             elif row['value'].startswith('undefined:/'):
                 fileAll = row['value'].split('undefined:/')[1]
@@ -3349,7 +3353,8 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
                 fileName = leftdata.rsplit('.', 1)[0]
 
                 Workspace.WDocumentViewer.instance().newTab(path = filePath, filename = fileName, 
-                                                            extension = fileExtension, repoDest=UCI.REPO_UNDEFINED)
+                                                            extension = fileExtension, 
+                                                            repoDest=UCI.REPO_UNDEFINED)
 
             else:
                 pass
@@ -3800,13 +3805,13 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
             if answer == QMessageBox.Yes:
                 editor = self.loadImageFromLocal() # load local image file
             else:
-                if UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+                if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                     editor = self.loadImageFromRemote() # load remote test config file
                 else:
                     QMessageBox.warning(self, self.tr("Import") , self.tr("Connect to the test center first!") )
         
         # import from remote repo
-        elif UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+        elif RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
             editor = self.loadImageFromRemote() # load remote dataset file
 
         else:
@@ -3829,13 +3834,13 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
             if answer == QMessageBox.Yes:
                 editor = self.loadFromLocal() # load local dataset file
             else:
-                if UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+                if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                     editor = self.loadFromRemote() # load remote test config file
                 else:
                     QMessageBox.warning(self, self.tr("Import") , self.tr("Connect to the test center first!") )
         
         # import from remote repo
-        elif UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+        elif RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
             editor = self.loadFromRemote() # load remote dataset file
 
         else:

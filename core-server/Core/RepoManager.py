@@ -554,7 +554,7 @@ class RepoManager(Logger.ClassLogger):
                         locked_by = ''
             
             if is_locked and not forceOpen and addLock and not readOnly:
-                return (self.context.CODE_LOCKED,) +  ret +  (base64.b64encode(""), is_locked, locked_by)
+                return (self.context.CODE_OK,) +  ret +  (base64.b64encode(""), is_locked, locked_by)
                 
             # open the file in binary mode ? yes by default
             if binaryMode:
@@ -629,12 +629,13 @@ class RepoManager(Logger.ClassLogger):
         """
         ret = (pathFile, nameFile, extFile, project, overwriteFile, closeAfter)
         lockedBy = ''
+        is_locked = False
         try:
             # checking extension
             if extFile.lower() not in [ PY_EXT, PNG_EXT, TXT_EXT, TEST_UNIT_EXT, 
                                         TEST_SUITE_EXT, TEST_ABSTRACT_EXT, TEST_PLAN_EXT, 
                                         TEST_GLOBAL_EXT, TEST_CONFIG_EXT, TEST_DATA_EXT]:
-                return (self.context.CODE_FORBIDDEN,)+ ret + (lockedBy,)
+                return (self.context.CODE_FORBIDDEN,)+ ret + (is_locked, lockedBy,)
 
             # prepare path files
             if len(pathFile) > 0:
@@ -646,7 +647,6 @@ class RepoManager(Logger.ClassLogger):
 
             # refuse to save if a lock already exist with a diffent login name
             if lockMode:
-                is_locked = False
                 if os.path.exists( lockPath ): 
                     is_locked=True
                     fd_lock = open(lockPath, 'r')
@@ -655,7 +655,7 @@ class RepoManager(Logger.ClassLogger):
                     
                     # cancel lock when login
                     if base64.b64encode(login) !=  lockedBy:
-                        return (self.context.CODE_LOCKED,) + ret + (lockedBy,)
+                        return (self.context.CODE_OK,) + ret + (is_locked, lockedBy,)
                                 
             # create missing directory
             if createFolders:
@@ -666,7 +666,7 @@ class RepoManager(Logger.ClassLogger):
             # overwrite the file ?
             if not overwriteFile:
                 if os.path.exists( complete_path ):
-                    return (self.context.CODE_ALLREADY_EXISTS,) + ret + (lockedBy,)
+                    return (self.context.CODE_ALLREADY_EXISTS,) + ret + (is_locked, lockedBy,)
             
             # write the file
             content_decoded = base64.b64decode(contentFile)
@@ -677,11 +677,11 @@ class RepoManager(Logger.ClassLogger):
             f.write( content_decoded )
             f.close()
             
-            return ( self.context.CODE_OK,) + ret + (lockedBy,)
+            return ( self.context.CODE_OK,) + ret + (is_locked, lockedBy,)
                     
         except Exception as e:
             self.error( e )
-            return (self.context.CODE_ERROR,) + ret + (lockedBy,)
+            return (self.context.CODE_ERROR,) + ret + (is_locked, lockedBy,)
 
         
     # def importFile(self, pathFile, nameFile, extFile, contentFile, binaryMode=True, project='', makeDirs=False):

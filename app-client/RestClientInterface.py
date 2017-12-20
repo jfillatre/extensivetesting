@@ -28,6 +28,7 @@ import sys
 import json
 import base64
 import subprocess
+import copy
 
 try:
     from PyQt4.QtGui import (QDialog)
@@ -39,6 +40,29 @@ except ImportError:
 from Libs import QtHelper, Logger
 import ServerExplorer
 import Settings
+import TestResults
+
+import Workspace.FileModels.TestData as FileModelTestData
+import Workspace.FileModels.TestSuite as FileModelTestSuite
+import Workspace.FileModels.TestUnit as FileModelTestUnit
+import Workspace.FileModels.TestAbstract as FileModelTestAbstract
+import Workspace.FileModels.TestPlan as FileModelTestPlan
+
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
+EXT_TESTUNIT = "tux"
+EXT_TESTSUITE = "tsx"
+EXT_TESTPLAN = "tpx"
+EXT_TESTGLOBAL = "tgx"
+EXT_TESTABSTRACT = "tax"
+
+TESTPLAN_REPO_FROM_OTHER                = 'other'
+TESTPLAN_REPO_FROM_LOCAL                = 'local'
+TESTPLAN_REPO_FROM_REMOTE               = 'remote'
+TESTPLAN_REPO_FROM_HDD                  = 'hdd'
+TESTPLAN_REPO_FROM_LOCAL_REPO_OLD       = 'local repository'
 
 CODE_ERROR                  = 500
 CODE_DISABLED               = 405
@@ -49,6 +73,28 @@ CODE_ALLREADY_CONNECTED     = 416
 CODE_FORBIDDEN              = 403
 CODE_FAILED                 = 400
 CODE_OK                     = 200
+
+REPO_TESTS                          =   0
+REPO_ADAPTERS                       =   1
+REPO_TESTS_LOCAL                    =   2
+REPO_UNDEFINED                      =   3
+REPO_ARCHIVES                       =   4
+REPO_LIBRARIES                      =   5
+
+ACTION_MERGE_PARAMS     = 7
+ACTION_UPDATE_PATH      = 6
+ACTION_IMPORT_OUTPUTS   = 5
+ACTION_IMPORT_INPUTS    = 4
+ACTION_RELOAD_PARAMS    = 3
+ACTION_INSERT_AFTER     = 2
+ACTION_INSERT_BELOW     = 1
+ACTION_ADD              = 0
+
+FOR_DEST_TP             = 1
+FOR_DEST_TG             = 2
+FOR_DEST_TS             = 3
+FOR_DEST_TU             = 4
+FOR_DEST_ALL            = 10
 
 HTTP_POST   =   "POST"
 HTTP_GET    =   "GET"
@@ -79,6 +125,10 @@ CMD_TESTS_BACKUP                =   "/tests/backup"
 CMD_TESTS_BACKUP_REMOVE_ALL     =   "/tests/backup/remove/all"
 CMD_TESTS_BACKUP_DOWNLOAD       =   "/tests/backup/download"
 CMD_TESTS_RESET                 =   "/tests/reset"
+CMD_TESTS_CHECK_SYNTAX          =   "/tests/check/syntax"
+CMD_TESTS_CHECK_SYNTAX_TPG      =   "/tests/check/syntax/tpg"
+CMD_TESTS_CREATE_DESIGN         =   "/tests/create/design"
+CMD_TESTS_CREATE_DESIGN_TPG     =   "/tests/create/design/tpg"
 CMD_TESTS_STATISTICS            =   "/tests/statistics"
 CMD_TESTS_FILE_MOVE             =   "/tests/file/move"
 CMD_TESTS_FOLDER_MOVE           =   "/tests/directory/move"
@@ -98,12 +148,19 @@ CMD_TESTS_SNAPSHOT_RESTORE      =   "/tests/snapshot/restore"
 CMD_TESTS_FILE_UNLOCK           =   "/tests/file/unlock"
 CMD_TESTS_FILE_OPEN             =   "/tests/file/open"
 CMD_TESTS_FILE_UPLOAD           =   "/tests/file/upload"
+CMD_TESTS_DEFAULT_VERSION       =   "/tests/default/all"
+CMD_TESTS_SCHEDULE              =   "/tests/schedule"
+CMD_TESTS_SCHEDULE_TPG          =   "/tests/schedule/tpg"
+CMD_TESTS_SCHEDULE_GROUP        =   "/tests/schedule/group"
 
 CMD_LIBRARIES_UNLOCK_ALL        =   "/libraries/file/unlock/all"
 CMD_LIBRARIES_BUILD             =   "/libraries/build"
-CMD_LIBRARIES_SYNTAX            =   "/libraries/syntax/all"
-CMD_LIBRARIES_DEFAULT           =   "/libraries/set/default"
-CMD_LIBRARIES_GENERIC           =   "/libraries/set/generic"
+CMD_LIBRARIES_SYNTAX_ALL        =   "/libraries/check/syntax/all"
+CMD_LIBRARIES_SYNTAX            =   "/libraries/check/syntax"
+CMD_LIBRARIES_PACKAGE_ADD       =   "/libraries/package/add"
+CMD_LIBRARIES_LIB_ADD           =   "/libraries/library/add"
+CMD_LIBRARIES_DEFAULT           =   "/libraries/package/default"
+CMD_LIBRARIES_GENERIC           =   "/libraries/package/generic"
 CMD_LIBRARIES_BACKUP            =   "/libraries/backup"
 CMD_LIBRARIES_BACKUP_REMOVE_ALL =   "/libraries/backup/remove/all"
 CMD_LIBRARIES_BACKUP_DOWNLOAD   =   "/libraries/backup/download"
@@ -126,9 +183,14 @@ CMD_LIBRARIES_FILE_UPLOAD       =   "/libraries/file/upload"
 
 CMD_ADAPTERS_UNLOCK_ALL         =   "/adapters/file/unlock/all"
 CMD_ADAPTERS_BUILD              =   "/adapters/build"
-CMD_ADAPTERS_SYNTAX             =   "/adapters/syntax/all"
-CMD_ADAPTERS_DEFAULT            =   "/adapters/set/default"
-CMD_ADAPTERS_GENERIC            =   "/adapters/set/generic"
+CMD_ADAPTERS_SYNTAX_ALL         =   "/adapters/check/syntax/all"
+CMD_ADAPTERS_SYNTAX             =   "/adapters/check/syntax"
+CMD_ADAPTERS_PACKAGE_ADD        =   "/adapters/package/add"
+CMD_ADAPTERS_ADP_ADD            =   "/adapters/adapter/add"
+CMD_ADAPTERS_ADP_ADD_WSDL_URL   =   "/adapters/adapter/add/by/wsdl/url"
+CMD_ADAPTERS_ADP_ADD_WSDL_FILE  =   "/adapters/adapter/add/by/wsdl/file"
+CMD_ADAPTERS_DEFAULT            =   "/adapters/package/default"
+CMD_ADAPTERS_GENERIC            =   "/adapters/package/generic"
 CMD_ADAPTERS_BACKUP             =   "/adapters/backup"
 CMD_ADAPTERS_BACKUP_REMOVE_ALL  =   "/adapters/backup/remove/all"
 CMD_ADAPTERS_BACKUP_DOWNLOAD    =   "/adapters/backup/download"
@@ -158,6 +220,7 @@ CMD_CLIENTS_DOWNLOAD            =   "/clients/download"
 CMD_SYSTEM_USAGES               =   "/system/usages"
 
 CMD_METRICS_RESET               =   "/metrics/tests/reset"
+CMD_METRICS_WRITING_DURATION    =   "/metrics/tests/duration/writing"
 
 CMD_TASKS_REPLAY                =   "/tasks/replay"
 CMD_TASKS_VERDICT               =   "/tasks/verdict"
@@ -184,7 +247,7 @@ CMD_TR_DEL_COMMENTS             =   "/results/comments/remove"
 CMD_TR_ADD_COMMENT              =   "/results/comment/add"
 CMD_TR_ZIP                      =   "/results/compress/zip"
 CMD_TR_DOWNLOAD                 =   "/results/download/result"
-CMD_TR_UNCOMPLETE               =   "/results/download/result/uncomplete"
+CMD_TR_UNCOMPLETE               =   "/results/download/uncomplete"
 CMD_TR_LISTING                  =   "/results/listing/files"
 CMD_TR_GET_REPORTS              =   "/results/reports"
 CMD_TR_GET_IMAGE                =   "/results/download/image"
@@ -275,6 +338,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
     FileTestsUploadError = pyqtSignal(str, str, str, int, bool, bool)
     FileAdaptersUploadError = pyqtSignal(str, str, str, bool, bool)
     FileLibrariesUploadError = pyqtSignal(str, str, str, bool, bool)
+    GetFileRepo = pyqtSignal(str, str, str, str, int, int, int, int)
+    AddTestTab = pyqtSignal(object)
     def __init__(self, parent, clientVersion):
         """
         Constructor
@@ -284,11 +349,13 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.__parent = parent
         self.__sessionId = None
         self.__expires = 0
-        
+        self.__login = ""
+
         self.clientVersion = clientVersion
         self.authenticated = False
         self.userRights = []
-        
+        self.userId = 0
+
         self.refreshTimer = QTimer()
         self.refreshTimer.timeout.connect(self.refresh)
 
@@ -428,7 +495,9 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                  
             elif response['cmd'] == CMD_METRICS_RESET:
                 self.onMetricsReset(details=response)
-
+            elif response['cmd'] == CMD_METRICS_WRITING_DURATION:
+                self.onMetricsTestsDurationWriting(details=response)
+                
             elif response['cmd'] == CMD_SYSTEM_USAGES:
                 self.onSystemUsages(details=response)
                 
@@ -492,6 +561,22 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                 self.onTestsFileUploaded(details=response)    
             elif response['cmd'] == CMD_TESTS_FILE_UNLOCK:
                 self.onTestsFileUnlocked(details=response) 
+            elif response['cmd'] == CMD_TESTS_DEFAULT_VERSION:
+                self.onTestsDefaultAll(details=response) 
+            elif response['cmd'] == CMD_TESTS_CHECK_SYNTAX:
+                self.onTestsCheckSyntax(details=response) 
+            elif response['cmd'] == CMD_TESTS_CHECK_SYNTAX_TPG:
+                self.onTestsCheckSyntax(details=response)
+            elif response['cmd'] == CMD_TESTS_CREATE_DESIGN:
+                self.onTestsCreateDesign(details=response) 
+            elif response['cmd'] == CMD_TESTS_CREATE_DESIGN_TPG:
+                self.onTestsCreateDesign(details=response)
+            elif response['cmd'] == CMD_TESTS_SCHEDULE_GROUP:
+                self.onTestsScheduled(details=response)
+            elif response['cmd'] == CMD_TESTS_SCHEDULE:
+                self.onTestScheduled(details=response) 
+            elif response['cmd'] == CMD_TESTS_SCHEDULE_TPG:
+                self.onTestScheduled(details=response) 
                 
             elif response['cmd'] == CMD_TASKS_WAITING:
                 self.onWaitingTasks(details=response) 
@@ -556,8 +641,10 @@ class RestClientInterface(QObject, Logger.ClassLogger):
             
             elif response['cmd'] == CMD_LIBRARIES_UNLOCK_ALL:
                 self.onUnlockLibraries(details=response)
+            elif response['cmd'] == CMD_LIBRARIES_SYNTAX_ALL:
+                self.onSyntaxAllLibraries(details=response)
             elif response['cmd'] == CMD_LIBRARIES_SYNTAX:
-                self.onSyntaxLibraries(details=response)
+                self.onSyntaxLibrary(details=response)
             elif response['cmd'] == CMD_LIBRARIES_BUILD:
                 self.onBuildLibraries(details=response)
             elif response['cmd'] == CMD_LIBRARIES_DEFAULT:
@@ -602,11 +689,17 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                 self.onLibrariesFileUploaded(details=response) 
             elif response['cmd'] == CMD_LIBRARIES_FILE_UNLOCK:
                 self.onLibrariesFileUnlocked(details=response) 
+            elif response['cmd'] == CMD_LIBRARIES_PACKAGE_ADD:
+                self.onLibrariesPackageAdded(details=response)
+            elif response['cmd'] == CMD_LIBRARIES_LIB_ADD:
+                self.onLibrariesLibraryAdded(details=response)
                 
             elif response['cmd'] == CMD_ADAPTERS_UNLOCK_ALL:
                 self.onUnlockAdapters(details=response)
+            elif response['cmd'] == CMD_ADAPTERS_SYNTAX_ALL:
+                self.onSyntaxAllAdapters(details=response)
             elif response['cmd'] == CMD_ADAPTERS_SYNTAX:
-                self.onSyntaxAdapters(details=response) 
+                self.onSyntaxAdapter(details=response) 
             elif response['cmd'] == CMD_ADAPTERS_BUILD:
                 self.onBuildAdapters(details=response) 
             elif response['cmd'] == CMD_ADAPTERS_DEFAULT:
@@ -650,8 +743,16 @@ class RestClientInterface(QObject, Logger.ClassLogger):
             elif response['cmd'] == CMD_ADAPTERS_FILE_UPLOAD:
                 self.onAdaptersFileUploaded(details=response) 
             elif response['cmd'] == CMD_ADAPTERS_FILE_UNLOCK:
-                self.onAdaptersFileUnlocked(details=response) 
-                
+                self.onAdaptersFileUnlocked(details=response)
+            elif response['cmd'] == CMD_ADAPTERS_PACKAGE_ADD:
+                self.onAdaptersPackageAdded(details=response)
+            elif response['cmd'] == CMD_ADAPTERS_ADP_ADD:
+                self.onAdaptersAdapterAdded(details=response)
+            elif response['cmd'] == CMD_ADAPTERS_ADP_ADD_WSDL_URL:
+                self.onAdaptersAdapterWsdlUrlAdded(details=response)
+            elif response['cmd'] == CMD_ADAPTERS_ADP_ADD_WSDL_FILE:
+                self.onAdaptersAdapterWsdlFileAdded(details=response)
+    
             else:
                 self.onGenericError(err=self.tr("Bad cmd provided on response: %s" % response["cmd"]), 
                                     title=self.tr("Bad message") )
@@ -676,6 +777,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         Login
         """
         # reset
+        self.__login = login
         self.__sessionId = None
         self.__expires = 0
         self.refreshTimer.stop()
@@ -1122,6 +1224,16 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.makeRequest( uri=CMD_METRICS_RESET, request=HTTP_GET, _json={} )
     
     @calling_rest
+    def durationTestsWritingMetrics(self, duration, projectId, isTp=False, isTs=False, 
+                                          isTu=False, isTg=False, isTa=False):
+        """
+        Delete test result
+        """
+        _json = { "project-id": int(projectId), "duration": duration, "is-ta": isTa,
+                    "is-tu": isTu, "is-ts": isTs, "is-tp": isTp, "is-tg": isTg }
+        self.makeRequest( uri=CMD_METRICS_WRITING_DURATION, request=HTTP_POST, _json=_json )
+    
+    @calling_rest
     def sessionContext(self):
         """
         Delete test result
@@ -1140,14 +1252,87 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         check syntax
         """
-        self.makeRequest( uri=CMD_ADAPTERS_SYNTAX, request=HTTP_GET, _json={} )
+        self.makeRequest( uri=CMD_ADAPTERS_SYNTAX_ALL, request=HTTP_GET, _json={} )
     
     @calling_rest
     def checkSyntaxLibraries(self):
         """
         check syntax
         """
-        self.makeRequest( uri=CMD_LIBRARIES_SYNTAX, request=HTTP_GET, _json={} )
+        self.makeRequest( uri=CMD_LIBRARIES_SYNTAX_ALL, request=HTTP_GET, _json={} )
+        
+    @calling_rest
+    def checkSyntaxAdapter(self, fileContent):
+        """
+        check syntax
+        """
+        _json = { "file-content": fileContent }
+        self.makeRequest( uri=CMD_ADAPTERS_SYNTAX, request=HTTP_POST, _json=_json )
+    
+    @calling_rest
+    def checkSyntaxLibrary(self, fileContent):
+        """
+        check syntax
+        """
+        _json = { "file-content": fileContent }
+        self.makeRequest( uri=CMD_LIBRARIES_SYNTAX, request=HTTP_POST, _json=_json )
+ 
+    @calling_rest
+    def addPackageAdapters(self, packageName):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName }
+        self.makeRequest( uri=CMD_ADAPTERS_PACKAGE_ADD, request=HTTP_POST, _json=_json )
+    
+    @calling_rest
+    def addPackageLibraries(self, packageName):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName }
+        self.makeRequest( uri=CMD_LIBRARIES_PACKAGE_ADD, request=HTTP_POST, _json=_json )
+
+    @calling_rest
+    def addPackageAdapter(self, packageName, adapterName):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName, "adapter-name": adapterName }
+        self.makeRequest( uri=CMD_ADAPTERS_ADP_ADD, request=HTTP_POST, _json=_json )
+    
+    @calling_rest
+    def addPackageLibrary(self, packageName, libraryName):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName, "library-name": libraryName }
+        self.makeRequest( uri=CMD_LIBRARIES_LIB_ADD, request=HTTP_POST, _json=_json )
+        
+    @calling_rest
+    def addAdapterByWsdlUrl(self, packageName, overwriteAdapter, wsdlUrl):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName, "overwrite-adapter": overwriteAdapter,
+                  "wsdl-url": wsdlUrl}
+        self.makeRequest( uri=CMD_ADAPTERS_ADP_ADD_WSDL_URL, request=HTTP_POST, _json=_json )
+        
+    @calling_rest
+    def addAdapterByWsdlFile(self, packageName, overwriteAdapter, wsdlFile):
+        """
+        check syntax
+        """
+        _json = { "package-name": packageName, "overwrite-adapter": overwriteAdapter,
+                  "wsdl-file": wsdlFile}
+        self.makeRequest( uri=CMD_ADAPTERS_ADP_ADD_WSDL_FILE, request=HTTP_POST, _json=_json )
+  
+    @calling_rest
+    def setAllTestsAsDefault(self):
+        """
+        check syntax
+        """
+        self.makeRequest( uri=CMD_TESTS_DEFAULT_VERSION, request=HTTP_GET, _json=_json )
         
     @calling_rest
     def setDefaultAdapter(self, packageName):
@@ -1649,6 +1834,38 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.makeRequest( uri=CMD_TESTS_SNAPSHOT_ADD, request=HTTP_POST, _json=_json )
     
     @calling_rest
+    def scheduleTests(self, tests, postponeMode, postponeAt, parallelMode):
+        """
+        """
+        _json = { "tests": tests, "postpone-mode": postponeMode,
+                  "postpone-at": postponeAt, "parallel-mode": parallelMode}
+        self.makeRequest( uri=CMD_TESTS_SCHEDULE_GROUP, request=HTTP_POST, _json=_json )
+        
+    @calling_rest
+    def scheduleTest(self, req, wdocument=None):
+        """
+        """
+        if wdocument is not None:
+            path = wdocument.getShortName( withAsterisk = False )
+            TestResults.instance().newTest( name = "[] %s" % path, projectId=req["project-id"] )
+        else:
+            TestResults.instance().newTest( name = "[] %s" % req["test-name"], projectId=req["project-id"] )
+                
+        self.makeRequest( uri=CMD_TESTS_SCHEDULE, request=HTTP_POST, _json=req )
+        
+    @calling_rest
+    def scheduleTestTpg(self, req, wdocument=None):
+        """
+        """
+        if wdocument is not None:
+            path = wdocument.getShortName( withAsterisk = False )
+            TestResults.instance().newTest( name = "[] %s" % path, projectId=req["project-id"] )
+        else:
+            TestResults.instance().newTest( name = "[] %s" % req["test-name"], projectId=req["project-id"] )
+                
+        self.makeRequest( uri=CMD_TESTS_SCHEDULE_TPG, request=HTTP_POST, _json=req )
+
+    @calling_rest
     def restoreSnapshotTests(self, projectId, snapshotPath, snapshotName):
         """
         restore snapshot
@@ -1676,12 +1893,20 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.makeRequest( uri=CMD_TESTS_SNAPSHOT_REMOVE_ALL, request=HTTP_POST, _json=_json )
     
     @calling_rest
-    def openFileTests(self, projectId, filePath, ignoreLock=False, readOnly=False):
+    def openFileTests(self, projectId, filePath, ignoreLock=False, readOnly=False, 
+                      customParam=None, actionId=None, destinationId=None):
         """
         add snapshot
         """
         _json = { "project-id": projectId, "file-path": filePath,
                   "ignore-lock": ignoreLock, "read-only": readOnly}
+        if customParam is not None:
+            _json["custom-param"] = customParam
+        if actionId is not None:
+            _json["action-id"] = actionId
+        if destinationId is not None:
+            _json["destination-id"] = destinationId
+              
         self.makeRequest( uri=CMD_TESTS_FILE_OPEN, request=HTTP_POST, _json=_json )
     
     @calling_rest
@@ -1775,7 +2000,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         Add probe
         """
-        _json = { "directory-path": folderPath, "recursive": recursive }
+        _json = { "directory-path": folderPath }
         self.makeRequest( uri=CMD_ADAPTERS_FOLDER_REMOVE, request=HTTP_POST, _json=_json )
 
     @calling_rest
@@ -1873,6 +2098,30 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         self.makeRequest( uri=CMD_LIBRARIES_LISTING, request=HTTP_GET, _json={} )
         
+    @calling_rest
+    def checkTestSyntax(self, req):
+        """
+        """
+        self.makeRequest( uri=CMD_TESTS_CHECK_SYNTAX, request=HTTP_POST, _json=req )
+        
+    @calling_rest
+    def checkTestSyntaxTpg(self, req):
+        """
+        """
+        self.makeRequest( uri=CMD_TESTS_CHECK_SYNTAX_TPG, request=HTTP_POST, _json=req )
+        
+    @calling_rest
+    def createTestDesign(self, req):
+        """
+        """
+        self.makeRequest( uri=CMD_TESTS_CREATE_DESIGN, request=HTTP_POST, _json=req )
+        
+    @calling_rest
+    def createTestDesignTpg(self, req):
+        """
+        """
+        self.makeRequest( uri=CMD_TESTS_CREATE_DESIGN_TPG, request=HTTP_POST, _json=req )   
+
     # handle rest responses
     def onRefresh(self, details):
         """
@@ -1991,6 +2240,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         else:
             self.InformationMsg.emit( self.tr("Empty remote repository") , self.tr("The repository is now empty!") )
     
+        self.refreshTr(projectId=details['project-id'], partialRefresh=True)
+        
     def onGetTrDownloaded(self, details):
         """
         """
@@ -2157,13 +2408,18 @@ class RestClientInterface(QObject, Logger.ClassLogger):
     def onMetricsReset(self, details):
         """
         """
-        self.trace("on metrics reseted")
+        self.trace("on tests metrics reseted")
         if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
             self.ResetStatistics.emit()
             self.application().showMessageWarningTray(msg="Statistics are reseted!")
         else:
             self.InformationMsg.emit( self.tr("Reset statistics") , self.tr("Statistics are reseted!") )
-            
+        
+    def onMetricsTestsDurationWriting(self, details):
+        """
+        """
+        self.trace("on tests metrics duration writing added")
+        
     def onSessionContext(self, details):
         """
         """
@@ -2175,7 +2431,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         """
         self.trace("on system usages")
-        
+
         self.RefreshUsages.emit(details["usages"])
         
     def onBuildDocumentations(self, details):
@@ -2301,7 +2557,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.trace("on agents default")
         self.RefreshDefaultAgents.emit(details['agents'])
         
-    def onSyntaxAdapters(self, details):
+    def onSyntaxAllAdapters(self, details):
         """
         """
         self.trace("on syntax adapters")
@@ -2311,7 +2567,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         else:
             self.CriticalMsg.emit( self.tr("Check syntax"), details['syntax-error'] )
         
-    def onSyntaxLibraries(self, details):
+    def onSyntaxAllLibraries(self, details):
         """
         """
         self.trace("on syntax libraries")
@@ -2320,7 +2576,29 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                                       "%s\n%s" % (self.tr("Well done!"), "No syntax error detected.") )
         else:
             self.CriticalMsg.emit( self.tr("Check syntax"), details['syntax-error'] )
-
+    
+    def onSyntaxAdapter(self, details):
+        """
+        """
+        if details["success"]:
+            self.InformationMsg.emit( self.tr("Check syntax"), 
+                                      "%s\n%s" % ( self.tr("Well done!"), "No syntax error detected.") )
+        else:
+            msg = "An error exists on this file."
+            msg += "\n%s" % details["syntax-error"]
+            self.CriticalMsg.emit( self.tr("Check syntax"), msg )
+        
+    def onSyntaxLibrary(self, details):
+        """
+        """
+        if details["success"]:
+            self.InformationMsg.emit( self.tr("Check syntax"), 
+                                      "%s\n%s" % ( self.tr("Well done!"), "No syntax error detected.") )
+        else:
+            msg = "An error exists on this file."
+            msg += "\n%s" % details["syntax-error"]
+            self.CriticalMsg.emit( self.tr("Check syntax"), msg )
+            
     def onGenericAdapters(self, details):
         """
         """
@@ -2966,25 +3244,35 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         """
         self.trace("on tests file opened") 
-        
-        self.OpenTestFile.emit( details["file-path"],
-                                details["file-name"],
-                                details["file-extension"],
-                                details["file-content"],
-                                details["project-id"],
-                                details["locked"],
-                                details["locked-by"])
+        if details["destination-id"] is not None and details["action-id"] is not None:
+            self.GetFileRepo.emit( details["file-path"], 
+                                   details["file-name"], 
+                                   details["file-extension"], 
+                                   details["file-content"],
+                                   details["project-id"], 
+                                   details["destination-id"], 
+                                   details["action-id"],
+                                   details["custom-param"] )
+        else:
+            self.OpenTestFile.emit( details["file-path"],
+                                    details["file-name"],
+                                    details["file-extension"],
+                                    details["file-content"],
+                                    details["project-id"],
+                                    details["locked"],
+                                    details["locked-by"] )
         
     def onTestsFileUploaded(self, details):
         """
         """
-        self.trace("on tests file uploaded") 
+        self.trace("on tests file uploaded")
         
+        lockedBy = base64.b64decode(details["locked-by"])
+        if sys.version_info > (3,): # python3 support
+            lockedBy = lockedBy.decode("utf8")
+            
         if details["code"] == CODE_OK:
-            if details["locked"]:
-                lockedBy = base64.b64decode(details["locked-by"])
-                if sys.version_info > (3,): # python3 support
-                    lockedBy = lockedBy.decode("utf8")
+            if details["locked"] and lockedBy != self.__login:
                 msg = "This file is locked by the user %s\nUnable to save the file!" %  lockedBy
                 self.WarningMsg.emit( "File locked" , msg  )
             else:
@@ -3006,7 +3294,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                                              details["overwrite"],
                                              details["close-after"] )
         else:
-            self.CriticalMsg.emit( "Save file" , "Unable to save the file.\nError Num=%s" % details["code"])
+            self.CriticalMsg.emit( "Save file" , 
+                                   "Unable to save the file.\nError Num=%s" % details["code"])
             
             self.FileTestsUploadError.emit( details["file-path"],
                                              details["file-name"], 
@@ -3128,6 +3417,155 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         self.trace("on tests file unlocked") 
         
+    def onAdaptersPackageAdded(self, details):
+        """
+        """
+        self.trace("on adapters package added") 
+        
+        self.listingAdapters()
+        
+    def onLibrariesPackageAdded(self, details):
+        """
+        """
+        self.trace("on libraries package added") 
+        
+        self.listingLibraries()
+        
+    def onLibrariesLibraryAdded(self, details):
+        """
+        """
+        self.trace("on library added") 
+        
+        self.listingLibraries()
+        
+    def onAdaptersAdapterAdded(self, details):
+        """
+        """
+        self.trace("on adapter added") 
+        
+        self.listingAdapters()
+        
+    def onAdaptersAdapterWsdlUrlAdded(self, details):
+        """
+        """
+        self.trace("on adapter added from wsdl url")
+        
+        if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+            self.application().showMessageTray(msg="Adapter generated successfully!")
+        else:
+            self.InformationMsg.emit( self.tr("Adapter generator") , 
+                                      self.tr("Adapter generated successfully!") )
+                                    
+        self.listingAdapters()   
+        
+    def onAdaptersAdapterWsdlFileAdded(self, details):
+        """
+        """
+        self.trace("on adapter added from wsdl file") 
+        
+        if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+            self.application().showMessageTray(msg="Adapter generated successfully!")
+        else:
+            self.InformationMsg.emit( self.tr("Adapter generator") , 
+                                      self.tr("Adapter generated successfully!") )
+                                      
+        self.listingAdapters()
+        
+    def onTestsDefaultAll(self, details):
+        """
+        """
+        self.trace("on default all tests") 
+        
+        if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+            self.application().showMessageTray(msg="All tests are updated!")
+        else:
+            self.InformationMsg.emit( self.tr("Set default version"), 
+                                      self.tr("All tests are updated!" ) )
+          
+    def onTestsCheckSyntax(self, details):
+        """
+        """
+        self.trace("on check test syntax")
+        
+        if details["status"]:
+            self.InformationMsg.emit( self.tr("Check syntax") , 
+                                      "%s\n%s" % ( self.tr("Well done!"), 
+                                                   self.tr("No syntax error detected in your test.") ) )
+        else:
+            msg = self.tr("An error exists on this test.")
+            msg += "\n%s" % details["error-msg"]
+            self.WarningMsg.emit( self.tr("Check syntax") , msg )
+            
+    def onTestsCreateDesign(self, details):
+        """
+        """
+        self.trace("on create test design")
+        
+        if details["error"]:
+            if details["error-msg"] == "Syntax":
+                msg = "Unable to prepare the design of the test!\n"
+                msg += "Syntax error detected in this test!"
+                self.WarningMsg.emit( "Test Design", msg )
+            else:
+                self.WarningMsg.emit( "Test Design", 
+                                      "Unable to prepare the design!" )
+        else:
+            self.GetTrDesigns.emit(details["design"], details["xml-design"])
+            
+    def onTestsScheduled(self, details):
+        """
+        """
+        self.trace("on tests scheduled")
+        
+        if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+            self.application().showMessageTray(msg="Group of test(s) enqueued to run.")
+        else:
+            self.InformationMsg.emit( self.tr("Tests Execution") , 
+                                      self.tr("Group of test(s) enqueued to run.") )
+            
+    def onTestScheduled(self, details):
+        """
+        """
+        self.trace("on test scheduled")
+
+        if details["message"] in [ "background", "recursive-background", 
+                                   "postponed-background", "successive-background" ]:
+            TestResults.instance().delWidgetTest( testId = details["tab-id"] )
+            if details["message"] == "successive-background":  
+                if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+                    self.application().showMessageTray(msg="Your test is running several time in background.")
+                else:
+                    self.InformationMsg.emit( self.tr("Test Execution") ,
+                                              self.tr("Your test is running several time in background.") )
+                                              
+            elif details["message"] == "recursive-background":
+                if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+                    self.application().showMessageTray(msg="Recursive test execution scheduled!")
+                else:
+                    self.InformationMsg.emit( self.tr("Test Execution") , 
+                                              self.tr('Recursive test execution scheduled!') )
+                                              
+            elif details["message"] == "postponed-background":
+                if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+                    self.application().showMessageTray(msg="Test execution postponed!")
+                else:
+                    self.InformationMsg.emit( self.tr("Test Execution") , 
+                                              self.tr('Test execution postponed!') )
+                                              
+            elif details["message"] == "background":
+                if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
+                    self.application().showMessageTray(msg="Your test is running in background.")
+                else:
+                    self.InformationMsg.emit( self.tr("Test Execution") , 
+                                              self.tr("Your test is running in background.") )
+                                              
+        else:
+            wTest = TestResults.instance().getWidgetTest( testId = details["tab-id"] )
+            wTest.name = '[%s] %s' % (details["task-id"], details["test-name"])
+            wTest.TID = details["task-id"]
+            if wTest is not None:
+                self.AddTestTab.emit( wTest )
+                        
 RCI = None # Singleton
 def instance ():
     """

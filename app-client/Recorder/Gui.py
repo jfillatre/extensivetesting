@@ -61,6 +61,8 @@ import ServerExplorer.Agents as ServerAgents
 
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
+
 import Workspace as WWorkspace
 import DefaultTemplates
 
@@ -1004,7 +1006,7 @@ class WRecorderGui(QWidget, Logger.ClassLogger):
         Export steps
         """
         if not self.offlineMode:
-            if not UCI.instance().isAuthenticated():
+            if not RCI.instance().isAuthenticated():
                 QMessageBox.warning(self, "Assistant Automation" , "Connect to the test center in first!")
                 return
 

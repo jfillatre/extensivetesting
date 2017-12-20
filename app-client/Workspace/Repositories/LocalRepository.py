@@ -54,6 +54,7 @@ except ImportError:
 from Libs import QtHelper, Logger
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 import Workspace.TestPlan as TestPlan
 import Workspace.TestConfig as TestConfig
@@ -658,7 +659,7 @@ class Repository(QWidget, Logger.ClassLogger):
         """
         Initialize the repository
         """
-        if UCI.instance().isAuthenticated():
+        if RCI.instance().isAuthenticated():
             testcasesRoot = Item(repo = self, parent = self.wrepository, txt = "%s" % Settings.instance().readValue( key = 'Repositories/local-repo' ), 
                                     type = QTreeWidgetItem.UserType+10, isRoot = True, itemTxt="Root" )
             testcasesRoot.setSelected(True)

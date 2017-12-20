@@ -73,6 +73,7 @@ import Workspace.FileModels.TestConfig as FileModelTestConfig
 
 import Settings
 import UserClientInterface as UCI
+import RestClientInterface as RCI
 
 
 import base64
@@ -384,13 +385,13 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
             if answer == QMessageBox.Yes:
                 ret = self.saveToLocal(inputs=inputs)
             elif answer == QMessageBox.No:
-                if UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+                if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                      ret = self.saveToRemote(inputs=inputs)
                 else:
                     QMessageBox.warning(self, "Save" , "Connect to the test center first!")
         
         # not configured then in remo repo if connected ?
-        elif UCI.instance().isAuthenticated():
+        elif RCI.instance().isAuthenticated:
              ret = self.saveToRemote(inputs=inputs)
         else:
             QMessageBox.warning(self, "Save" , "Connect to the test center first!")
@@ -443,7 +444,17 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                 doc.dataModel.properties['properties']['parameters']['parameter'] = self.parameters.table().model.getData()
             else:
                 doc.dataModel.properties['properties']['parameters']['parameter'] = self.parametersOutput.table().model.getData()
-            UCI.instance().putFileRepo( document=doc, project=prjId )
+            
+            # rest call
+            # UCI.instance().putFileRepo( document=doc, project=prjId )
+            RCI.instance().uploadTestFile(filePath=doc.path, 
+                                          fileName=doc.filename, 
+                                          fileExtension=doc.extension, 
+                                          fileContent=doc.getraw_encoded(), 
+                                          projectId=int(prjId), 
+                                          updateMode=False, 
+                                          closeTabAfter=False)
+                       
             ret = True
         return ret
 
@@ -490,13 +501,13 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
             if answer == QMessageBox.Yes:
                 self.loadFromLocal(inputs=inputs) # load local test config file
             else:
-                if UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+                if RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
                     self.loadFromRemote(inputs=inputs) # load remote test config file
                 else:
                     QMessageBox.warning(self, "Save" , "Connect to the test center first!")
         
         # import from remote repo
-        elif UCI.instance().isAuthenticated(): # no then perhaps in remo repo if connected?
+        elif RCI.instance().isAuthenticated: # no then perhaps in remo repo if connected?
             self.loadFromRemote(inputs=inputs) # load remote test config file
         else:
             QMessageBox.warning(self, "Save" , "Connect to the test center first!")        
@@ -512,12 +523,25 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         dialog = self.iRepo.remote().saveAs
         if dialog.exec_() == QDialog.Accepted:
             if inputs:
-                UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
-                                    actionId=UCI.ACTION_IMPORT_INPUTS, project=prjId)
+                # UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
+                                    # actionId=UCI.ACTION_IMPORT_INPUTS, project=prjId)
+                RCI.instance().openFileTests(projectId=int(prjId), 
+                                             filePath=dialog.getSelection(), 
+                                             ignoreLock=False, 
+                                             readOnly=False, 
+                                             customParam=None, 
+                                             actionId=UCI.ACTION_IMPORT_INPUTS, 
+                                             destinationId=UCI.FOR_DEST_ALL)
             else:
-                UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
-                                    actionId=UCI.ACTION_IMPORT_OUTPUTS, project=prjId)
-
+                # UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
+                                    # actionId=UCI.ACTION_IMPORT_OUTPUTS, project=prjId)
+                RCI.instance().openFileTests(projectId=int(prjId), 
+                                             filePath=dialog.getSelection(), 
+                                             ignoreLock=False, 
+                                             readOnly=False, 
+                                             customParam=None, 
+                                             actionId=UCI.ACTION_IMPORT_OUTPUTS, 
+                                             destinationId=UCI.FOR_DEST_ALL)
     def loadFromLocal(self, inputs=True):
         """
         Load test config from local repository

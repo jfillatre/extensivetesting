@@ -2050,12 +2050,30 @@ class Repository(QWidget, Logger.ClassLogger):
 
             testFilePath = "%s/%s" % (pathFile, self.itemCurrent.fileName)
             testId = TestResults.instance().getTestId()
-            UCI.instance().scheduleTest(wdocument=None, testId=testId, background = False, runAt = (0,0,0,0,0,0),
-                                        runType=UCI.SCHED_NOW, runNb=-1, withoutProbes=False,  debugActivated=False, 
-                                        withoutNotif=False, noKeepTr=False, prjId=projectId,
-                                        testFileExtension=self.itemCurrent.fileExtension, testFilePath=testFilePath, 
-                                        testFileName=self.itemCurrent.fileName)
-
+            # UCI.instance().scheduleTest(wdocument=None, testId=testId, background = False, runAt = (0,0,0,0,0,0),
+                                        # runType=UCI.SCHED_NOW, runNb=-1, withoutProbes=False,  debugActivated=False, 
+                                        # withoutNotif=False, noKeepTr=False, prjId=projectId,
+                                        # testFileExtension=self.itemCurrent.fileExtension, testFilePath=testFilePath, 
+                                        # testFileName=self.itemCurrent.fileName)
+            _json = DocumentViewer.instance().prepareTest( wdocument=None, tabId=testId, background = False, 
+                                                           runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW, runNb=-1, 
+                                                           withoutProbes=False, debugActivated=False, 
+                                                           withoutNotif=False, noKeepTr=False, 
+                                                           prjId=projectId, testFileExtension=self.itemCurrent.fileExtension, 
+                                                           testFilePath=testFilePath, testFileName=self.itemCurrent.fileName, 
+                                                           fromTime=(0,0,0,0,0,0), 
+                                                           toTime=(0,0,0,0,0,0), prjName='', 
+                                                           stepByStep=False, breakpoint=False,
+                                                           channelId=False, 
+                                                           basicMode=False  )
+                                                           
+            if self.itemCurrent.fileExtension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
+                RCI.instance().scheduleTest(req=_json, wdocument=None)
+            elif self.itemCurrent.fileExtension in [ RCI.EXT_TESTPLAN, RCI.EXT_TESTGLOBAL]:
+                RCI.instance().scheduleTestTpg(req=_json, wdocument=None)
+            else:
+                pass
+            
     def __saveasItem(self):
         """
         Save item as 

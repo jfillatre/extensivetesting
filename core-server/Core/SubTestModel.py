@@ -60,12 +60,13 @@ def createSubTest(dataTest, descriptions, trPath, defaultLibrary='', defaultAdap
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    if 'src-test' in dataTest:
-        srcTest = dataTest['src-test']
-
-    if isTestPlan or isTestGlobal:
-        srcTest = dataTest['src']
-
+    # if 'src-test' in dataTest:
+        # srcTest = dataTest['src-test']
+    srcTest = dataTest['test-definition']
+    
+    # if isTestPlan or isTestGlobal:
+        # srcTest = dataTest['src']
+        
     # te construction
     te = []
 

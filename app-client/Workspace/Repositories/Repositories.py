@@ -138,19 +138,19 @@ class WRepositories(QWidget, Logger.ClassLogger):
        
         # remote repo
         self.remoteRepository = RemoteTests.Repository( parent = self, projectSupport=True )
-        if not UCI.instance().isAuthenticated():
+        if not RCI.instance().isAuthenticated():
             self.remoteRepository.setNotConnected() 
             self.remoteRepository.setEnabled( False ) 
 
         # adapters remote repo
         self.adaptersRemoteRepository = RemoteAdapters.Repository( parent = self )
-        if not UCI.instance().isAuthenticated():
+        if not RCI.instance().isAuthenticated():
             self.adaptersRemoteRepository.setNotConnected() 
             self.adaptersRemoteRepository.setEnabled( False ) 
 
         # libraries adapters remote repo
         self.librariesRemoteRepository = RemoteLibraries.Repository( parent = self )
-        if not UCI.instance().isAuthenticated():
+        if not RCI.instance().isAuthenticated():
             self.librariesRemoteRepository.setNotConnected() 
             self.librariesRemoteRepository.setEnabled( False ) 
 
