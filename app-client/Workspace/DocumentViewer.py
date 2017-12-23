@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -1687,59 +1687,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             self.newTab( path = filePath, filename = fileName, extension = fileExtension, 
                         remoteFile=True, contentFile=content,  repoDest=UCI.REPO_LIBRARIES, newAdp=False, 
                         newLib=True, project=0, isReadOnly=isReadOnly, isLocked=isLocked)
-                        
-    # def openRemoteFile(self, data):
-        # """
-        # Open remote file
-
-        # @param data: 
-        # @type data: 
-        # """
-        # repoType, path_file, name_file, ext_file, encoded_data, project, is_locked = data 
-
-        # locked, locked_by = is_locked # new in v12
-        # content = base64.b64decode(encoded_data)
-        # adpDetected=False
-        # if repoType == UCI.REPO_ADAPTERS:
-            # adpDetected=True
-            # project = 0
-        # libDetected=False
-        # if repoType == UCI.REPO_LIBRARIES:
-            # libDetected=True
-            # project = 0
-        
-        # newTab = False
-        # isReadOnly = False
-        # if not locked:
-            # newTab = True
-        # else:
-            # messageBox = QMessageBox(self)
-
-            # if sys.version_info > (3,): # python3 support
-                # msg = "User (%s) is editing this file. Edit the test anyway?\n\nYes = Edit the test\nNo = Open as read only\nCancel = Do nothing.\n" % bytes2str(base64.b64decode(locked_by))
-            # else:
-                # msg = "User (%s) is editing this file. Edit the test anyway?\n\nYes = Edit the test\nNo = Open as read only\nCancel = Do nothing.\n" % base64.b64decode(locked_by)
-            # reply = messageBox.warning(self, self.tr("File locked"), msg, QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel )
-                        
-            # force to open the file
-            # if reply == QMessageBox.Yes:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), 
-                                                # project=project, repo=repoType, forceOpen=True)
-
-            # force as read only
-            # if reply == QMessageBox.No:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), project=project, 
-                                                # repo=repoType, forceOpen=True, readOnly=True)
-                
-            # cancel the opening
-            # else:
-                # newTab = False
-        
-        # if newTab:
-            # self.newTab( path = path_file, filename = name_file, extension = ext_file, 
-                        # remoteFile=True, contentFile=content,  repoDest=repoType, newAdp=adpDetected, 
-                        # newLib=libDetected, project=project, isReadOnly=isReadOnly, isLocked=locked)
-                        
+ 
     def onRemoteTestFileSaved(self, filePath, fileName, fileExtension,
                                 projectId, overwriteFile, closeAfter):
         """
@@ -1871,48 +1819,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             # close the tab ?
             if closeAfter:
                 self.closeTab( tabId = tabId )
-                
-    # def remoteFileSaved(self, data):
-        # """
-        # Called when a remote file is saved
-
-        # @param data: 
-        # @type data: 
-        # """
-
-        # repoType, path_file, name_file, ext_file, file_already_exists, project, closeAfter = data
-        # if len(path_file) > 0:
-            # complete_path = "%s/%s.%s" % (path_file, name_file, ext_file)
-        # else:
-            # complete_path = "%s.%s" % ( name_file, ext_file)
-        
-        # tabId = None
-
-        # if file_already_exists:
-            # tabId = self.checkAlreadyOpened(path = complete_path, remoteFile=True, repoType=repoType, project=project)
-        # else:
-            # for tid in xrange( self.tab.count() ):
-                # doc = self.tab.widget(tid)
-                
-                # bypass the welcome page
-                # if isinstance(doc, WelcomePage): continue
-
-                # if doc.isRemote == True and doc.getPath() == complete_path and doc.project == project and doc.repoDest==repoType:
-                    # tabId = tid
-                    # break
-                
-                # first remote save
-                # if doc.isRemote == True and doc.getPath() == complete_path and doc.repoDest==UCI.REPO_UNDEFINED:
-                    # tabId = tid
-                    # break
-
-        # if tabId is not None:
-            # doc = self.tab.widget(tabId)
-            # doc.setUnmodify(repoType=repoType)
-            # close the tab ?
-            # if closeAfter:
-                # self.closeTab( tabId = tabId )
-                
+  
     def remoteTestsFileRenamed(self, projectId, filePath, fileName, fileExtension, newName):
         """
         Called when a remote file is renamed
@@ -1996,33 +1903,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             elif answer == QMessageBox.No:
                 doc.unSaved()
                 doc.setModify()
-                
-    # def remoteFileRenamed(self, data):
-        # """
-        # Called when a remote file is renamed
 
-        # @param data: 
-        # @type data: 
-        # """
-        # repoType, path_file, name_file, new_name_file, ext_file, project = data
-        # if len(path_file) > 0:
-            # complete_path = "%s/%s.%s" % (path_file, name_file, ext_file)
-        # else:
-            # complete_path = "%s.%s" % ( name_file, ext_file)
-        # tabId = self.checkAlreadyOpened(path = complete_path, remoteFile=True, repoType=repoType, project=project)
-        # if tabId is not None:
-            # doc = self.tab.widget(tabId)
-            # self.tab.setCurrentIndex(tabId)
-            # buttons = QMessageBox.Yes | QMessageBox.No 
-            # answer = QMessageBox.question(self, Settings.instance().readValue( key = 'Common/name' ), 
-                            # self.tr("This file has been renamed.\nDo you want to update the name ?") , buttons)
-            # if answer == QMessageBox.Yes:
-                # doc.updateFilename( filename=new_name_file )
-                # doc.setUnmodify()
-            # elif answer == QMessageBox.No:
-                # doc.unSaved()
-                # doc.setModify()
-    
     def remoteTestsDirRenamed(self, projectId, directoryPath, directoryName, newName):
         """
         Called when a remote directory is renamed
@@ -2033,7 +1914,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         else:
             complete_old = directoryName
             complete_new = newName
-        
+
         for tabId in xrange( self.tab.count() ):    
             doc = self.tab.widget(tabId)
             
@@ -2042,8 +1923,9 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                 continue
             # end of bypass
             
+            
             if doc.isRemote == True and doc.getPathOnly().startswith(complete_old) and \
-                    doc.project == projectId and doc.repoDest==UCI.REPO_TESTS:  
+                    doc.project == int(projectId) and doc.repoDest==UCI.REPO_TESTS:  
                 to_keep = doc.getPathOnly().split(complete_old)
                 if len(to_keep) > 1: to_keep = to_keep[1]
                 else: to_keep = to_keep[0]
@@ -3235,7 +3117,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         
         # unlock the file on server side
         if doc.extension not in [ TestPng.TYPE ]:
-            if doc.isRemote:
+            if doc.isRemote and doc.path is not None:
                 if RCI.instance().isAuthenticated():
                     if doc.repoDest == UCI.REPO_TESTS:
                         RCI.instance().unlockTestFile(filePath=doc.path, fileName=doc.filename, 
@@ -4313,6 +4195,9 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                 QMessageBox.critical(self, self.tr("Save As") , self.tr("Unable to save the file...") )
                 isSaved = False
             self.iRepo.local().refreshAll()
+            
+            QMessageBox.information(self, self.tr("Export") , self.tr("File exported with success!") )
+            
         else:
             document.project = project
             

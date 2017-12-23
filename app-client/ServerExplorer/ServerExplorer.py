@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -109,210 +109,6 @@ NETWORK_ERRORS[301] = "The Network Access API cannot honor the request because t
 NETWORK_ERRORS[302] = "The requested operation is invalid for this protocol."
 NETWORK_ERRORS[399] = "A breakdown in protocol was detected (parsing error, invalid or unexpected responses."
 
-class XmlrpcNetworkHandler(QObject, Logger.ClassLogger):
-    """
-    Xmlrpc network handler
-    """
-    StartWorking = pyqtSignal()
-    StartWorkingChannel = pyqtSignal()
-    StopWorking = pyqtSignal()
-    InProgress = pyqtSignal(int, int)
-    def __init__(self, parent = None):
-        """
-        Constructor
-
-        @param dialogName: 
-        @type dialogName:
-
-        @param parent: 
-        @type parent:
-        """
-        QObject.__init__(self, parent)
-
-        self.WsAddress = ''
-
-        self.httpPostReq = []
-        self.reqInProgress= None
-
-        self.manager = QNetworkAccessManager()
-        self.manager.finished.connect(self.onNetworkFinished)
-        self.manager.sslErrors.connect(self.onNetworkSslErrors)
-
-    def onNetworkProgress(self, bytesRead, totalBytes):
-        """
-        On network progress
-        """
-        self.InProgress.emit(bytesRead, totalBytes)
-
-    def onNetworkSslErrors(self, reply, errors):
-        """
-        Ignore SSL errors, not good ...
-        """
-        self.trace('WS ignore ssl errors')
-        reply.ignoreSslErrors()
-
-    def onNetworkFinished(self, reply):
-        """
-        On network finished
-        """
-
-        if reply in NETWORK_ERRORS:
-            self.error( 'XmlRPC response error: %s' % NETWORK_ERRORS[reply] )
-            self.stopWorking()
-            UCI.instance().onError( title=self.tr("XmlRPC - Connection Error"), err=self.tr( "%s" % NETWORK_ERRORS[reply] ) )
-        else:
-            # read the body
-            rsp = reply.readAll()
-            
-            # read the http response code
-            httpCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
-            if sys.version_info < (3,): httpCode = httpCode.toString()
-                
-            self.trace("http code response: %s" % httpCode)
-            if httpCode is None: return
-            
-            if int(httpCode) != 200:
-                self.error("bad code response %s, http body content for xmlrpc: %s" % (httpCode,rsp) )
-                self.stopWorking()
-                UCI.instance().onError( title=self.tr("XmlRPC Error"), err="Error Code: %s\n\nError details:\n%s" % (httpCode,rsp) )
-            else:
-                if len(rsp):
-                    try:
-                        self.trace('XmlRPC response received (truncated): %s' % rsp[:500])
-                        # decode xml rpc response and strip it
-                        if sys.version_info > (3,):
-                            xml_rsp = xmlrpclib.loads( str(rsp, 'utf8').strip() )
-                        else:
-                            xml_rsp = xmlrpclib.loads( unicode(rsp).strip() )
-                    except xmlrpclib.Fault as e:
-                        self.error("XmlRPC Fault code: %d" % e.faultCode)
-                        self.error("XmlRPC Fault string: %s" % e.faultString)
-                        self.error("XmlRPC Data received: %s" % rsp)
-                        self.stopWorking()
-                        UCI.instance().onError( title=self.tr("XmlRPC Error"), err=self.tr("Unable to read XML response")  )
-                    except Exception as e:
-                        self.trace("XmlRPC data received: %s" % rsp)
-                        self.error( "XmlRPC generic error: %s" % e)
-                        self.stopWorking()
-                        UCI.instance().onError( title=self.tr("XmlRPC Generic Error"), err=self.tr("Unexpected response received") )
-                    else:
-                        self.stopWorking()
-                        UCI.instance().onResponse(value=tuple(xml_rsp[0][0]) )
-
-        reply.close()
-        reply.deleteLater()
-        
-        self.reqInProgress = None
-        if len(self.httpPostReq):
-            self.__NetworkCall( postData=self.httpPostReq.pop(0) )
-            
-    def closeEvent(self, event):
-        """
-        On close event
-        """
-        self.httpPostId = None
-        event.accept()
-
-    def setWsAddress(self, address, port, scheme, webpath, hostname ):
-        """
-        Set webservice address
-        """
-        self.WsAddress = address
-        self.WsHostname = hostname 
-        self.WsPort = int(port)
-        self.WsScheme = scheme 
-        self.WsWebpath = webpath
-        self.trace("configure address=%s:%s scheme=%s webpath=%s hostname=%s for xmlrpc" % (address, port, scheme, webpath, hostname) )
-
-    def setWsProxy(self, ip, port, login=None, password=None):
-        """
-        Set webservice proxy
-        """
-        if len(ip):
-            if port:
-                proxy = QNetworkProxy()
-                proxy.setType(3); # http
-                proxy.setHostName(ip)
-                proxy.setPort(int(port))
-                
-                if login is not None:
-                    proxy.setUser(login)
-                if password is not None:
-                    proxy.setPassword(password)
-
-                self.manager.setProxy(proxy)
-                self.trace("configure proxy address for xmlrpc: %s:%s" % (ip, port) )
-                
-    def unsetWsProxy(self):
-        """
-        Unset webservice proxy
-        """
-        proxy = QNetworkProxy()
-        proxy.setType(2); # no proxy
-        self.manager.setProxy(proxy)
-
-    def startWorking(self):
-        """
-        Start working, emit signal
-        """
-        self.StartWorking.emit()
-        return True
-
-    def startWorkingChannel(self):
-        """
-        Start working on channel, emit signal
-        """
-        self.StartWorkingChannel.emit()
-        return True
-
-    def stopWorking(self):
-        """
-        Stop working, emit signal
-        """
-        self.StopWorking.emit()
-
-    def NetworkCall(self, postData ):
-        """
-        Network call
-        """
-        self.httpPostReq.append( postData )
-        if self.reqInProgress is None:
-            self.__NetworkCall( postData=self.httpPostReq.pop(0) )
-            
-    def __NetworkCall(self, postData):
-        """
-        Sub network call
-        """
-        self.startWorking()
-
-        self.trace('prepare post request for xmlrpc api' )
-        try:
-            url   = QUrl("%s://%s:%s/%s" % (self.WsScheme.lower(), self.WsAddress, self.WsPort, self.WsWebpath) )
-            
-            req   = QNetworkRequest (url)
-            if sys.version_info > (3,):
-                req.setRawHeader( b"Host", bytes(self.WsHostname, 'utf8') )
-                req.setRawHeader( b"User-Agent", bytes(Settings.instance().readValue( key = 'Common/acronym'), "utf8") )
-                req.setRawHeader( b"Connexion", b"Keep-Alive" )
-                req.setRawHeader( b"Content-Type", b"text/xml" )
-            else:
-                req.setRawHeader( b"Host", bytes(self.WsHostname) )
-                req.setRawHeader( b"User-Agent", bytes(Settings.instance().readValue( key = 'Common/acronym' )) )
-                req.setRawHeader( b"Connexion", b"Keep-Alive" )
-                req.setRawHeader( b"Content-Type", b"text/xml" )
-            
-            if sys.version_info > (3,):
-                reply = self.manager.post(req, bytes(postData, "utf8") )
-            else:
-                reply = self.manager.post(req, bytes(postData) )
-
-            reply.downloadProgress.connect(self.onNetworkProgress)
-
-        except Exception as e:
-            self.error( str(e) )
-            self.stopWorking()
-            UCI.instance().onError(err='XmlRPC Call Error: %s' % str(e) )
-            
 class RestNetworkHandler(QObject, Logger.ClassLogger):
     """
     Webservice network handler
@@ -377,7 +173,8 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
                 self.error("no http code, timeout?")
                 self.stopWorking()
                 # RCI.instance().onGenericError( title=self.tr("REST Error"), 
-                                                # err="Timeout" )
+                                                # err="Connection lost!" )
+                self.stopConnection()
                 return
             
             if int(httpCode) in [ 401 ]:
@@ -579,12 +376,6 @@ class WServerProgress(QWidget, Logger.ClassLogger):
         
         self.createWidget()
 
-    def progress(self):
-        """
-        return the progress bar
-        """
-        return self.progressBar
-        
     def createWidget(self):
         """
         Create qt widget
@@ -592,13 +383,6 @@ class WServerProgress(QWidget, Logger.ClassLogger):
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 2, 0)
 
-        self.progressBar = QProgressBar(self)
-        self.progressBar.setTextVisible(False)
-        self.progressBar.setMaximum(100)
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setAlignment(Qt.AlignCenter)
-        self.progressBar.setObjectName("progressBar")
-        
         self.progressBar2 = QProgressBar(self)
         self.progressBar2.setTextVisible(False)
         self.progressBar2.setMaximum(100)
@@ -606,40 +390,18 @@ class WServerProgress(QWidget, Logger.ClassLogger):
         self.progressBar2.setAlignment(Qt.AlignCenter)
         self.progressBar2.setObjectName("progressBar")
 
-        layout.addWidget( QLabel("| Data Transfer:") )
+        layout.addWidget( QLabel("| API:") )
         
         layout2 = QVBoxLayout()
         layout2.setSpacing(0)
         layout2.setContentsMargins(0, 0, 0, 0)
-        layout2.addWidget( self.progressBar )
         layout2.addWidget( self.progressBar2 )
         
         layout.addLayout(layout2)
         
         self.setLayout(layout)
-        self.setFixedWidth(150)
+        self.setFixedWidth(180)
         self.setFixedHeight(15)
-
-    def stopWorking(self):
-        """
-        Stop working, emit signal
-        """
-        self.progressBar.setMaximum(100)
-        self.progressBar.setProperty("value", 0)
-        
-    def startWorking(self):
-        """
-        Start working, emit signal
-        """
-        self.progressBar.setMaximum(0)
-        self.progressBar.setProperty("value", 0)
-        
-    def updateProgress(self, bytesRead, totalBytes):
-        """
-        Start working, emit signal
-        """
-        self.progressBar.setMaximum(totalBytes)
-        self.progressBar.setValue(bytesRead)
 
     def stopWorkingRest(self):
         """
@@ -706,7 +468,8 @@ class WServerStatus(QWidget, Logger.ClassLogger):
         layout.addWidget(self.proxyLabel)
         self.setLayout(layout)
         
-    def setStatus(self, status, serverIp = None, rightUser = None, userLogin=None, proxyIp=None, serverPort=None):
+    def setStatus(self, status, serverIp = None, rightUser = None, userLogin=None, 
+                  proxyIp=None, serverPort=None):
         """
         Called to change the status of the connection
 
@@ -1081,12 +844,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         Create qt connections
         """
-        # xmlrpc
-        self.wWebService.StartWorking.connect(self.OnWsStartWorking)
-        self.wWebService.StartWorkingChannel.connect(self.OnChannelStartWorking)
-        self.wWebService.StopWorking.connect(self.OnWsStopWorking)
-        self.wWebService.InProgress.connect(self.onNetworkProgress)
-        
         # rest
         self.RestService.StartWorking.connect(self.OnRestStartWorking)
         self.RestService.StopWorking.connect(self.OnRestStopWorking)
@@ -1169,7 +926,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         self.wServerStatus = WServerStatus(self)
         self.parent.addWidgetToStatusBar( self.wServerStatus, 0 )
 
-        self.wWebService = XmlrpcNetworkHandler(self)
         self.RestService = RestNetworkHandler(self)
 
         self.wServerProgress = WServerProgress(self)
@@ -1322,7 +1078,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Agents.instance().loadStats( data = self.decodeData(data['agents-stats']) )
                 Agents.instance().loadDefault( data = self.decodeData(data['agents-default']) )
 
-            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
+            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights \
+                  or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
 
                 Archives.instance().active()
                 Archives.instance().setEnabled(True)
@@ -1332,7 +1089,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Repositories.instance().cleanStatsArchives()
                 rootItem = Archives.instance().createRootItem()
                 Archives.instance().loadData( data = self.decodeData(data['archives']), parent=rootItem )
-                Archives.instance().initializeProjects( projects=self.decodeData(data['projects']), defaultProject=data['default-project'] )
+                Archives.instance().initializeProjects( projects=self.decodeData(data['projects']), 
+                                                        defaultProject=data['default-project'] )
 
             if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
 
@@ -1346,7 +1104,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Repositories.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_REPO_POS, True )
                 
-                Repositories.instance().initializeProjects( projects=self.decodeData(data['projects']), defaultProject=data['default-project'] )
+                Repositories.instance().initializeProjects( projects=self.decodeData(data['projects']), 
+                                                            defaultProject=data['default-project'] )
                 Repositories.instance().loadData(   data = data['stats-repo-tests'], 
                                                     backups=self.decodeData(data['backups-repo-tests']) )
                 Repositories.instance().loadDataAdapters(   data = data['stats-repo-adapters'],
@@ -1389,7 +1148,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         except Exception as e:
             self.error('error on connection: %s' % str(e) )
             self.stopConnection()
-            self.wWebService.stopWorking()
             self.RestService.stopWorking()
             
     def onDisconnection (self):
@@ -1441,7 +1199,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         if dConnect.exec_() == QDialog.Accepted:
             retCtx = dConnect.getCtx()
             if retCtx:
-                started = self.wWebService.startWorking()
+                # started = self.wWebService.startWorking()
+                started = self.RestService.startWorking()
                 addr, login, pwd, supportProxy, addrProxyHttp, portProxyHttp  = retCtx
                 if started:
                     ret = UCI.instance().setCtx(address = addr, login = login, password = pwd, 
@@ -1452,7 +1211,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                         self.disconnectAction.setEnabled(True)
                         UCI.instance().connectChannel()
                     else:
-                        self.wWebService.stopWorking()
+                        # self.wWebService.stopWorking()
                         self.RestService.stopWorking()
             else:
                 self.ConnectCancelled.emit()
@@ -1480,10 +1239,8 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @type data: tuple
         """ 
         action, event = data[1]
-        if data[0] == 'progressbar':    
-            cur_progress, max_progress = event
-            self.wWebService.WsUpdateDataReadProgress(cur_progress, max_progress)
-        elif data[0] == 'context-server':       
+        
+        if data[0] == 'context-server':       
             Settings.instance().setServerContext( event )
             Miscellaneous.instance().cleanContext()
             Miscellaneous.instance().loadData( data=event )
@@ -1504,9 +1261,13 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Archives.instance().resetPreview()
             else:
                 if 'stats-repo-archives' in event:
-                    Archives.instance().refreshData(data = event['archive'], data_stats=event['stats-repo-archives'], action = action )
+                    Archives.instance().refreshData(data = event['archive'], 
+                                                    data_stats=event['stats-repo-archives'], 
+                                                    action = action )
                 else:
-                    Archives.instance().refreshData(data = event['archive'], data_stats=None, action = action )
+                    Archives.instance().refreshData(data = event['archive'], 
+                                                    data_stats=None, 
+                                                    action = action )
         elif data[0] == 'archives':
             if action == 'reset-backups':
                 Repositories.instance().resetBackupArchivesPart()
@@ -1684,13 +1445,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         Clear tasks history
         """
         TestManager.instance().updateHistory( data = [] )
-        
-    # def onWebCall(self, data):
-        # """
-        # On web call
-        # """
-        # self.wWebService.NetworkCall(postData=data)
-        
+
     def onRestCall(self, uri, request, body=''):
         """
         On rest call
@@ -1701,10 +1456,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         Configure server for network handler
         """
-        # self.wWebService.setWsAddress( address= address, port = port,
-                                        # scheme=scheme, 
-                                        # webpath=Settings.instance().readValue( key = 'Server/xmlrpc-path' ),
-                                        # hostname=hostname )
         self.RestService.setWsAddress( address= address, port = port,
                                         scheme=scheme, 
                                         webpath=Settings.instance().readValue( key = 'Server/rest-path' ),
@@ -1714,14 +1465,12 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         """
         Configure proxy for network handler
         """
-        # self.wWebService.setWsProxy(ip=ip, port=port)
         self.RestService.setWsProxy(ip=ip, port=port)
         
     def stopWorking(self):
         """
         Stop working
         """
-        # self.wWebService.stopWorking()
         self.RestService.stopWorking()
         
     def rest(self):
@@ -1729,14 +1478,7 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         Return rest webservice object
         """
         return self.RestService
-        
-    # def xmlrpc(self):
-        # """
-        # Return the xmlrpc object
-        # """
-        # return self.wWebService
-        
-        
+
 ServerExplorer = None # Singleton
 def instance ():
     """

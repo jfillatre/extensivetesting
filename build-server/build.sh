@@ -179,7 +179,7 @@ dos2unix $APP_SRC_PATH/Scripts/decode-trx.py 1>> "$LOG_FILE" 2>&1
 chmod +x $APP_SRC_PATH/Scripts/*.sh
 
 echo "- generate doc api"
-$APP_SRC_PATH/Scripts/generate-api-docs.sh $APP_SRC_PATH
+$APP_SRC_PATH/Scripts/yaml-restapi-docs.sh $APP_SRC_PATH
 
 echo "- create pkg"
 tar -czvf /tmp/$PKG_NAME-$PKG_VERSION.tar.gz ../$PKG_NAME-$PKG_VERSION/  1>> /dev/null 2>&1

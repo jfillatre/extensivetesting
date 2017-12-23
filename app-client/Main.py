@@ -3,7 +3,7 @@
 
 # -------------------------------------------------------------------
 # This file is part of the extensive testing project
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -2460,7 +2460,8 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         if recentListFiles:
             # search if already exist in the list
             for rf in recentListFiles:
-                if rf['file'] == fileDescription['file'] and rf['type'] == fileDescription['type'] and rf['project'] == fileDescription['project']:
+                if rf['file'] == fileDescription['file'] and \
+                    rf['type'] == fileDescription['type'] and rf['project'] == fileDescription['project']:
                     self.trace('already exist in the list, nothing todo')
                     return
 
@@ -3149,34 +3150,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         rnDialog.parseRn( text = rn )
         rnDialog.exec_()
 
-    # def onOpenFileRepo(self, repoType, path_file, name_file, ext_file, encoded_data, project, is_locked):
-        # """
-        # Called on open file from remote repository
-
-        # @param repoType: 
-        # @type repoType:
-
-        # @param path_file: 
-        # @type path_file:
-
-        # @param name_file: 
-        # @type name_file:
-        
-        # @param ext_file: 
-        # @type ext_file:
-        
-        # @param encoded_data: 
-        # @type encoded_data:
-        
-        # @param project: 
-        # @type project:
-        # """
-        # WWorkspace.WDocumentViewer.instance().openRemoteFile( 
-                                                                # data=(repoType, str(path_file), 
-                                                                # str(name_file), str(ext_file), 
-                                                                # encoded_data, project, is_locked) 
-                                                            # )
-
     def onRefreshRepo(self, repoType, data, saveAsOnly, forRuns, projectid):
         """
         On refresh repo
@@ -3497,12 +3470,6 @@ if __name__ == '__main__':
     showMessageSplashscreen( QObject().tr('Initializing main application...') )
     window = MainApplication()
 
-    # showMessageSplashscreen( QObject().tr('Initializing recorder engine...') )
-    # WRecorder.initialize(parent=window, offlineMode=WORKSPACE_OFFLINE)    
-        
-    # showMessageSplashscreen( QObject().tr('Initializing menu recorder...') )
-    # window.moreMenu()
-    
     showMessageSplashscreen( QObject().tr('Terminated...') )
 
     window.show()

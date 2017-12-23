@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -2983,8 +2983,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         self.trace("on test folder renamed")
         
         self.FolderTestsRenamed.emit(details["project-id"], 
+                                     details["directory-path"],
                                      details["directory-name"], 
-                                     details["directory-path"], 
                                      details["new-directory-name"] )
                                          
         self.listingTests(projectId=details["project-id"])
