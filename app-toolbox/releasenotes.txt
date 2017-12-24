@@ -1,6 +1,6 @@
 
 13.0.0
-	Date: xx/xx/201x
+	Date: xx/xx/2018
 	What's new		
 		1. (minor) code cleanup after static analysis
 		2. (minor) build: python package update for selenium 3.7.0
@@ -12,5 +12,6 @@
 		8. (medium) build: ie driver updated to 3.6.0
 		9. (minor) build: java JRE updated to the version 8u151 x64
 		10. (major) full support of qt5.9 and python3.6
+		11. (major) no more use xmlrpc api
 	Issues Fixed
 		1. (minor) fix some code issues thanks to static analysis 
