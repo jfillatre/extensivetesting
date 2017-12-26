@@ -1,6 +1,6 @@
 
 18.0.0
-	Date: xx/xx/2017
+	Date: xx/xx/2018
 	What's new
 		1. (minor) test library: change open source project url in test report header
 		2. (major) toolboxes windows and linux no more embedded in the package
@@ -9,8 +9,14 @@
 		5. (medium) build: update of the python selenium library with version 3.7.0
 		6. (minor) remove deprecated python modules: commands, compiler
 		7. (major) rest api: /rest/results/* updated to support replay id, new type of reports and more
-		8. (major) test libray: task uuid added in test logger xml events
+		8. (major) test library: task uuid added in test logger xml events
 		9. (major) rest api: /rest/tasks/* updated with news functions
+		10. (major) rest api: /rest/tests/* updated with news functions
+		11. (major) XmlRPC API no more available, client update not possible from 17.1 to the new version
+		12. (major) no more dependencies with python-twisted libraries
+		13. (minor) licence feature removed from the product, code simplification
+		14. (major) Web server: no more support php 5.1
+		15. (major) Web server: xmlrpc api no more used
 	Issues Fixed
 		1. (minor) test library: undefined variable in virtualRun function #issue1
 		2. (minor) unable to reset libraries and adapters repositories

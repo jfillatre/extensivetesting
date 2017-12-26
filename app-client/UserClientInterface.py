@@ -30,10 +30,6 @@ import sys
 import time
 import base64
 import zlib
-# try:
-    # import xmlrpclib
-# except ImportError: # support python3
-    # import xmlrpc.client as xmlrpclib
 import hashlib
 import copy
 import os
@@ -270,9 +266,6 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
         self.proxyActivated = False
 
         self.portData = Settings.instance().readValue( key = 'Server/port-data' )
-        # self.authenticated = False
-        # self.userRights = []
-        # self.userId = 0
         self.loaderDialog = QtHelper.MessageBoxDialog(dialogName = self.tr("Loading"))
 
         self.parent.DataProgress.connect(self.updateDataReadProgress)
@@ -408,15 +401,6 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
         """
         self.startConnection()
 
-    # def isAuthenticated (self):
-        # """
-        # Is authenticated ?
-
-        # @return:
-        # @rtype:
-        # """
-        # return self.authenticated
-
     def onResolveHostnameFailed(self, err):
         """
         On resolve hostname failed
@@ -428,6 +412,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
             msgErr = 'Server address resolution failed'
         else:
             msgErr = err
+            
         if ServerExplorer.instance() is not None:
             ServerExplorer.instance().stopWorking()
             ServerExplorer.instance().enableConnect()
@@ -447,6 +432,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
             msgErr = 'Proxy address resolution failed'
         else:
             msgErr = err
+            
         if ServerExplorer.instance() is not None:
             ServerExplorer.instance().stopWorking()
             ServerExplorer.instance().enableConnect()
@@ -466,6 +452,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
             msgErr = 'The connection has been refused by the server'
         else:
             msgErr = err
+            
         if ServerExplorer.instance() is not None:
             ServerExplorer.instance().stopWorking()
             ServerExplorer.instance().enableConnect()
@@ -514,6 +501,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
             msgErr = 'Proxy: the connection has been refused by the server'
         else:
             msgErr = err
+            
         if ServerExplorer.instance() is not None:
             ServerExplorer.instance().stopWorking()
             ServerExplorer.instance().enableConnect()
@@ -634,8 +622,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
         Emit "Disconnected" on disconnection
         """
         self.trace('on disconnection byserver=%s inactivitserver=%s...' %(byServer, inactivityServer) )
-        # self.authenticated = False
-                    
+           
         if QtHelper.str2bool( Settings.instance().readValue( key = 'Server/rest-support' ) ):
             if not byServer:
                 RCI.instance().logout()
@@ -644,9 +631,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
             if ServerExplorer.instance() is not None: ServerExplorer.instance().stopWorking()
 
             self.channelId = None
-            # self.userRights = []
-            # self.userId = 0
-
+            
             self.Disconnected.emit() 
             
             if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
@@ -660,18 +645,18 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
         else:
             if self.isConnected():  self.trace('Disconnection...')
             self.channelId = None
-            # self.userRights = []
-            # self.userId = 0
+
             NetLayerLib.ClientAgent.onDisconnection(self)
             if ServerExplorer.instance() is not None: ServerExplorer.instance().stopWorking()
             
             self.Disconnected.emit() 
             
+            msg = "Disconnected by the server.\nPlease to reconnect"
             if byServer:
                 if QtHelper.str2bool( Settings.instance().readValue( key = 'Common/systray-notifications' ) ):
-                    self.application().showMessageWarningTray(msg=self.tr("Disconnected by the server.\nPlease to reconnect"))
+                    self.application().showMessageWarningTray(msg=self.tr(msg))
                 else: 
-                    self.emitWarningMsg(title=self.tr("Connection"), err=self.tr("Disconnected by the server.\nPlease to reconnect"))
+                    self.emitWarningMsg(title=self.tr("Connection"), err=self.tr(msg))
         
     def onRequest (self, client, tid, request):
         """
@@ -690,6 +675,7 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
                     self.channelId = request['body'][1]['channel-id']
             else:
                 self.Notify.emit( request['body'] )
+                
         elif request['cmd'] == Messages.RSQ_CMD:
             if 'cmd' in request['body']:
                 if request['body']['cmd'] == Messages.CMD_INTERACT:
@@ -705,10 +691,16 @@ class UserClientInterface(QObject, Logger.ClassLogger, NetLayerLib.ClientAgent):
 											int(request['body']['test-id']), defaultValue )
 											
                     if 'pause' in request['body']:
-                        self.Pause.emit( tid, request['body']['step-id'], request['body']['step-summary'],
-                                           request['body']['timeout'], int(request['body']['test-id']) )
+                        self.Pause.emit( tid, request['body']['step-id'], 
+                                         request['body']['step-summary'],
+                                         request['body']['timeout'], 
+                                         int(request['body']['test-id']) )
+                                         
                     if 'breakpoint' in request['body']:
-                        self.BreakPoint.emit( tid, int(request['body']['test-id']), request['body']['timeout'] )
+                        self.BreakPoint.emit( tid, 
+                                              int(request['body']['test-id']), 
+                                              request['body']['timeout'] )
+                                              
                 else:
                     NetLayerLib.ClientAgent.forbidden(self, tid=tid, body='' )
             else:

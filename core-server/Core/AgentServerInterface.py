@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -212,10 +212,7 @@ class AgentServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         self.trace("on registration" )
         self.__mutex.acquire()
         doNotify=False
-        if len(self.agentsRegistered) >= self.context.getLicence()[ 'agents' ] [ 'instance' ]:
-            self.info('license agents reached')
-            NetLayerLib.ServerAgent.forbidden(self, client, tid)
-        elif request['userid'] in  self.agentsRegistered:
+        if request['userid'] in  self.agentsRegistered:
             self.info('duplicate agents registration: %s' % request['userid'] )
             NetLayerLib.ServerAgent.failed(self, client, tid)
         else:

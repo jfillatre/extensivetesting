@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -99,14 +99,8 @@ class AgentsManager(Logger.ClassLogger):
         @rtype: dict
         """
         ret= {}
-        try:
-            ret['max-reg'] = self.context.getLicence()[ 'agents' ] [ 'instance' ]
-            ret['max-def'] = self.context.getLicence()[ 'agents' ] [ 'default' ]
-        except Exception as e:
-            self.error( "unable to get agents stats: %s" % e )
-        else:
-            if b64:
-                ret = self.encodeData(data=ret)
+        if b64:
+            ret = self.encodeData(data=ret)
         return ret
 
     def getDefaultAgents(self, b64=False):
@@ -151,27 +145,23 @@ class AgentsManager(Logger.ClassLogger):
         ret = self.context.CODE_ERROR
         try:
             if self.configsFile is not None:
-                # check licence
-                if len(self.configsFile.sections()) >=  self.context.getLicence()[ 'agents' ] [ 'default' ]:
-                    ret = self.context.CODE_FORBIDDEN
-                else:
-                    # add the section in the config file object
-                    self.configsFile.add_section(aName)
-                    self.configsFile.set( aName, 'enable', 1)
-                    self.configsFile.set( aName, 'type', aType)
-                    self.configsFile.set( aName, 'description', aDescr)
-                    
-                    # write date the file 
-                    f = open(  "%s/agents.ini" % Settings.getDirExec() , 'w')
-                    self.configsFile.write(f)
-                    f.close()
+                # add the section in the config file object
+                self.configsFile.add_section(aName)
+                self.configsFile.set( aName, 'enable', 1)
+                self.configsFile.set( aName, 'type', aType)
+                self.configsFile.set( aName, 'description', aDescr)
+                
+                # write date the file 
+                f = open(  "%s/agents.ini" % Settings.getDirExec() , 'w')
+                self.configsFile.write(f)
+                f.close()
 
-                    # notify all admin and tester
-                    notif = ( 'agents-default', ( 'add', self.getDefaultAgents() ) )
-                    ESI.instance().notifyByUserTypes(body = notif, admin=True, leader=False, tester=True, developer=False)
-                    
-                    # return OK
-                    ret = self.context.CODE_OK
+                # notify all admin and tester
+                notif = ( 'agents-default', ( 'add', self.getDefaultAgents() ) )
+                ESI.instance().notifyByUserTypes(body = notif, admin=True, leader=False, tester=True, developer=False)
+                
+                # return OK
+                ret = self.context.CODE_OK
         except ConfigParser.DuplicateSectionError:
             self.error( "agent already exist %s" % str(aName) ) 
             ret = self.context.CODE_ALLREADY_EXISTS

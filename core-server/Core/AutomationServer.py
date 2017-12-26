@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -152,7 +152,7 @@ class AutomationServer(Logger.ClassLogger, daemon.Daemon):
             # Initialize the core
             Context.initialize()
             Context.instance().setStartTime()
-            Context.instance().readLicence()
+            # Context.instance().readLicence()
             Context.instance().setMysqlVersion()
             Context.instance().setApacheVersion()
             Context.instance().setPhpVersion()

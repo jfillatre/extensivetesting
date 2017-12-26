@@ -446,7 +446,6 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                 doc.dataModel.properties['properties']['parameters']['parameter'] = self.parametersOutput.table().model.getData()
             
             # rest call
-            # UCI.instance().putFileRepo( document=doc, project=prjId )
             RCI.instance().uploadTestFile(filePath=doc.path, 
                                           fileName=doc.filename, 
                                           fileExtension=doc.extension, 
@@ -523,8 +522,6 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
         dialog = self.iRepo.remote().saveAs
         if dialog.exec_() == QDialog.Accepted:
             if inputs:
-                # UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
-                                    # actionId=UCI.ACTION_IMPORT_INPUTS, project=prjId)
                 RCI.instance().openFileTests(projectId=int(prjId), 
                                              filePath=dialog.getSelection(), 
                                              ignoreLock=False, 
@@ -533,8 +530,6 @@ class WDocumentProperties(QWidget, Logger.ClassLogger):
                                              actionId=UCI.ACTION_IMPORT_INPUTS, 
                                              destinationId=UCI.FOR_DEST_ALL)
             else:
-                # UCI.instance().getFileRepo( pathFile=dialog.getSelection(), forDest=UCI.FOR_DEST_ALL, 
-                                    # actionId=UCI.ACTION_IMPORT_OUTPUTS, project=prjId)
                 RCI.instance().openFileTests(projectId=int(prjId), 
                                              filePath=dialog.getSelection(), 
                                              ignoreLock=False, 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -225,7 +225,7 @@ class Context(Logger.ClassLogger):
         self.mysqlVersion = None
         self.apacheVersion = None
         self.phpVersion = None
-        self.licence = None
+        # self.licence = None
         self.networkInterfaces = None
         self.networkRoutes = None
         
@@ -327,75 +327,75 @@ class Context(Logger.ClassLogger):
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
         return (total, used, free)
 
-    def readLicence(self):
-        """
-        Read licence
-        """
-        self.trace('Detecting the licence')
-        if not os.path.isfile('%s/Scripts/product.lic' % Settings.getDirExec() ):
-            raise Exception('the licence is missing')
+    # def readLicence(self):
+        # """
+        # Read licence
+        # """
+        # self.trace('Detecting the licence')
+        # if not os.path.isfile('%s/Scripts/product.lic' % Settings.getDirExec() ):
+            # raise Exception('the licence is missing')
         
-        if not os.path.isfile('%s/Scripts/product.key' % Settings.getDirExec() ):
-            raise Exception('the licence key is missing')
+        # if not os.path.isfile('%s/Scripts/product.key' % Settings.getDirExec() ):
+            # raise Exception('the licence key is missing')
         
-        if not os.path.exists( Settings.get('Bin', 'openssl') ):
-            raise Exception('openssl is needed')
+        # if not os.path.exists( Settings.get('Bin', 'openssl') ):
+            # raise Exception('openssl is needed')
 
-        try:
-            fd_key = open( '%s/Scripts/product.key' % (Settings.getDirExec()) , 'r')
-            keyiv_raw = fd_key.read()
-            fd_key.close()
-        except Exception as e:
-            raise Exception('unable to read the licence key: %s'  % str(e) )
+        # try:
+            # fd_key = open( '%s/Scripts/product.key' % (Settings.getDirExec()) , 'r')
+            # keyiv_raw = fd_key.read()
+            # fd_key.close()
+        # except Exception as e:
+            # raise Exception('unable to read the licence key: %s'  % str(e) )
     
-        try:
+        # try:
             # salt=A74785B240B0CA91
             # key=4835CA963AB4C373B8334738162DBC815F812FB33E06FF594D23A62FE4C44A66
             # iv =C4B0F6D76926ECA8EDA66230AAFB153A
-            key = keyiv_raw.splitlines()[1].split('=')[1]
-            iv = keyiv_raw.splitlines()[2].split('=')[1]
-        except Exception as e:
-            raise Exception('unable to extract key and iv: %s' % str(e) )
+            # key = keyiv_raw.splitlines()[1].split('=')[1]
+            # iv = keyiv_raw.splitlines()[2].split('=')[1]
+        # except Exception as e:
+            # raise Exception('unable to extract key and iv: %s' % str(e) )
 
         
-        openssl_cmd = "%s aes-256-cbc -K %s -iv %s -d -in %s/Scripts/product.lic" % ( Settings.get('Bin', 'openssl'), 
-                                                                                      key, iv, 
-                                                                                        Settings.getDirExec() ) 
+        # openssl_cmd = "%s aes-256-cbc -K %s -iv %s -d -in %s/Scripts/product.lic" % ( Settings.get('Bin', 'openssl'), 
+                                                                                      # key, iv, 
+                                                                                        # Settings.getDirExec() ) 
         # code_ret, lic_str = commands.getstatusoutput(openssl_cmd)
-        code_ret, lic_str = getstatusoutput(openssl_cmd)
-        if code_ret:
-            raise Exception('unable to decode licence' )
+        # code_ret, lic_str = getstatusoutput(openssl_cmd)
+        # if code_ret:
+            # raise Exception('unable to decode licence' )
 
-        try:
-            licence = eval(lic_str)
-        except Exception as e:
-            raise Exception('unable to eval licence: %s' % str(e) )
+        # try:
+            # licence = eval(lic_str)
+        # except Exception as e:
+            # raise Exception('unable to eval licence: %s' % str(e) )
 
-        if not 'users' in licence or not 'probes' in licence or not 'agents' in licence or not 'projects' in licence:
-            raise Exception('invalid licence, users or probes, projects or agents part are missing' )
+        # if not 'users' in licence or not 'probes' in licence or not 'agents' in licence or not 'projects' in licence:
+            # raise Exception('invalid licence, users or probes, projects or agents part are missing' )
 
-        if not 'administrator' in licence['users'] or not 'developer' in licence['users'] \
-            or not 'tester' in licence['users'] or not 'tester' in licence['users']:
-            raise Exception('invalid licence, part users incorrect.' )
+        # if not 'administrator' in licence['users'] or not 'developer' in licence['users'] \
+            # or not 'tester' in licence['users'] or not 'tester' in licence['users']:
+            # raise Exception('invalid licence, part users incorrect.' )
 
-        if not 'default' in licence['probes'] or not 'instance' in licence['probes']:
-            raise Exception('invalid licence, part probes incorrect.' )
+        # if not 'default' in licence['probes'] or not 'instance' in licence['probes']:
+            # raise Exception('invalid licence, part probes incorrect.' )
 
-        if not 'default' in licence['agents'] or not 'instance' in licence['agents']:
-            raise Exception('invalid licence, part agents incorrect.' )
+        # if not 'default' in licence['agents'] or not 'instance' in licence['agents']:
+            # raise Exception('invalid licence, part agents incorrect.' )
 
-        if not 'instance' in licence['projects']:
-            raise Exception('invalid licence, part projects incorrect.' )
+        # if not 'instance' in licence['projects']:
+            # raise Exception('invalid licence, part projects incorrect.' )
 
         # the licence is correct, save it
-        self.licence = licence
-        self.trace('The licence is correct')
+        # self.licence = licence
+        # self.trace('The licence is correct')
 
-    def getLicence(self):
-        """
-        Return the licence
-        """
-        return self.licence
+    # def getLicence(self):
+        # """
+        # Return the licence
+        # """
+        # return self.licence
 
     def getUniqueId(self):
         """
@@ -977,9 +977,9 @@ class Context(Logger.ClassLogger):
     
         return True
 
-    def unregisterUserFromXmlrpc(self, login):
+    def unregisterChannelUser(self, login):
         """
-        Deletes user, disconnection from xml rpc
+        Force channel disconnection
         """
         self.info( "Unregister user Login=%s" % login )
         UsersManager.instance().setOnlineStatus(login=login, online=False)

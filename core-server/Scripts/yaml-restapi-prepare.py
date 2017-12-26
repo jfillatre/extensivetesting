@@ -26,6 +26,7 @@ sys.path.insert(0, '../' )
 import inspect
 import ast
 
+import Core.RestCommonFunctions as CommonFunctions
 import Core.RestTesterFunctions as TesterFunctions
 import Core.RestAdminFunctions as AdminFunctions
 from  Libs import Settings
@@ -172,7 +173,11 @@ yaml_path = "/%s/../%s/tester-api-rest/%s.yaml" % (
 with open(yaml_path, "wt" ) as f:
     f.write( "\n".join(swagger) )
 
+##################
+##################
 # params for admins functions
+##################
+##################
 swagger = []
 swagger_version = "2.0"
 swagger_email = Settings.get( 'Server', 'contact-email')
@@ -269,6 +274,114 @@ swagger.extend( swagger_defs )
 
 # write the file
 yaml_path = "/%s/../%s/admin-api-rest/%s.yaml" % (
+                            Settings.getDirExec(), 
+                            Settings.get( 'Paths', 'docs'),
+                            Settings.get( 'Server', 'acronym')
+                        )
+with open(yaml_path, "wt" ) as f:
+    f.write( "\n".join(swagger) )
+
+##################
+##################
+# Common functions
+##################
+##################
+swagger = []
+swagger_version = "2.0"
+swagger_email = Settings.get( 'Server', 'contact-email')
+swagger_licence = "LGPL 2.1"
+swagger_info = [
+                    ( "description", "Control your test server with %s API" % Settings.get( 'Server', 'name') ),
+                    ( "version", Settings.getVersion(path="../") ),
+                    ( "title", "Swagger Common - %s" % Settings.get( 'Server', 'name') ),
+                ]
+swagger_schemes = [ 
+                    "https"
+                  ]
+swagger_host = Settings.get( 'Bind', 'ip-ext')
+swagger_base_path = "/rest"
+
+swagger_paths = [ "paths:" ]
+swagger_tab = 2
+
+# extract yaml python code in rest server interface
+py_tab = 4
+py_decorators = findDecorators(module=CommonFunctions)
+for (c,fcs) in py_decorators:
+    obj = getattr(CommonFunctions, c)
+    json_path = obj.__doc__.strip("\n").rstrip("\n ")
+    json_path = json_path[py_tab:]
+    cur = " "*swagger_tab 
+    swagger_paths.append( "%s%s:" % (cur,json_path) )
+    for f in fcs:
+        func = getattr(obj, f)
+        cur += " "*swagger_tab
+        swagger_paths.append( "%s%s:" % (cur,f) )
+        if func.__doc__ is not None:
+            epydoc = func.__doc__.strip("\n").rstrip("\n ")
+            cur += " "*swagger_tab
+            for l in epydoc.splitlines():
+                swagger_paths.append( "%s%s" % (cur,l[py_tab*2:]) )
+
+# find defintions
+swagger_defs = []
+py_decorators = findDecorators(module=CommonFunctions, deco="_to_yaml_defs")
+if len(py_decorators): 
+    swagger_defs = [ "definitions:" ]
+    for (c,fcs) in py_decorators:
+        obj = getattr(CommonFunctions, c)
+        for f in fcs:
+            func = getattr(obj, f)
+            cur = " "*swagger_tab 
+            swagger_defs.append( "%s%s:" % (cur,f) )
+            if func.__doc__ is not None:
+                epydoc = func.__doc__.strip("\n").rstrip("\n ")
+                cur += " "*swagger_tab
+                for l in epydoc.splitlines():
+                    swagger_defs.append( "%s%s" % (cur,l[py_tab*2:]) )
+                    
+swagger_tags = [ ]
+py_decorators = findDecorators(module=CommonFunctions, deco="_to_yaml_tags")
+if len(py_decorators): 
+    for (c,fcs) in py_decorators:
+        obj = getattr(CommonFunctions, c)
+        for f in fcs:
+            func = getattr(obj, f)
+            if func.__doc__ is not None:
+                epydoc = func.__doc__.strip("\n").rstrip("\n ")
+                for l in epydoc.splitlines():
+                    swagger_tags.append( ("%s" % f , l[py_tab*2:]) )
+
+# construct swagger 
+swagger.append( "swagger: '%s'" % swagger_version ) 
+swagger.append( "info:" )
+for (k,v) in swagger_info:
+    cur = " "*swagger_tab 
+    swagger.append( "%s%s: %s" % (cur,k,v) )
+swagger.append( "%scontact:" % cur ) 
+swagger.append( "%s%semail: %s" % (cur, cur, swagger_email ) ) 
+swagger.append( "%slicense:" % cur )
+swagger.append( "%s%sname: %s" % (cur, cur, swagger_licence ) )
+swagger.append( "host: %s" % swagger_host )
+swagger.append( "basePath: %s" % swagger_base_path )
+
+if len(swagger_tags):
+    swagger.append( "tags:"  )
+    for (k,v) in swagger_tags:
+        cur = " "*swagger_tab 
+        swagger.append( "%s- name: %s" % (cur,k) )
+        swagger.append( "%s%sdescription: %s" % (cur,cur,v) )
+        
+if len(swagger_schemes):
+    swagger.append( "schemes:"  )
+    for (s) in swagger_schemes:
+        swagger.append( "%s- %s" % (cur,s) )
+        
+swagger.extend( swagger_paths )
+swagger.extend( swagger_defs )
+
+# write the file
+yaml_path = "/%s/../%s/common-api-rest/%s.yaml" % (
                             Settings.getDirExec(), 
                             Settings.get( 'Paths', 'docs'),
                             Settings.get( 'Server', 'acronym')

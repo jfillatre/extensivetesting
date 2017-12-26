@@ -1,7 +1,7 @@
 <?php
 	/*
 	---------------------------------------------------------------
-	 Copyright (c) 2010-2017 Denis Machard. All rights reserved.
+	 Copyright (c) 2010-2018 Denis Machard. All rights reserved.
 
 	 This file is part of the extensive testing project; you can redistribute it and/or
 	 modify it under the terms of the GNU General Public License, Version 3.
@@ -499,12 +499,10 @@
 			{
 				if ( empty_obj( $req->args->projectid ) or ! is_numeric( $req->args->projectid ) )
 					response(400, "You must fill the field project id." );
-				if ( empty_obj( $req->args->trpath ) )
-					response(400, "You must fill the field test path." );
-				if ( empty_obj( $req->args->trname ) )
-					response(400, "You must fill the field test name." );
+				if ( empty_obj( $req->args->testid ) )
+					response(400, "You must fill the field test id." );
 				// request seems to be ok, call ws
-				$rsp = open_test_report( $req->args->projectid, $req->args->trpath, $req->args->trname );
+				$rsp = open_test_report( $req->args->projectid, $req->args->testid );
 			}
 		}
 	} 

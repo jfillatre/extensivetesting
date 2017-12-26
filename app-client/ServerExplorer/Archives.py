@@ -1702,13 +1702,10 @@ class WArchives(QWidget, Logger.ClassLogger):
                                         QMessageBox.Yes |QMessageBox.Cancel )
             #call web service
             if reply == QMessageBox.Yes:   
-                # UCI.instance().deleteTestResult(  '%s/' % (logDirName), projectId=projectId )
                 RCI.instance().deleteTestResultByDate( date=date, projectId=projectId )
                 
         elif cur.typeItem == 1: # test result folder
             testId = cur.testId
-            # logDirName = cur.parent.archiveDescr['name']
-            # logSubDirName = cur.archiveDescr['name']
             projectId =  cur.archiveDescr['project']
        
             
@@ -1717,8 +1714,6 @@ class WArchives(QWidget, Logger.ClassLogger):
                                        QMessageBox.Yes |QMessageBox.Cancel )
             #call web service
             if reply == QMessageBox.Yes:   
-                # UCI.instance().deleteTestResult('%s/%s' % (logDirName,logSubDirName), 
-                                                # projectId=projectId )
                 RCI.instance().deleteTestResult( testId=testId, projectId=projectId )
         else:
             pass

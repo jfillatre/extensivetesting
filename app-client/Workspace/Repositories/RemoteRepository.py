@@ -2050,11 +2050,7 @@ class Repository(QWidget, Logger.ClassLogger):
 
             testFilePath = "%s/%s" % (pathFile, self.itemCurrent.fileName)
             testId = TestResults.instance().getTestId()
-            # UCI.instance().scheduleTest(wdocument=None, testId=testId, background = False, runAt = (0,0,0,0,0,0),
-                                        # runType=UCI.SCHED_NOW, runNb=-1, withoutProbes=False,  debugActivated=False, 
-                                        # withoutNotif=False, noKeepTr=False, prjId=projectId,
-                                        # testFileExtension=self.itemCurrent.fileExtension, testFilePath=testFilePath, 
-                                        # testFileName=self.itemCurrent.fileName)
+            
             _json = DocumentViewer.instance().prepareTest( wdocument=None, tabId=testId, background = False, 
                                                            runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW, runNb=-1, 
                                                            withoutProbes=False, debugActivated=False, 
@@ -2092,8 +2088,6 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Delete all snapshots"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            # UCI.instance().deleteAllSnapshots(path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName,
-                                               # extension=self.itemCurrent.fileExtension,  projectId=self.itemCurrent.projectId)
             RCI.instance().removeAllSnapshotTests(projectId=int(self.itemCurrent.projectId), 
                                                   testPath=self.itemCurrent.getPath(), 
                                                   testName=self.itemCurrent.fileName, 
@@ -2109,10 +2103,6 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Delete snapshot"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            # UCI.instance().deleteSnapshot(snapshotName=self.itemCurrent.snapRealname,
-                                          # snapshotPath=self.itemCurrent.getPath(withFileName=False),
-                                          # projectId=self.itemCurrent.projectId
-                                          # )
             RCI.instance().removeSnapshotTests(projectId=int(self.itemCurrent.projectId), 
                                                snapshotPath=self.itemCurrent.getPath(withFileName=False), 
                                                snapshotName=self.itemCurrent.snapRealname)
@@ -2126,10 +2116,6 @@ class Repository(QWidget, Logger.ClassLogger):
         reply = QMessageBox.question(self, self.tr("Restore snapshot"), self.tr("Are you sure?"),
                         QMessageBox.Yes | QMessageBox.No )
         if reply == QMessageBox.Yes: 
-            # UCI.instance().restoreSnapshot(snapshotName=self.itemCurrent.snapRealname,
-                                          # snapshotPath=self.itemCurrent.getPath(withFileName=False),
-                                          # projectId=self.itemCurrent.projectId
-                                          # )
             RCI.instance().restoreSnapshotTests(projectId=int(self.itemCurrent.projectId), 
                                                 snapshotPath=self.itemCurrent.getPath(withFileName=False), 
                                                 snapshotName=self.itemCurrent.snapRealname)
@@ -2150,9 +2136,6 @@ class Repository(QWidget, Logger.ClassLogger):
                 if sys.version_info > (3,): # python3 support only 
                     txt.encode("ascii") 
 
-                # UCI.instance().createSnapshot( path=self.itemCurrent.getPath(), filename=self.itemCurrent.fileName, 
-                                               # extension=self.itemCurrent.fileExtension, projectId=self.itemCurrent.projectId, 
-                                               # snapshotName=txt, snapshotTimestamp="%s" % time.time() )
                 RCI.instance().addSnapshotTests(projectId=int(self.itemCurrent.projectId), 
                                                 testPath=self.itemCurrent.getPath(), 
                                                 snapshotName=txt, 

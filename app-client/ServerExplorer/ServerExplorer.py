@@ -131,6 +131,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
         self.WsAddress = ''
         self.WsCookie = None
         
+        self.__parent = parent
         self.httpPostReq = []
         self.reqInProgress= None
 
@@ -174,7 +175,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
                 self.stopWorking()
                 # RCI.instance().onGenericError( title=self.tr("REST Error"), 
                                                 # err="Connection lost!" )
-                self.stopConnection()
+                self.__parent.stopConnection()
                 return
             
             if int(httpCode) in [ 401 ]:
@@ -1125,10 +1126,10 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 if len(RCI.instance().userRights) == 1 and RCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
                     self.serverTab.setCurrentIndex(TAB_RN_POS)
                 
-                rnDecoded = base64.b64decode( data['rn'] )
-                rnAdpDecoded = base64.b64decode( data['rnAdp'] )
-                rnLibAdpDecoded = base64.b64decode( data['rnLibAdp'] )
-                rnToolboxDecoded =  base64.b64decode( data['rnToolbox'] )
+                rnDecoded = base64.b64decode( data['core'] )
+                rnAdpDecoded = base64.b64decode( data['adapters'] )
+                rnLibAdpDecoded = base64.b64decode( data['libraries'] )
+                rnToolboxDecoded =  base64.b64decode( data['toolbox'] )
                 ReleaseNotes.instance().loadData(   data = rnDecoded, 
                                                     dataAdp = rnAdpDecoded,
                                                     dataLibAdp=rnLibAdpDecoded, 

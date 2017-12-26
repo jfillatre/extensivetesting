@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -359,10 +359,12 @@ class ProjectsManager(Logger.ClassLogger):
         
     def delProjectFromDB(self, projectId):
         """
+        Delete a project from DB and disk
         """
         # init some shortcut
         prefix = Settings.get( 'MySql', 'table-prefix')
         escape = MySQLdb.escape_string
+        projectId = str(projectId)
         
         # not possible to delete default project common
         if int(projectId) == 1:
@@ -384,7 +386,8 @@ class ProjectsManager(Logger.ClassLogger):
             self.error( "unable to read project relations" )
             return (self.context.CODE_ERROR, "unable to read project relations")
         if dbRows[0]["nbrelation"]:
-            return (self.context.CODE_ERROR, "unable to remove project because this project is linked with %s users" % dbRows["nbrelation"] )
+            msg = "unable to remove project because this project is linked with %s user(s)" % dbRows[0]["nbrelation"]
+            return (self.context.CODE_ERROR, msg )
         
         # delete from db
         sql = """DELETE FROM `%s-projects` WHERE  id='%s'""" % ( prefix, escape(projectId) )
@@ -404,6 +407,7 @@ class ProjectsManager(Logger.ClassLogger):
         
     def getProjectsFromDB(self):
         """
+        Delete all projects
         """
         # init some shortcut
         prefix = Settings.get( 'MySql', 'table-prefix')

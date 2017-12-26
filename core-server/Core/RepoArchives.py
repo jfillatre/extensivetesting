@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -738,7 +738,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         try:
             # write the file
             f = open( "%s/%s/%s" %(testsPath, logPath, logName), 'wb')
-            f.write(logData)
+            f.write(base64.b64decode(logData))
             f.close()
             
             # notify all users

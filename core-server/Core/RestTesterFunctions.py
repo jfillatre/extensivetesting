@@ -25,10 +25,8 @@ from pycnic.core import Handler
 from pycnic.errors import HTTP_401, HTTP_400, HTTP_500, HTTP_403, HTTP_404
 
 import os
-import platform
 import json
 import wrapt
-import base64
 
 from Libs import Settings, Logger
 
@@ -103,1418 +101,6 @@ def _get_user(request):
             return Context.instance().getSessions()[sess_id]
         else:
             raise HTTP_401("Invalid session")
-            
-"""
-Session handlers
-"""
-class SessionLogin(Handler):
-    """
-    /rest/session/login
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - session
-        summary: Authenticate client
-        description: ''
-        operationId: sessionLogin
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [login,password]
-              properties:
-                login:
-                  type: string
-                password:
-                  type: string
-                  description: sha1 password
-                channel-id:
-                  type: string
-                client-version:
-                  type: string
-                client-platform:
-                  type: boolean
-                client-portable:
-                  type: string
-        responses:
-          '200':
-            description: Logged in
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-                expires:
-                  type: integer
-                user_id:
-                  type: integer
-                session_id:
-                  type: string
-                project_id:
-                  type: integer
-            examples:
-              application/json: |
-                {
-                  "expires": 86400, 
-                  "user_id": 2, 
-                  "cmd": "/session/login", 
-                  "session_id": "NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M", 
-                  "message": "Logged in", 
-                  "project_id": 1
-                }
-            headers:
-              Set-Cookie:
-                type: string
-                description: |
-                  session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M;expires=Wed, 10-May-2017 06:32:57 GMT; path=/ 
-          '401':
-            description: Invalid login | Account disabled | Access not authorized | Invalid  password
-          '400':
-            description: Bad request provided
-        """
-        try:
-            login = self.request.data.get("login")
-            password = self.request.data.get("password")
-            if not login or not password:  raise EmptyValue("Please specify login and password")
-            
-            channelId = self.request.data.get("channel-id")
-            clientVersion = self.request.data.get("client-version")
-            clientPlatform = self.request.data.get("client-platform")
-            clientPortable = self.request.data.get("client-portable")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # check user access 
-        (userSession, expires) = Context.instance().apiAuthorization(login=login, 
-                                                                     password=password)
-        
-        if userSession == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_401("Invalid login!")
-
-        if userSession == Context.instance().CODE_DISABLED:
-            raise HTTP_401("Account disabled!")
-
-        if userSession == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_401("Access not authorized!")
-
-        if userSession == Context.instance().CODE_FAILED:
-            raise HTTP_401("Invalid  password!")
-
-        channel = Context.instance().getUser(login)
-        if channel is not None: raise HTTP_401("Already connected in another session!")
-         
-        lease = Settings.get('Users_Session', 'max-expiry-age') #in seconds
-        userProfile = Context.instance().getSessions()[userSession]
-        
-        self.response.set_cookie(key="session_id", value=userSession, expires=expires, path='/', domain="") 
-
-        # get levels
-        levels = Context.instance().getLevels(userProfile=userProfile)
-        
-        if channelId is not None:
-            if not isinstance(channelId, list): raise HTTP_400("Bad channel-id provided in request, list expected")
-            if len(channelId) != 2: raise HTTP_400("Bad len channel-id provided in request, list of 2 elements expected")
-            
-            channelId = tuple(channelId)
-            user = { 'address' : channelId, 'profile': userProfile }
-            registered = Context.instance().registerUser(user=user)
-            
-        _rsp = {    "cmd": self.request.path, "message":"Logged in", 
-                    "session_id": userSession, "expires": int(lease), 
-                    "user_id": userProfile['id'], "levels": levels,
-                    "project_id":  userProfile['defaultproject'], 
-                    }
-        
-        # checking version 
-        if clientVersion is not None and clientPlatform is not None and clientPortable is not None:
-            success, newVersion, newPkg = Context.instance().checkClientUpdate( currentVersion= clientVersion, 
-                                                                                systemOs = clientPlatform, 
-                                                                                portable = clientPortable )
-            clientAvailable = False
-            if success == Context.instance().CODE_ERROR:
-                raise HTTP_500("error to check if a new client is available")
-            if success == Context.instance().CODE_OK:
-                clientAvailable = True
-            _rsp["client-available"] = clientAvailable
-            _rsp["version"] = newVersion 
-            _rsp["name"] = newPkg
-            
-        return _rsp
-        
-class SessionLogout(Handler):
-    """
-    /rest/session/logout
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - session
-        summary: Logout client
-        description: ''
-        operationId: sessionLogout
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Logged out | Not logged in
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "logged out",
-                  "cmd": "/session/logout"
-                }
-            headers:
-              Set-Cookie:
-                type: string
-                description: |
-                  session_id=DELETED;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/ 
-        """
-        sess_id = self.request.cookies.get("session_id")
-        
-        if sess_id in Context.instance().getSessions():
-            del Context.instance().getSessions()[sess_id]
-            self.response.delete_cookie("session_id")
-            return {  "cmd": self.request.path, "message":"logged out" } 
-
-        return { "cmd": self.request.path, "message":"Not logged in" }
-        
-class SessionRefresh(Handler):
-    """
-    /rest/session/refresh
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - session
-        summary: Refresh session
-        description: ''
-        operationId: sessionRefresh
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Session refreshed
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "session refreshed",
-                  "cmd": "/session/refresh"
-                }
-            headers:
-              Set-Cookie:
-                type: string
-                description: |
-                  session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M;expires=Wed, 10-May-2017 06:32:57 GMT; path=/ 
-          '401':
-            description: Access denied
-        """
-        sess_user = _get_user(request=self.request)
-        sess_id = self.request.cookies.get("session_id")
-        
-        expires = Context.instance().updateSession(sessionId=sess_id)
-        self.response.set_cookie(key="session_id", value=sess_id, expires=expires, path='/', domain="") 
-        return { "cmd": self.request.path, "message":"session refreshed" }
-        
-class SessionContext(Handler):
-    """
-    /rest/session/context
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - session
-        summary: Context session
-        description: ''
-        operationId: sessionContext
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Session refreshed
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "context": "xxxxxxxxxxxx",
-                  "cmd": "/session/context"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
-        
-        context = Context.instance().getInformations(user=user_profile['login'], b64=True)
-        
-        return { "cmd": self.request.path, "context": context }
-        
-class SessionContextAll(Handler):
-    """
-    /rest/session/context/all
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - session
-        summary: get full context
-        description: ''
-        operationId: sessionContextAll
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Session refreshed
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "context": "xxxxxxxxxxxx",
-                  "cmd": "/session/context"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
-        
-        USER_CTX = Context.UserContext(login=user_profile["login"])
-        
-        rsp = { "cmd": self.request.path }
-        
-        rsp['probes'] = ProbesManager.instance().getRunning(b64=True)
-        rsp['probes-installed'] = ProbesManager.instance().getInstalled(b64=True)
-        rsp['probes-stats'] = ProbesManager.instance().getStats(b64=True)
-        rsp['probes-default'] = ProbesManager.instance().getDefaultProbes(b64=True)
-
-        rsp['agents'] = AgentsManager.instance().getRunning(b64=True)
-        rsp['agents-installed'] = AgentsManager.instance().getInstalled(b64=True)
-        rsp['agents-stats'] = AgentsManager.instance().getStats(b64=True)
-        rsp['agents-default'] = AgentsManager.instance().getDefaultAgents(b64=True)
-        
-        rsp['projects'] = USER_CTX.getProjects(b64=True)
-        rsp['default-project'] = USER_CTX.getDefault()
-        
-        _, _, archs, stats_archs = RepoArchives.instance().getTree(b64=True,  project=USER_CTX.getDefault())
-        rsp['archives'] =  archs
-        rsp['stats-repo-archives'] = stats_archs
-
-        rsp['tasks-running'] = TaskManager.instance().getRunning(b64=True, user=USER_CTX)
-        rsp['tasks-waiting'] = TaskManager.instance().getWaiting(b64=True, user=USER_CTX)
-        rsp['tasks-history'] = TaskManager.instance().getHistory(b64=True, user=USER_CTX)
-        rsp['tasks-enqueued'] = TaskManager.instance().getEnqueued(b64=True)
-
-        _, _, tests, stats_tests = RepoTests.instance().getTree(b64=True, project=USER_CTX.getDefault() )
-        rsp['repo'] = tests
-        rsp['stats-repo-tests'] = stats_tests
-        
-        rsp['help'] = HelperManager.instance().getHelps()
-        rsp['stats'] = StatsManager.instance().getStats()
-        
-        rsp['stats-server'] = Context.instance().getStats(b64=True)
-        rsp['backups-repo-tests'] = RepoTests.instance().getBackups(b64=True)
-        rsp['backups-repo-adapters'] = RepoAdapters.instance().getBackups(b64=True)
-        rsp['backups-repo-libraries'] = RepoLibraries.instance().getBackups(b64=True)
-        rsp['backups-repo-archives'] = RepoArchives.instance().getBackups(b64=True)
-            
-        _, _, adps, stats_adps = RepoAdapters.instance().getTree(b64=True)
-        rsp['repo-adp'] = adps
-        rsp['stats-repo-adapters'] = stats_adps
-        
-        _, _, libs, stats_libs = RepoLibraries.instance().getTree(b64=True)
-        rsp['repo-lib-adp'] = libs
-        rsp['stats-repo-libraries'] = stats_libs
-        
-        rsp['rn'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
-        rsp['rnAdp'] = RepoAdapters.instance().getRn(b64=True)
-        rsp['rnLibAdp'] = RepoLibraries.instance().getRn(b64=True)
-        rsp['rnToolbox'] = ToolboxManager.instance().getRn(b64=True)
-        rsp['informations'] = Context.instance().getInformations(user=USER_CTX, b64=True)
-        
-        del USER_CTX
-        
-        return rsp
-
-"""
-Tasks handlers
-"""
-class TasksRunning(Handler):
-    """
-    /rest/tasks/running
-    """
-    @_to_yaml    
-    def get(self):
-        """
-        tags:
-          - tasks
-        summary: Get all my running tasks or all with admin level
-        description: ''
-        operationId: tasksRunning
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Running tasks
-            schema :
-              properties:
-                cmd:
-                  type: string
-                tasks-running:
-                  type: array
-            examples:
-              application/json: |
-                {
-                  "tasks-running": [],
-                  "cmd": "/tasks/running"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
-        
-        _userCtx = Context.UserContext(login=user_profile['login'])
-        if user_profile['administrator']: _userCtx = None
-        
-        running = TaskManager.instance().getRunning(b64=False, user=_userCtx)
-        return { "cmd": self.request.path, "tasks-running": running }
-        
-class TasksWaiting(Handler):
-    """
-    /rest/tasks/waiting
-    """
-    @_to_yaml    
-    def get(self):
-        """
-        tags:
-          - tasks
-        summary: Get all my waiting tasks or all with admin level
-        description: ''
-        operationId: tasksWaiting
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: Waiting tasks
-            schema :
-              properties:
-                cmd:
-                  type: string
-                tasks-waiting:
-                  type: array
-            examples:
-              application/json: |
-                {
-                  "tasks-waiting": [],
-                  "cmd": "/tasks/waiting"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-
-        _userCtx = Context.UserContext(login=user_profile['login'])
-        if user_profile['administrator']: _userCtx = None
-        
-        waiting = TaskManager.instance().getWaiting(b64=False, user=_userCtx)
-        return { "cmd": self.request.path, "tasks-waiting": waiting }
-        
-class TasksHistory(Handler):
-    """
-    /rest/tasks/history
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - tasks
-        summary: Get my partial history tasks or all with admin level
-        description: ''
-        operationId: tasksHistory
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: History tasks
-            schema :
-              properties:
-                cmd:
-                  type: string
-                tasks-history:
-                  type: array
-            examples:
-              application/json: |
-                {
-                  "tasks-history": [],
-                  "cmd": "/tasks/history"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-
-        _userCtx = Context.UserContext(login=user_profile['login'])
-        if user_profile['administrator']: _userCtx = None
-        
-        history = TaskManager.instance().getHistory(b64=False, user=_userCtx)
-        return { "cmd": self.request.path, "tasks-history": history }
-        
-class TasksHistoryAll(Handler):
-    """
-    /rest/tasks/history/all
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - tasks
-        summary: Get all my history tasks or all with admin level
-        description: ''
-        operationId: tasksHistoryAll
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: History tasks
-            schema :
-              properties:
-                cmd:
-                  type: string
-                tasks-history:
-                  type: array
-            examples:
-              application/json: |
-                {
-                  "tasks-history": [],
-                  "cmd": "/tasks/history/all"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-
-        _userCtx = Context.UserContext(login=user_profile['login'])
-        if user_profile['administrator']: _userCtx = None
-        
-        history = TaskManager.instance().getHistory(Full=True, b64=False, user=_userCtx)
-        return { "cmd": self.request.path, "tasks-history": history }
-
-class TasksCancel(Handler):
-    """
-    /rest/tasks/cancel
-    """
-    @_to_yaml    
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: Cancel one specific task according to the id
-        description: ''
-        operationId: tasksCancel
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-                  description: task id to cancel
-        responses:
-          '200':
-            description: Task successfully cancelled
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task successfully cancelled",
-                  "cmd": "/tasks/cancel"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-        
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        # kill all task
-        success = TaskManager.instance().cancelTask(taskId=taskId, userName=_userName)
-        if success == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if success == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("unable to kill the task")
-
-        return { "cmd": self.request.path, "message": "task successfully cancelled", 'task-id': taskId }
-        
-class TasksCancelSelective(Handler):
-    """
-    /rest/tasks/cancel/selective
-    """
-    @_to_yaml    
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: Cancel one or more tasks according to the id
-        description: ''
-        operationId: tasksCancelSelective
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ tasks-id ]
-              properties:
-                tasks-id:
-                  type: array
-                  description: list of tasks id to cancel
-        responses:
-          '200':
-            description: Tasks successfully cancelled
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "tasks successfully cancelled",
-                  "cmd": "/tasks/cancel/selective"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            tasksId = self.request.data.get("tasks-id")
-            if tasksId is None: raise EmptyValue("Please specify tasks-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(tasksId, list):
-            raise HTTP_400("Bad tasks id provided in request, list expected")
-        
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        # cancel selective tasks
-        for taskId in tasksId:
-            success = TaskManager.instance().cancelTask(taskId=taskId, userName=_userName)
-            if success == Context.instance().CODE_NOT_FOUND:
-                raise HTTP_404("task id not found")
-            if success == Context.instance().CODE_FORBIDDEN:
-                raise HTTP_403("access denied to this task")
-            if success == Context.instance().CODE_ERROR:
-                raise HTTP_500("unable to cancel the task")
-
-        return { "cmd": self.request.path, "message": "tasks successfully cancelled" }
-  
-class TasksKill(Handler):
-    """
-    /rest/tasks/kill
-    """
-    @_to_yaml    
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: Kill one specific task according to the id
-        description: ''
-        operationId: tasksKill
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-                  description: task id to kill
-        responses:
-          '200':
-            description: Task successfully killed
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task successfully killed",
-                  "cmd": "/tasks/kill"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-        
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        # kill all task
-        success = TaskManager.instance().killTask(taskId=taskId, userName=_userName)
-        if success == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if success == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("unable to kill the task")
-
-        return { "cmd": self.request.path, "message": "task successfully killed", 'task-id': taskId }
-        
-class TasksKillSelective(Handler):
-    """
-    /rest/tasks/kill/selective
-    """
-    @_to_yaml    
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: Kill one or more tasks according to the id
-        description: ''
-        operationId: tasksKillSelective
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ tasks-id ]
-              properties:
-                tasks-id:
-                  type: array
-                  description: list of tasks id to kill
-        responses:
-          '200':
-            description: Tasks successfully killed
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "tasks successfully killed",
-                  "cmd": "/tasks/kill/selective"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            tasksId = self.request.data.get("tasks-id")
-            if tasksId is None: raise EmptyValue("Please specify tasks-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(tasksId, list):
-            raise HTTP_400("Bad tasks id provided in request, list expected")
-        
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        # kill selective tasks
-        for taskId in tasksId:
-            success = TaskManager.instance().killTask(taskId=taskId, userName=_userName)
-            if success == Context.instance().CODE_NOT_FOUND:
-                raise HTTP_404("task id not found")
-            if success == Context.instance().CODE_FORBIDDEN:
-                raise HTTP_403("access denied to this task")
-            if success == Context.instance().CODE_ERROR:
-                raise HTTP_500("unable to kill the task")
-
-        return { "cmd": self.request.path, "message": "tasks successfully killed" }
-   
-class TasksReschedule(Handler):
-    """
-    /rest/tasks/reschedule
-    """ 
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: Reschedule a test
-        description: ''
-        operationId: tasksReschedule
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id, task-enabled, schedule-at, schedule-repeat, probes-enabled, debug-enabled, notifications-enabled, logs-enabled, from-time, to-time  ]
-              properties:
-                task-id:
-                  type: integer
-                  description: task id to reschedule
-                schedule-id:
-                  type: integer
-                schedule-type:
-                  type: string
-                  description: daily | hourly | weekly | every | at | in | now
-                task-enabled:
-                  type: boolean
-                schedule-at:
-                  type: array
-                  description: [ Y,M,D,H,M,S ]
-                schedule-repeat:
-                  type: integer
-                probes-enabled:
-                  type: boolean 
-                debug-enabled:
-                  type: boolean 
-                notifications-enabled:
-                  type: boolean 
-                logs-enabled:
-                  type: boolean 
-                from-time:
-                  type: array
-                  description: [ Y,M,D,H,M,S ]
-                to-time:
-                  type: array 
-                  description: [ Y,M,D,H,M,S ]
-        responses:
-          '200':
-            description: task successfully rescheduled
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task successfully rescheduled",
-                  "cmd": "/tasks/reschedule"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            scheduleType = self.request.data.get("schedule-type")
-            scheduleId = self.request.data.get("schedule-id")
-            taskEnabled = self.request.data.get("task-enabled")
-            scheduleAt = self.request.data.get("schedule-at")
-            scheduleRepeat = self.request.data.get("schedule-repeat")
-            probesEnabled = self.request.data.get("probes-enabled")
-            notificationsEnabled = self.request.data.get("notifications-enabled")
-            logsEnabled = self.request.data.get("logs-enabled")
-            debugEnabled = self.request.data.get("debug-enabled")
-            fromTime = self.request.data.get("from-time")
-            toTime = self.request.data.get("to-time")
-            
-            if taskId is None: raise EmptyValue("Please specify task-id")
-            if taskEnabled is None: raise EmptyValue("Please specify task-boolean")
-            
-            if scheduleType is None and scheduleId is None : raise EmptyValue("Please specify schedule-type or schedule-id")
-            if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
-            if scheduleRepeat is None: raise EmptyValue("Please specify schedule-repeat")
-            
-            if probesEnabled is None: raise EmptyValue("Please specify probes-enabled")
-            if notificationsEnabled is None: raise EmptyValue("Please specify notifications-enabled")
-            if logsEnabled is None: raise EmptyValue("Please specify logs-enabled")
-            if debugEnabled is None: raise EmptyValue("Please specify debug-enabled")
-            
-            if fromTime is None: raise EmptyValue("Please specify from-time")
-            if toTime is None: raise EmptyValue("Please specify to-time")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task-id provided in request, int expected")
-        if not isinstance(taskEnabled, bool):
-            raise HTTP_400("Bad task-enabled provided in request, boolean expected")
-        if not isinstance(scheduleRepeat, int):
-            raise HTTP_400("Bad schedule-repeat provided in request, int expected")
-        if not isinstance(probesEnabled, bool):
-            raise HTTP_400("Bad probes-enabled provided in request, boolean expected")
-        if not isinstance(notificationsEnabled, bool):
-            raise HTTP_400("Bad notifications-enabled provided in request, boolean expected")
-        if not isinstance(logsEnabled, bool):
-            raise HTTP_400("Bad logs-enabled provided in request, boolean expected")
-        if not isinstance(debugEnabled, bool):
-            raise HTTP_400("Bad debug-enabled provided in request, boolean expected")
-        if len(scheduleAt) != 6:
-            raise HTTP_400("Bad schedule-at provided in request, array of size 6 expected")
-        if len(fromTime) != 6:
-            raise HTTP_400("Bad from-time provided in request, array of size 6 expected")
-        if len(toTime) != 6:
-            raise HTTP_400("Bad to-time provided in request, array of size 6 expected")
-            
-        if scheduleType is not None:
-            if scheduleType not in TaskManager.SCHEDULE_TYPES:
-                raise HTTP_400("Bad schedule-type provided in request, string expected daily | hourly | weekly | every | at | in | now ")
-                
-        if scheduleId is None:
-            scheduleId = TaskManager.SCHEDULE_TYPES[scheduleType]
-        
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-         
-        success = TaskManager.instance().updateTask( taskId = taskId, schedType=scheduleId, schedEnabled=taskEnabled,
-                                                    shedAt=scheduleAt, schedNb=scheduleRepeat, withoutProbes=probesEnabled,
-                                                    debugActivated=debugEnabled, withoutNotif=notificationsEnabled,
-                                                    noKeepTr=logsEnabled, schedFrom=fromTime, schedTo=toTime,
-                                                    userName=_userName)
-        if success == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if success == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("unable to reschedule the task")
-            
-        return { "cmd": self.request.path, "message": "task successfully rescheduled" }
-
-class TasksVerdict(Handler):
-    """
-    /rest/tasks/verdict
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: get the verdict as report of my task
-        description: ''
-        operationId: tasksVerdict
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-        responses:
-          '200':
-            description: task replayed with success
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task replayed with success",
-                  "cmd": "/tasks/verdict"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-            
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        task = TaskManager.instance().getTaskBy( taskId = taskId, userName=_userName )
-        if task == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if task == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        
-        verdict = task.getTestVerdict()
-        xmlVerdict = task.getTestVerdict(returnXml=True)
-            
-        return { "cmd": self.request.path, "verdict": verdict, "xml-verdict": xmlVerdict }
-
-class TasksReview(Handler):
-    """
-    /rest/tasks/review
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: get the review as report of my test
-        description: ''
-        operationId: tasksReview
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-        responses:
-          '200':
-            description: task replayed with success
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task replayed with success",
-                  "cmd": "/tasks/review"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-            
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        task = TaskManager.instance().getTaskBy( taskId = taskId, userName=_userName )
-        if task == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if task == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        
-        review = task.getTestReport()
-        xmlReview = task.getTestReport(returnXml=True)
-            
-        return { "cmd": self.request.path, "review": review, "xml-review": xmlReview }
-        
-class TasksDesign(Handler):
-    """
-    /rest/tasks/design
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: get the design as report of my task
-        description: ''
-        operationId: tasksDesign
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-        responses:
-          '200':
-            description: task replayed with success
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task replayed with success",
-                  "cmd": "/tasks/replay"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-            
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        task = TaskManager.instance().getTaskBy( taskId = taskId, userName=_userName )
-        if task == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if task == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        
-        design = task.getTestDesign()
-        xmlDesign = task.getTestDesign(returnXml=True)
-            
-        return { "cmd": self.request.path, "design": design, "xml-design": xmlDesign }
-   
-class TasksComment(Handler):
-    """
-    /rest/tasks/comment
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: add a comment to the task
-        description: ''
-        operationId: tasksComment
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id, comment, timestamp ]
-              properties:
-                task-id:
-                  type: integer
-                comment:
-                  type: string
-                timestamp:
-                  type: string
-        responses:
-          '200':
-            description: task replayed with success
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "comment added with success",
-                  "cmd": "/tasks/comment"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            comment = self.request.data.get("comment")
-            timestamp = self.request.data.get("timestamp")
-            
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-            
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        task = TaskManager.instance().getTaskBy( taskId = taskId, userName=_userName )
-        if task == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if task == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        
-        archivePath = task.getFileResultPath()
-        success, _, _, _ = RepoArchives.instance().addComment(  archiveUser=user_profile['login'], 
-                                                                archivePath=archivePath, 
-                                                                archivePost=comment, 
-                                                                archiveTimestamp=timestamp )
-        if success != Context.instance().CODE_OK:
-            raise HTTP_500("Unable to add comment")
-            
-        return { "cmd": self.request.path, "message": "comment added with success" }
-
-class TasksReplay(Handler):
-    """
-    /rest/tasks/replay
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - tasks
-        summary: replay my task
-        description: ''
-        operationId: tastkReplay
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ task-id ]
-              properties:
-                task-id:
-                  type: integer
-        responses:
-          '200':
-            description: task replayed with success
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "message": "task replayed with success",
-                  "cmd": "/tasks/replay"
-                }
-          '401':
-            description: Access denied 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            taskId = self.request.data.get("task-id")
-            if taskId is None: raise EmptyValue("Please specify task-id")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # checking input
-        if not isinstance(taskId, int):
-            raise HTTP_400("Bad task id provided in request, int expected")
-            
-        _userName = user_profile['login']
-        if user_profile['administrator']: _userName = None
-        
-        success = TaskManager.instance().replayTask( tid = taskId, userName=_userName)
-        if success == Context.instance().CODE_NOT_FOUND:
-            raise HTTP_404("task id not found")
-        if success == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("access denied to this task")
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("unable to replay the task")
-            
-        return { "cmd": self.request.path, "message": "task replayed with success" }
 
 """
 Adapters handler
@@ -5015,109 +3601,6 @@ class LibrariesFileOpen(Handler):
                  "project-id": project }
 
 """
-System handlers
-"""
-class SystemUsages(Handler):
-    """
-    /rest/system/usages
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - system
-        summary: get system usages
-        description: ''
-        operationId: systemUsages
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "disk": {...},
-                  "cmd": "/system/usages"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
- 
-        usages = {}
-        usages["disk"] = Context.instance().getUsage(b64=False)
-        
-        return { "cmd": self.request.path, "usages": usages }
-
-class SystemAbout(Handler):
-    """
-    /rest/system/about
-    """
-    @_to_yaml
-    def get(self):
-        """
-        tags:
-          - system
-        summary: get system about
-        description: ''
-        operationId: systemAbout
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "about": {...},
-                  "cmd": "/system/about"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
- 
-        about = {}
-        
-        rn = {}
-        rn['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
-        rn['adapter'] = RepoAdapters.instance().getRn(b64=True)
-        rn['libraries'] = RepoLibraries.instance().getRn(b64=True)
-        rn['toolbox'] = ToolboxManager.instance().getRn(b64=True)
-            
-        versions = {}
-        versions["core"] = Settings.getVersion()
-        versions["python"] = platform.python_version()
-        versions["php"] = Context.instance().phpVersion
-        versions["database"] = Context.instance().mysqlVersion
-        versions["web"] = Context.instance().apacheVersion
-        
-        about["rn"] = rn
-        about["versions"] = versions
-        about["network"] = Context.instance().networkInterfaces
-        
-        return { "cmd": self.request.path, "about": about }
-
-"""
 Agents handlers
 """
 class AgentsRunning(Handler):
@@ -5264,7 +3747,7 @@ class AgentsDisconnect(Handler):
   
         try:
             agentName = self.request.data.get("agent-name")
-            if not agentName : raise HTTP_400("Please specify a agent name")
+            if agentName is None : raise HTTP_400("Please specify a agent name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -5659,7 +4142,7 @@ class ProbesDisconnect(Handler):
    
         try:
             probeName = self.request.data.get("probe-name")
-            if not probeName : raise HTTP_400("Please specify a probe name")
+            if probeName is None: raise HTTP_400("Please specify a probe name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -5916,7 +4399,7 @@ class PublicListing(Handler):
     def get(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Get the listing of all files and folders in the public area
         description: ''
         operationId: publicListing
@@ -5959,7 +4442,7 @@ class PublicDirectoryAdd(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Add directory in the public storage
         description: ''
         operationId: publicDirectoryAdd
@@ -6009,10 +4492,10 @@ class PublicDirectoryAdd(Handler):
         
         try:
             folderName = self.request.data.get("directory-name")
-            if not folderName: raise EmptyValue("Please specify a source folder name")
+            if folderName is None: raise EmptyValue("Please specify a source folder name")
             
             folderPath = self.request.data.get("directory-path")
-            if not folderPath: raise EmptyValue("Please specify a source folder path")
+            if folderPath is None: raise EmptyValue("Please specify a source folder path")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6036,7 +4519,7 @@ class PublicDirectoryRename(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Rename directory name in the public storage
         description: ''
         operationId: publicDirectoryRename
@@ -6096,12 +4579,12 @@ class PublicDirectoryRename(Handler):
        
         try:
             folderName = self.request.data.get("source")["directory-name"]
-            if not folderName: raise EmptyValue("Please specify a source folder name")
+            if folderName is None: raise EmptyValue("Please specify a source folder name")
             folderPath = self.request.data.get("source")["directory-path"]
-            if not folderPath: raise EmptyValue("Please specify a source folder path")
+            if folderPath is None: raise EmptyValue("Please specify a source folder path")
             
             newFolderName = self.request.data.get("destination")["directory-name"]
-            if not newFolderName: raise EmptyValue("Please specify a destination folder name")
+            if newFolderName is None: raise EmptyValue("Please specify a destination folder name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6128,7 +4611,7 @@ class PublicDirectoryRemove(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Remove directory in the public storage and their contents recursively
         description: ''
         operationId: publicDirectoryRemove
@@ -6182,7 +4665,7 @@ class PublicDirectoryRemove(Handler):
         
         try:
             folderPath = self.request.data.get("source")["directory-path"]
-            if not folderPath: raise EmptyValue("Please specify a source folder path")
+            if folderPath is None: raise EmptyValue("Please specify a source folder path")
             _recursive = self.request.data.get("recursive")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
@@ -6223,7 +4706,7 @@ class PublicImport(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Import file to the public storage. Provide the file in base64 format
         description: ''
         operationId: publicFileImport
@@ -6275,7 +4758,7 @@ class PublicImport(Handler):
         try:
             filePath = self.request.data.get("file-path")
             fileContent = self.request.data.get("file-content")
-            if not projectName and not filePath and not fileContent:
+            if not filePath and not fileContent:
                 raise EmptyValue("Please specify a project name, file content and path")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
@@ -6310,7 +4793,7 @@ class PublicRemove(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Import file to the public storage. Provide the file in base64 format
         description: ''
         operationId: publicFileRemove
@@ -6361,8 +4844,7 @@ class PublicRemove(Handler):
         
         try:
             filePath = self.request.data.get("file-path")
-            if not projectName and not filePath:
-                raise EmptyValue("Please specify a project name and file path")
+            if filePath is None:raise EmptyValue("Please specify a project name and file path")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6388,7 +4870,7 @@ class PublicRename(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Import file to the public storage. Provide the file in base64 format
         description: ''
         operationId: publicFileRename
@@ -6439,14 +4921,14 @@ class PublicRename(Handler):
         
         try:
             fileName = self.request.data.get("source")["file-path"]
-            if not fileName: raise EmptyValue("Please specify a source filename")
+            if fileName is None: raise EmptyValue("Please specify a source filename")
             filePath = self.request.data.get("source")["file-name"]
-            if not filePath: raise EmptyValue("Please specify a source file path")
+            if filePath is None: raise EmptyValue("Please specify a source file path")
             fileExt = self.request.data.get("source")["file-extension"]
-            if not fileExt: raise EmptyValue("Please specify a source file extension")
+            if fileExt is None: raise EmptyValue("Please specify a source file extension")
             
             newFileName = self.request.data.get("destination")["file-name"]
-            if not newFileName: raise EmptyValue("Please specify a destination file name")
+            if newFileName is None: raise EmptyValue("Please specify a destination file name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6478,7 +4960,7 @@ class PublicDownload(Handler):
     def post(self):
         """
         tags:
-          - public_storage
+          - public
         summary: Import file to the public storage. Provide the file in base64 format
         description: ''
         operationId: publicFileDownload
@@ -6529,8 +5011,7 @@ class PublicDownload(Handler):
         
         try:
             filePath = self.request.data.get("file-path")
-            if not projectName and not filePath:
-                raise EmptyValue("Please specify a project name and file path")
+            if filePath is None: raise EmptyValue("Please specify a project name and file path")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -6544,94 +5025,6 @@ class PublicDownload(Handler):
             raise HTTP_500("Unable to download file")
 
         return { "cmd": self.request.path, "file-content": content }
-
-"""
-Documentations handler
-"""     
-class DocumentationsCache(Handler):
-    """
-    /rest/documentations/cache
-    """   
-    @_to_yaml   
-    def get(self):
-        """
-        tags:
-          - documentations
-        summary: get documentations from cache
-        description: ''
-        operationId: documentationsCache
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: usages
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cache": "....",
-                  "cmd": "/documentations/cache"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(self.request)
-
-        docs = {}
-        docs["help"] = HelperManager.instance().getHelps()
-        
-        return { "cmd": self.request.path, "cache": docs }
-        
-class DocumentationsBuild(Handler):
-    """
-    /rest/documentations/build
-    """
-    @_to_yaml    
-    def get(self):
-        """
-        tags:
-          - documentations
-        summary: build a cache for the documentations
-        description: ''
-        operationId: documentationsBuild
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            description: usages
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "build": "success",
-                  "cmd": "/documentations/build"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(self.request)
-
-        success, details = HelperManager.instance().generateHelps()
-
-        return { "cmd": self.request.path, "build": success, "details": details }
 
 """
 Tests handlers
@@ -6866,9 +5259,10 @@ class TestsScheduleGroup(Handler):
                 if not res:
                     raise HTTP_500('Unable to read test plan: %s' % testPath)
 
-                rslt = RepoTests.instance().addtf2tp( data_= doc.getSorted() )
-                if rslt is not None:
-                    raise HTTP_500('Unable to prepare test plan: %s' % testPath)
+                tests = doc.getSorted()
+                success, error_msg = RepoTests.instance().addtf2tp( data_=tests )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test plan: %s' % error_msg )
 
                 testData = { 'test-execution': doc.getSorted(), 
                              'test-properties': doc.properties['properties'],
@@ -6884,9 +5278,10 @@ class TestsScheduleGroup(Handler):
                 if not res:
                      raise HTTP_500('Unable to read test global: %s' % testPath)
 
-                rslt, alltests = RepoTests.instance().addtf2tg( data_= doc.getSorted() )
-                if rslt is not None:
-                    raise HTTP_500('Unable to prepare test global: %s' % testPath)
+                alltests = doc.getSorted()
+                success, error_msg, alltests = RepoTests.instance().addtf2tg( data_= alltests )
+                if success != Context.instance().CODE_OK:
+                    raise HTTP_500('Unable to prepare test global: %s' % error_msg)
 
                 testData = { 'test-execution': alltests, 
                              'test-properties': doc.properties['properties'],
@@ -6937,7 +5332,7 @@ class TestsSchedule(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, test-definition, test-execution, test-properties, test-path, test-name, schedule-id, schedule-at]
+              required: [ project-id, test-definition, test-execution, test-properties, test-extension, test-path, test-name, schedule-id, schedule-at]
               properties:
                 project-id:
                   type: integer
@@ -6947,6 +5342,8 @@ class TestsSchedule(Handler):
                   type: string 
                 test-properties:
                   type: object 
+                test-extension:
+                  type: string 
                 test-path:
                   type: string 
                 test-name:
@@ -7455,9 +5852,7 @@ class TestsScheduleTpg(Handler):
             scheduleAt = self.request.data.get("schedule-at")
             if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
             
-            scheduleRepeat = self.request.data.get("schedule-repeat")
-            if scheduleRepeat is None: raise EmptyValue("Please specify schedule-repeat")
-
+            _scheduleRepeat = self.request.data.get("schedule-repeat")
             _tabId = self.request.data.get("tab-id")
             _backgroundMode = self.request.data.get("background-mode")
             _stepMode = self.request.data.get("step-mode")
@@ -7608,7 +6003,9 @@ class TestsScheduleTpg(Handler):
         fromTime = (0,0,0,0,0,0)
         toTime = (0,0,0,0,0,0)
         message = "success" 
+        scheduleRepeat = 0
 
+        if _scheduleRepeat is not None: scheduleRepeat = _scheduleRepeat
         if _tabId is not None: tabId = _tabId
         if _backgroundMode is not None: backgroundMode=_backgroundMode
         if _stepMode is not None: stepMode=_stepMode
@@ -7733,20 +6130,19 @@ class TestsListing(Handler):
                   type: boolean
         responses:
           '200':
-            description: tests listing
             schema :
               properties:
                 cmd:
                   type: string
-                tests-listing:
-                  type: string
+                listing:
+                  type: array
                 project-id:
                   type: integer
             examples:
               application/json: |
                 {
                   "cmd": "/tests/listing", 
-                  "tests-listing": "....",
+                  "listing": [],
                   "project-id": 1
                 }
           '400':
@@ -7787,9 +6183,9 @@ class TestsListing(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        _, _, listing, _ = RepoTests.instance().getTree(b64=True, project=projectId)
+        _, _, listing, _ = RepoTests.instance().getTree(b64=False, project=projectId)
 
-        return { "cmd": self.request.path, "tests-listing": listing, "project-id": projectId, 
+        return { "cmd": self.request.path, "listing": listing, "project-id": projectId, 
                  "for-saveas": _forsaveas, "for-runs": _forruns }
 
 class TestsCheckSyntax(Handler):
@@ -7979,10 +6375,8 @@ class TestsCheckSyntaxTpg(Handler):
         if testExtension not in [ "tgx", "tpx" ]:
             raise HTTP_400("Bad test extension provided (%s)" % testExtension)
             
-        if testExtension == "tgx":  
-            success, error_msg, self.request.data["test-execution"] = RepoTests.instance().addtf2tg( 
-                                data_=self.request.data["test-execution"]
-                              )
+        if testExtension == "tgx":
+            success, error_msg, testExecution = RepoTests.instance().addtf2tg( data_= testExecution )
             if success != Context.instance().CODE_OK:
                 return { "cmd": self.request.path, "status": False, "error-msg": error_msg }
                 
@@ -8734,9 +7128,8 @@ class TestsFileUnlock(Handler):
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
-            
             filePath = self.request.data.get("file-path")
-            if filePath is None: raise EmptyValue("Please specify a source filepath")
+            if filePath is None: raise EmptyValue("Please specify a source file path")
             fileName = self.request.data.get("file-name")
             if fileName is None: raise EmptyValue("Please specify a source file filename")
             fileExt = self.request.data.get("file-extension")
@@ -10790,7 +9183,91 @@ class VariablesSearchById(Handler):
 
 """
 Tests Results handlers
-"""          
+"""
+class ResultsUploadFile(Handler):
+    """
+    /rest/results/upload/file
+    """
+    @_to_yaml
+    def post(self):
+        """
+        tags:
+          - results
+        summary: Upload a file in the test result
+        description: ''
+        operationId: resultsUploadFile
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ result-path, file-name, file-content ]
+              properties:
+                result-path:
+                  type: string
+                file-name:
+                  type: string
+                file-content:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                message:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/results/upload/file", 
+                  "message": "success"
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Extension file refused
+          '404':
+            description: Test result not found
+          '500':
+            description: Server error 
+        """
+        try:
+            resultPath = self.request.data.get("result-path")
+            if resultPath is None: raise EmptyValue("Please specify a result path")
+            
+            fileName = self.request.data.get("file-name")
+            if fileName is None: raise EmptyValue("Please specify a file name")
+            
+            fileContent = self.request.data.get("file-content")
+            if fileContent is None: raise EmptyValue("Please specify a file content")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+            
+        # we can upload only zip file
+        if not fileName.endswith(".zip") and not fileName.endswith(".png") \
+                and not fileName.endswith(".jpg") and not fileName.endswith(".mp4") :
+            raise HTTP_403('Extension file not authorized')
+            
+        archiveRepo='%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
+        if not os.path.exists( "%s/%s" % (archiveRepo, resultPath )):
+            raise HTTP_404('test result path not found')
+        
+        success = RepoArchives.instance().createResultLog(testsPath=archiveRepo , 
+                                                          logPath=resultPath,
+                                                          logName=fileName, 
+                                                          logData=fileContent )
+        if not success:
+            raise HTTP_500("Unable to upload file in testresult")
+            
+        return { "cmd": self.request.path, 'message': 'success' }
+       
 class ResultsCompressZip(Handler):
     """
     /rest/results/compress/zip
@@ -10930,7 +9407,7 @@ class ResultsListingFiles(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/results/listing", 
+                  "cmd": "/results/listing/files", 
                   "listing": [...],
                   "nb-folders": 2,
                   "nb-files":  2,
@@ -11417,97 +9894,6 @@ class ResultsDownloadImage(Handler):
             
         return { "cmd": self.request.path, 'test-id': testId, 'project-id': projectId, 'image': b64img }
 
-class ResultsUploadFile(Handler):
-    """
-    /rest/results/upload/file
-    """
-    @_to_yaml
-    def post(self):
-        """
-        tags:
-          - results
-        summary: Upload a file in the test result
-        description: ''
-        operationId: resultsUploadFile
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ result-path, file-name, file-content ]
-              properties:
-                result-path:
-                  type: string
-                file-name:
-                  type: string
-                file-content:
-                  type: string
-        responses:
-          '200':
-            schema :
-              properties:
-                cmd:
-                  type: string
-                message:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/results/upload/file", 
-                  "message": "success"
-                }
-          '400':
-            description: Bad request provided
-          '403':
-            description: Extension file refused
-          '404':
-            description: Test result not found
-          '500':
-            description: Server error 
-        """
-        user_profile = _get_user(request=self.request)
-        
-        try:
-            resultPath = self.request.data.get("result-path")
-            if resultPath is None: raise EmptyValue("Please specify a result path")
-            
-            fileName = self.request.data.get("file-name")
-            if fileName is None: raise EmptyValue("Please specify a file name")
-            
-            fileContent = self.request.data.get("file-content")
-            if fileContent is None: raise EmptyValue("Please specify a file content")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-            
-        # we can upload only zip file
-        if not fileName.endswith(".zip") and not fileName.endswith(".png") \
-                and not fileName.endswith(".jpg") and not fileName.endswith(".mp4") :
-            raise HTTP_403('Extension file not authorized')
-            
-        archiveRepo='%s%s' % ( Settings.getDirExec(), Settings.get( 'Paths', 'testsresults' ) )
-        if not os.path.exists( "%s/%s" % (archiveRepo, resultPath )):
-            raise HTTP_404('test result path not found')
-        
-        success = RepoArchives.instance().createResultLog(testsPath=archiveRepo , 
-                                                          logPath=resultPath,
-                                                          logName=fileName, 
-                                                          logData=fileContent )
-        if not success:
-            raise HTTP_500("Unable to upload file in testresult")
-            
-        return { "cmd": self.request.path, 'message': 'success' }
-
 class ResultsRemoveById(Handler):
     """
     /rest/results/remove/by/id
@@ -11992,7 +10378,7 @@ class ResultsReportReviews(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/results/reports", 
+                  "cmd": "/results/report/reviews", 
                   "test-id": "7dcc4836-e989-49eb-89b7-5ec1351d2ced",
                   "basic-review": "eJztfHnPq9iZ5/+R+ju8qqiVbjkV....",
                   "review": "eJztfHnPq9iZ5/+R+ju8qqiVbjkV...."
@@ -13025,184 +11411,3 @@ class MetricsTestsWritingDuration(Handler):
             raise HTTP_500("unable to save duration in table")
             
         return { "cmd": self.request.path, 'message': 'duration added' }
-
-"""
-Clients Handler
-"""
-class ClientsAvailable(Handler):
-    """
-    /rest/clients/available
-    """
-    @_to_yaml  
-    def post(self):
-        """
-        tags:
-          - clients
-        summary: check if a new client is available
-        description: ''
-        operationId: clientsAvailable
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ client-version, client-platform, client-portable ]
-              properties:
-                client-version:
-                  type: string
-                client-platform:
-                  type: boolean
-                client-portable:
-                  type: string
-                recheck:
-                  type: boolean
-        responses:
-          '200':
-            description: results statistics
-            schema :
-              properties:
-                cmd:
-                  type: string
-                client-available:
-                  type: boolean
-                version:
-                  type: string
-                name:
-                  type: string
-                recheck:
-                  type: boolean
-            examples:
-              application/json: |
-                {
-                  "cmd": "/clients/available", 
-                  "client-available": True,
-                  "version": "1.0.0",
-                  "name: "...."
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error 
-        """
-        user_profile = _get_user(request=self.request)
-   
-        try:
-            clientVersion = self.request.data.get("client-version")
-            clientPlatform = self.request.data.get("client-platform")
-            clientPortable = self.request.data.get("client-portable")
-            _recheck = self.request.data.get("recheck")
-            
-            if clientVersion is None: raise HTTP_400("Please specify a client version")
-            if clientPlatform is None: raise HTTP_400("Please specify a client platform")
-            if clientPortable is None: raise HTTP_400("Please specify a client portable")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        recheck = False
-        if _recheck is not None:
-            recheck = _recheck
-            
-        success, newVersion, newPkg = Context.instance().checkClientUpdate( currentVersion= clientVersion, 
-                                                                              systemOs = clientPlatform, 
-                                                                              portable = clientPortable )
-        clientAvailable = False
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500("error to check if a new client is available")
-        if success == Context.instance().CODE_OK:
-            clientAvailable = True
-            
-        return { "cmd": self.request.path, "client-available": clientAvailable, 
-                 "version": newVersion, "name": newPkg, "recheck": recheck } 
-
-class ClientsDownload(Handler):
-    """
-    /rest/clients/download
-    """
-    @_to_yaml  
-    def post(self):
-        """
-        tags:
-          - clients
-        summary: download client
-        description: ''
-        operationId: clientsDownload
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ client-platform, client-name ]
-              properties:
-                client-platform:
-                  type: boolean
-                client-name:
-                  type: string
-        responses:
-          '200':
-            description: results statistics
-            schema :
-              properties:
-                cmd:
-                  type: string
-                client-binary:
-                  type: boolean
-            examples:
-              application/json: |
-                {
-                  "cmd": "/clients/download", 
-                  "client-binary": "...."
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error 
-        """
-        user_profile = _get_user(request=self.request)
-     
-        try:
-            clientPlatform = self.request.data.get("client-platform")
-            clientName = self.request.data.get("client-name")
-
-            if clientPlatform is None: raise HTTP_400("Please specify a client platform")
-            if clientName is None: raise HTTP_400("Please specify a client name")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        # new in v17, force to download the 64_bit architecture
-        if clientPlatform == "win32": clientPlatform = "win64"
-        clientPackagePath = '%s%s/%s/%s' % ( Settings.getDirExec(), 
-                                             Settings.get( 'Paths', 'clt-package' ),
-                                             clientPlatform, 
-                                             clientName )
-        
-        try:
-            f = open( clientPackagePath, 'rb')
-            data_read = f.read()
-            f.close()
-        except Exception as e:
-            raise HTTP_500("unable to find the client")
-            
-        return { "cmd": self.request.path, "client-binary": base64.b64encode(data_read), 
-                 "client-name": clientName } 

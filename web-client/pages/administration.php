@@ -26,7 +26,7 @@
 	$INDEX_PAGE = get_pindex('administration');
 	$SUB_PAGE_PROFILE =  get_subpindex( 'administration', 'admin-profile' ) ;
 	$SUB_PAGE_USERS =  get_subpindex( 'administration', 'admin-users' ) ;
-	$SUB_PAGE_LICENSE =  get_subpindex( 'administration', 'admin-license' ) ;
+	//$SUB_PAGE_LICENSE =  get_subpindex( 'administration', 'admin-license' ) ;
 	$SUB_PAGE_PROJECTS =  get_subpindex( 'administration', 'admin-projects' ) ;
 	$SUB_PAGE_CONFIG =  get_subpindex( 'administration', 'admin-config' ) ;
 
@@ -65,8 +65,8 @@
 			( $s == $SUB_PAGE_PROJECTS ) ? $active="selected" : $active ="";
 			echo '<div class="link box-item '.$active.'" onclick="javascript:nav(\'./index.php?p='.$INDEX_PAGE.'&s='.$SUB_PAGE_PROJECTS.'\')" >'.lang('admin-projects').'</div><img onclick="javascript:nav(\'./index.php?p='.$INDEX_PAGE.'&s='.$SUB_PAGE_PROJECTS.'&c=new\')" src="./style/'.$__LWF_APP_DFLT_STYLE.'/img/add-green.png" class="link icon-add" alt="add" title="'.lang('admin-projects-new').'">';
 
-			( $s == $SUB_PAGE_LICENSE ) ? $active="selected" : $active ="";
-			echo '<div class="link box-item '.$active.'" onclick="javascript:nav(\'./index.php?p='.$INDEX_PAGE.'&s='.$SUB_PAGE_LICENSE.'\')" >'.lang('admin-license').'</div>';
+			// ( $s == $SUB_PAGE_LICENSE ) ? $active="selected" : $active ="";
+			// echo '<div class="link box-item '.$active.'" onclick="javascript:nav(\'./index.php?p='.$INDEX_PAGE.'&s='.$SUB_PAGE_LICENSE.'\')" >'.lang('admin-license').'</div>';
 
 			( $s == $SUB_PAGE_CONFIG ) ? $active="selected" : $active ="";
 			echo '<div class="link box-item '.$active.'" onclick="javascript:nav(\'./index.php?p='.$INDEX_PAGE.'&s='.$SUB_PAGE_CONFIG.'\')" >'.lang('admin-config').'</div>';
@@ -337,34 +337,34 @@
 		}
 
 		// license part
-		if ( $s == $SUB_PAGE_LICENSE )
-		{
+		// if ( $s == $SUB_PAGE_LICENSE )
+		// {
 
 			// title
-			echo '<div class="admin-title-index">'.lang('admin-license').'</div>';
+			// echo '<div class="admin-title-index">'.lang('admin-license').'</div>';
 
 			// mcrypt library is installed ?
-			$testMcrypt = get_extension_funcs("mcrypt"); // Grab function list 
-			if (!$testMcrypt) {
-				$tb = '<div class="box-warn">mcrypt library not installed on your system</div>';
-			}else {
-				if ( ! $CORE->profile['administrator'] ) {
-					echo lang('access denied');
-					return;
-				}
+			// $testMcrypt = get_extension_funcs("mcrypt"); // Grab function list 
+			// if (!$testMcrypt) {
+				// $tb = '<div class="box-warn">mcrypt library not installed on your system</div>';
+			// }else {
+				// if ( ! $CORE->profile['administrator'] ) {
+					// echo lang('access denied');
+					// return;
+				// }
 
-				$CORE->read_license();
+				// $CORE->read_license();
 
-				if ( $CORE->license != null ) {
-					$tb = $CORE->display_license();
-				} else {
-					$tb = $CORE->license_error;
-				}
-			}
-			$tabsbody[] = $tb;
+				// if ( $CORE->license != null ) {
+					// $tb = $CORE->display_license();
+				// } else {
+					// $tb = $CORE->license_error;
+				// }
+			// }
+			// $tabsbody[] = $tb;
 			// construct tab body
-			echo construct_tabbody($tabsbody);
-		}
+			// echo construct_tabbody($tabsbody);
+		// }
 
 		// users part
 		if ( $s == $SUB_PAGE_USERS )

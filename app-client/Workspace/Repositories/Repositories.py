@@ -336,8 +336,9 @@ class WRepositories(QWidget, Logger.ClassLogger):
                 self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
             
             self.remoteRepository.defaultActions()
-            self.remoteRepository.initialize(listing= self.decodeData(data['repo'])  )
-            self.remoteRepository.initializeProjects( projects=self.decodeData(data['projects']), defaultProject=data['default-project'] )
+            self.remoteRepository.initialize(listing= data['repo']  )
+            self.remoteRepository.initializeProjects( projects=self.decodeData(data['projects']), 
+                                                      defaultProject=data['default-project'] )
         
         if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
             self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
@@ -394,7 +395,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
             self.remoteRepository.defaultActions()
             if self.remoteRepository.initializeProjects( projects= self.decodeData(data['projects']), 
                                                          defaultProject=data['default-project']  ) :
-                self.remoteRepository.initialize(listing= self.decodeData(data['repo']))
+                self.remoteRepository.initialize(listing= data['repo'])
 
             self.adaptersRemoteRepository.setConnected() 
             self.adaptersRemoteRepository.setEnabled(True)
@@ -469,13 +470,15 @@ class WRepositories(QWidget, Logger.ClassLogger):
         self.remoteRepository.defaultActions()
         
         if forSaveAs:
-            self.remoteRepository.initializeSaveAs(listing=self.decodeData(data), reloadItems=True )
+            self.remoteRepository.initializeSaveAs(listing=data, 
+                                                   reloadItems=True )
         else:
             # update default project
             projectName = self.remoteRepository.getProjectName(projectId)
             self.remoteRepository.setDefaultProject(projectName=projectName)
+            
             # reconstruct
-            self.remoteRepository.initialize(listing=self.decodeData(data) )
+            self.remoteRepository.initialize(listing=data )
 
     def onRefreshRemoteAdapters(self, data):
         """

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -674,15 +674,6 @@ if [ "$INSTALL_EMBEDDED_PKGS" = "Yes" ]; then
 	ldconfig 1>> "$LOG_FILE" 2>&1
     cd .. 1>> "$LOG_FILE" 2>&1
 	rm -rf $APP_PATH/$PYMSSQL/ 1>> "$LOG_FILE" 2>&1
-
-	echo -ne "* Installing phpmcrypt                 \r"
-	if [ "$OS_RELEASE" != "7" ]; then
-		rpm -ivh $PKG_PATH/libmcrypt-2.5.8-9.el6.x86_64.rpm 1>> "$LOG_FILE" 2>&1
-		rpm -ivh $PKG_PATH/php-mcrypt-5.3.3-3.el6.x86_64.rpm 1>> "$LOG_FILE" 2>&1
-	else
-		rpm -ivh $PKG_PATH/libmcrypt-2.5.8-13.el7.x86_64.rpm 1>> "$LOG_FILE" 2>&1
-		rpm -ivh $PKG_PATH/php-mcrypt-5.4.16-2.el7.x86_64.rpm 1>> "$LOG_FILE" 2>&1
-	fi
 
 	echo -ne "* Installing ecdsa                 \r"
 	$TAR_BIN xvf $PKG_PATH/$ECDSA.tar.gz  1>> "$LOG_FILE" 2>&1

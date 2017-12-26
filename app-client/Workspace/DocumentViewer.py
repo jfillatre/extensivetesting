@@ -722,15 +722,12 @@ class WorkspaceTab(QTabWidget):
             else: 
                 # open the file from the remote repo
                 if data['repotype'] == UCI.REPO_TESTS:
-                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
                     RCI.instance().openFileTests(projectId=data['projectid'], 
                                                  filePath=data['pathfile'])
                 elif data['repotype'] == UCI.REPO_ADAPTERS:
-                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
                     RCI.instance().openFileAdapters(filePath=data['pathfile'], 
                                                     ignoreLock=False, readOnly=False)
                 elif data['repotype'] == UCI.REPO_LIBRARIES:
-                    # UCI.instance().openFileRepo( repo=data['repotype'], pathFile = data['pathfile'], project=data['projectid'])
                     RCI.instance().openFileLibraries(filePath=data['pathfile'], 
                                                      ignoreLock=False, readOnly=False)
                 else:
@@ -1279,7 +1276,6 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                             defaultProject=Settings.instance().serverContext['default-project'] )
         if self.runsDialog.exec_() == QDialog.Accepted:
             tests, runLater, runAt, runSimultaneous = self.runsDialog.getTests()
-            # UCI.instance().scheduleTests(tests=tests, later=runLater, runAt=runAt, runSimultaneous=runSimultaneous)
 
             # rest call
             RCI.instance().scheduleTests(tests=tests,
@@ -1300,7 +1296,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         """
         On refresh repository runs
         """
-        self.runsDialog.initializeTests(listing=self.decodeData(data) )
+        self.runsDialog.initializeTests(listing=data )
 
     def printDoc(self):
         """
@@ -1539,7 +1535,8 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             _filename = tmp[1].rsplit(".", 1)[0]
         else:
             _filename = tmp[0].rsplit(".", 1)[0]
-        self.newTab( path = path, filename = _filename, extension = extension, repoDest=UCI.REPO_UNDEFINED)
+        self.newTab( path = path, filename = _filename, 
+                     extension = extension, repoDest=UCI.REPO_UNDEFINED)
 
     def openRemoteTestFile(self, filePath, fileName, fileExtension, fileContent, projectId, isLocked, lockedBy):
         """
@@ -1566,17 +1563,13 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel )
                         
             # force to open the file
-            if reply == QMessageBox.Yes:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), 
-                                                # project=projectId, repo=repoType, forceOpen=True)
+            if reply == QMessageBox.Yes:
                 RCI.instance().openFileTests(projectId=int(projectId), 
                                              filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                              ignoreLock=True, 
                                              readOnly=False)
             # force as read only
-            if reply == QMessageBox.No:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), project=projectId, 
-                                                # repo=repoType, forceOpen=True, readOnly=True)
+            if reply == QMessageBox.No: 
                 RCI.instance().openFileTests(projectId=int(projectId), 
                                              filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                              ignoreLock=True, 
@@ -1615,17 +1608,13 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel )
                         
             # force to open the file
-            if reply == QMessageBox.Yes:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), 
-                                                # project=0, repo=repoType, forceOpen=True)
+            if reply == QMessageBox.Yes: 
                 RCI.instance().openFileAdapters(projectId=0, 
                                                  filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                                  ignoreLock=True, 
                                                  readOnly=False)
             # force as read only
-            if reply == QMessageBox.No:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), project=0, 
-                                                # repo=repoType, forceOpen=True, readOnly=True)
+            if reply == QMessageBox.No:
                 RCI.instance().openFileAdapters(projectId=0, 
                                                  filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                                  ignoreLock=True, 
@@ -1664,17 +1653,13 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel )
                         
             # force to open the file
-            if reply == QMessageBox.Yes:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), 
-                                                # project=0, repo=repoType, forceOpen=True)
+            if reply == QMessageBox.Yes: 
                 RCI.instance().openFileLibraries(projectId=0, 
                                                  filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                                  ignoreLock=True, 
                                                  readOnly=False)
             # force as read only
-            if reply == QMessageBox.No:   
-                # UCI.instance().openFileRepo( pathFile = "%s/%s.%s" % (path_file, name_file, ext_file), project=0, 
-                                                # repo=repoType, forceOpen=True, readOnly=True)
+            if reply == QMessageBox.No: 
                 RCI.instance().openFileLibraries(projectId=int(projectId), 
                                                  filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
                                                  ignoreLock=True, 
@@ -2025,47 +2010,6 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                     doc.unSaved()
                     doc.setModify()
                     
-    # def remoteDirRenamed(self, data):
-        # """
-        # Called when a remote file is renamed
-
-        # @param data: 
-        # @type data: 
-        # """
-        # repoType, main_path, old_path, new_path, project = data
-        # if len(main_path) > 0:
-            # complete_old = "%s/%s" % (main_path, old_path)
-            # complete_new = "%s/%s" % (main_path, new_path)
-        # else:
-            # complete_old = old_path
-            # complete_new = new_path
-        
-        # for tabId in xrange( self.tab.count() ):    
-            # doc = self.tab.widget(tabId)
-            
-            # bypass the welcome page
-            # if isinstance(doc, WelcomePage): 
-                # continue
-            # end of bypass
-            
-            # if doc.isRemote == True and doc.getPathOnly().startswith(complete_old) and doc.repoDest==repoType:  
-                # to_keep = doc.getPathOnly().split(complete_old)
-                # if len(to_keep) > 1: to_keep = to_keep[1]
-                # else: to_keep = to_keep[0]
-
-                # full_new_path = "%s%s" % (complete_new, to_keep)
-
-                # self.tab.setCurrentIndex(tabId)
-                # buttons = QMessageBox.Yes | QMessageBox.No 
-                # answer = QMessageBox.question(self, Settings.instance().readValue( key = 'Common/name' ), 
-                                # self.tr("The path of this file has been renamed.\nDo you want to update the path ?") , buttons)
-                # if answer == QMessageBox.Yes:
-                    # doc.updatePath( pathFilename=full_new_path )
-                    # doc.setUnmodify()
-                # elif answer == QMessageBox.No:
-                    # doc.unSaved()
-                    # doc.setModify()
-                    
     def onRemoteTestFileSavedError(self, filePath, fileName, fileExtension,
                                     projectId, overwriteFile, closeAfter):
         """
@@ -2170,40 +2114,6 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         if tabId is not None:
             doc = self.tab.widget(tabId)
             doc.unSaved()
-            
-    # def remoteFileSaveErr(self, data):
-        # """
-        # Called when the save of a remote file failed
-
-        # @param data: 
-        # @type data: 
-        # """
-        # repoType, path_file, name_file, ext_file, file_already_exists, project, closeAfter  = data
-        # if len(path_file) > 0:
-            # complete_path = "%s/%s.%s" % (path_file, name_file, ext_file)
-        # else:
-            # complete_path = "%s.%s" % (name_file, ext_file)
-
-        # tabId = None # issue Issue 224
-        # if file_already_exists:
-            # tabId = self.checkAlreadyOpened(path = complete_path, remoteFile=True, 
-                                            # repoType=repoType, project=project)
-        # else:
-            # for tid in xrange( self.tab.count() ):
-                # doc = self.tab.widget(tid)
-                
-                # bypass the welcome page
-                # if isinstance(doc, WelcomePage): 
-                    # continue
-                # end of bypass
-                
-                # if doc.isRemote == True and doc.getPath() == complete_path and doc.repoDest==UCI.REPO_UNDEFINED:
-                    # tabId = tid
-                    # break
-
-        # if tabId is not None:
-            # doc = self.tab.widget(tabId)
-            # doc.unSaved()
 
     def updateRemoteTestOnTestglobal(self, data, parametersOnly=True, mergeParameters=False):
         """
@@ -4294,9 +4204,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
 
         currentDocument = self.tab.widget(tabId)
         projectName = self.iRepo.remote().getProjectName(project=currentDocument.project)
-        
-        # UCI.instance().checkDesignTest(  wdocument = currentDocument,  
-                                        # prjId=currentDocument.project, prjName=projectName )
+
         _json = self.prepareTest( wdocument = currentDocument, 
                                   prjId=currentDocument.project, 
                                   basicMode=False)    
@@ -4686,18 +4594,14 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         currentDocument = self.tab.widget(tabId)
         
         if isinstance(currentDocument, TestAdapter.WTestAdapter):
-            # UCI.instance().checkSyntaxAdapter(  wdocument = currentDocument )
             RCI.instance().checkSyntaxAdapter( fileContent=currentDocument.getraw_encoded() )
             
         elif isinstance(currentDocument, TestLibrary.WTestLibrary):
-            # UCI.instance().checkSyntaxLibrary(  wdocument = currentDocument )
             RCI.instance().checkSyntaxLibrary( fileContent=currentDocument.getraw_encoded() )
             
         else:
             testId = TestResults.instance().getTestId()
-            # UCI.instance().checkSyntaxTest(  wdocument = currentDocument, testId = testId, 
-                                            # runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW )
-              
+
             _json = self.prepareTest( wdocument = currentDocument, basicMode=True)    
             
             if currentDocument.extension in [ RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTUNIT]:
@@ -4828,14 +4732,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             schedType = runType
         currentDocument = self.tab.widget(tabId)
         testId = TestResults.instance().getTestId()
-        
-        # if background:
-        # UCI.instance().scheduleTest(  
-                                      # wdocument = currentDocument, testId = testId, background = background , runAt = runAt, 
-                                      # runType=schedType, runNb=runNb, withoutProbes=withoutProbes, debugActivated=debugActivated, 
-                                      # withoutNotif=withoutNotif, noKeepTr=noKeepTr, fromTime=fromTime, toTime=toTime, 
-                                      # prjId=currentDocument.project, stepByStep=stepByStep, breakpoint=breakpoint
-                                    # )
+
         _json = self.prepareTest (  wdocument=currentDocument, tabId=testId, background = background, 
                                     runAt = runAt, runType=schedType, runNb=runNb, withoutProbes=withoutProbes, 
                                     debugActivated=debugActivated, withoutNotif=withoutNotif, noKeepTr=noKeepTr, 

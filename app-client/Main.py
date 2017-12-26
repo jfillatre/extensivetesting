@@ -44,7 +44,7 @@ __TESTERS__ = [ "Emmanuel Monsoro", "Thibault Lecoq"  ]
 # project start in year
 __BEGIN__="2010"
 # year of the latest build
-__END__="2017"
+__END__="2018"
 # date and time of the buid
 __BUILDTIME__="29/10/2017 09:38:08"
 # Redirect stdout and stderr to log file only on production

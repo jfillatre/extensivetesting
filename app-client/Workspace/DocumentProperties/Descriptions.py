@@ -501,9 +501,7 @@ class ValueDelegate(QItemDelegate, Logger.ClassLogger):
                         # uci call
                         if stateTest == 'Executing':
                             duration = time.time() - float(wdoc.dataModel.testdev)
-                            # UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp,
-                                                        # isTs=isTs, isTu=isTu, isTg=isTg, isTa=isTa)
-                                                        
+                          
                             # rest call
                             RCI.instance().durationTestsWritingMetrics( duration=int(duration), 
                                                                         projectId=wdoc.project, 
@@ -839,7 +837,8 @@ class CommentsDialog(QtHelper.EnhancedQDialog, Logger.ClassLogger):
             postEncoded = str(postEncoded, 'utf8')
         else:
             postEncoded = base64.b64encode(tPost.toUtf8())
-        self.comments.append( {'author': UCI.instance().getLogin() , 'datetime': str(time.time()), 'post': postEncoded } )
+        self.comments.append( {'author': UCI.instance().getLogin() , 
+                               'datetime': str(time.time()), 'post': postEncoded } )
         self.clearText()
         self.loadComments()
 
@@ -1056,7 +1055,6 @@ class DescriptionsTableView(QTableView, Logger.ClassLogger):
                 break
 
         # call web service
-        # UCI.instance().addDevTime(duration=int(duration), prjId=wdoc.project, isTp=isTp, isTs=isTs, isTu=isTu, isTg=isTg)
         RCI.instance().durationTestsWritingMetrics( duration=int(duration), 
                                                     projectId=wdoc.project, 
                                                     isTp=isTp, 

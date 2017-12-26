@@ -43,7 +43,7 @@ import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 urllib3.disable_warnings(InsecureRequestWarning)
 
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 import os
 import html

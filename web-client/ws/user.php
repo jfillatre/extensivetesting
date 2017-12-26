@@ -1,7 +1,7 @@
 <?php
 	/*
 	---------------------------------------------------------------
-	 Copyright (c) 2010-2017 Denis Machard. All rights reserved.
+	 Copyright (c) 2010-2018 Denis Machard. All rights reserved.
 
 	 This file is part of the extensive testing project; you can redistribute it and/or
 	 modify it under the terms of the GNU General Public License, Version 3.
@@ -19,28 +19,28 @@
 	if (!defined('WS_OK'))
 		exit( 'access denied' );
 
-	function licencereached($level, $uid=null) {
-		global $db, $CORE, $__LWF_DB_PREFIX;
-		$sql_req = 'SELECT count(*) as nb FROM `'.$__LWF_DB_PREFIX.'-users` WHERE '.$level.'=1';
-		if ( $uid != null) {
-			$sql_req .= ' AND id <> \''.$uid.'\';';
-		}
-		$sql_req .= ';';
-		$rslt = $db->query( $sql_req ) ;
-		if ( !$rslt ) 
-		{
-			return -1;
-		} else {
-			$cur_u = $db->fetch_assoc($rslt);
-			if ( $CORE->license['users'][$level] == 'UNLIMITED' ) {
-				return false;
-			}
-			if ( $cur_u['nb'] >= $CORE->license['users'][$level] ){
-				return true;
-			}
-		}
-		return false;
-	}
+	// function licencereached($level, $uid=null) {
+		// global $db, $CORE, $__LWF_DB_PREFIX;
+		// $sql_req = 'SELECT count(*) as nb FROM `'.$__LWF_DB_PREFIX.'-users` WHERE '.$level.'=1';
+		// if ( $uid != null) {
+			// $sql_req .= ' AND id <> \''.$uid.'\';';
+		// }
+		// $sql_req .= ';';
+		// $rslt = $db->query( $sql_req ) ;
+		// if ( !$rslt ) 
+		// {
+			// return -1;
+		// } else {
+			// $cur_u = $db->fetch_assoc($rslt);
+			// if ( $CORE->license['users'][$level] == 'UNLIMITED' ) {
+				// return false;
+			// }
+			// if ( $cur_u['nb'] >= $CORE->license['users'][$level] ){
+				// return true;
+			// }
+		// }
+		// return false;
+	// }
 
 	function changenotfisuser( $uid, $notifications ) {
 		global $db, $CORE, $__LWF_DB_PREFIX;
@@ -189,7 +189,7 @@
 	}
 
 	function disconnectuser( $login ) {
-		global $db, $CORE, $XMLRPC, $__LWF_DB_PREFIX;
+		global $db, $CORE, $RESTAPI, $__LWF_DB_PREFIX;
 		$rsp = array();
 		$rsp["code"] = 100;
 		$rsp["msg"] = lang('ws-trying');
@@ -197,29 +197,23 @@
 	
 		$redirect_page_url = "./index.php?p=".get_pindex('administration')."&s=".get_subpindex( 'administration', 'admin-users' );
 
-		// check if login is exist
-		$user = getuserbylogin($login);
-		if ( $user == null || $user == false)
-		{
-			$rsp["code"] = 404;
-			$rsp["msg"] = lang('ws-user-not-found');
-			$rsp["moveto"] = $redirect_page_url;
-			return $rsp;
-		}
-
-		// disconnect user through xmlrpc
-		$disconnect =  $XMLRPC->disconnectUser($login);
-		if ( is_null($disconnect) ) {
-			$rsp["code"] = 500;
-			$rsp["msg"] = "Unable to disconnect user";
+		// disconnect user through rest api
+        list($code, $details) = $RESTAPI->disconnectUser($login=$login);
+        
+        $rsp["code"] = 500;
+		if ($code == 401) {
+			$rsp["msg"] = $details;
+		} elseif ($code == 400) {
+			$rsp["msg"] = $details;
+		} elseif ($code == 500) {
+			$rsp["msg"] = $details;
+		} elseif ($code == 403) {
+			$rsp["msg"] = $details;
+		} elseif ($code == 404) {
+			$rsp["msg"] = $details;
 		} else {
-			if ( $disconnect ) {
-				$rsp["code"] = 200;
-				$rsp["msg"] = lang('ws-user-disconnected');
-			} else {
-				$rsp["code"] = 500;
-				$rsp["msg"] = "Unable to disconnect user";
-			}
+            $rsp["code"] = 200;
+            $rsp["msg"] = lang('ws-user-disconnected');
 		}
 
 		$rsp["moveto"] = $redirect_page_url;
@@ -276,7 +270,7 @@
 	}
 
 	function deluser( $uid) {
-		global $db, $CORE, $XMLRPC, $__LWF_DB_PREFIX;
+		global $db, $CORE, $RESTAPI, $__LWF_DB_PREFIX;
 		$rsp = array();
 		$rsp["code"] = 100;
 		$rsp["msg"] = lang('ws-trying');
@@ -312,8 +306,8 @@
 			return $rsp;
 		}
 
-		// disconnect user through xmlrpc
-		$disconnect =  $XMLRPC->disconnectUser($user['login']);
+		// disconnect user through rest api
+		list($code, $details) = $RESTAPI->disconnectUser($login=$user['login']);
 
 		// delete user
 		$sql_req = 'DELETE FROM `'.$__LWF_DB_PREFIX.'-users` WHERE id=\''.mysql_real_escape_string($uid).'\';';
@@ -448,12 +442,12 @@
 
 
 		// check the license
-		$CORE->read_license();
-		if ( $CORE->license == null ) {
-			$rsp["code"] = 603;
-			$rsp["msg"] = $CORE->license_error;
-			return $rsp;
-		} 
+		// $CORE->read_license();
+		// if ( $CORE->license == null ) {
+			// $rsp["code"] = 603;
+			// $rsp["msg"] = $CORE->license_error;
+			// return $rsp;
+		// } 
 
         // set default values
         if ( !strbool2int($admin) and !strbool2int($leader) and !strbool2int($tester) and !strbool2int($developer) ) {
@@ -464,57 +458,57 @@
             $web = "true";
         }
         
-		if ( strbool2int($admin) ) {
-			$reached = licencereached($level="administrator");
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count administrator users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for administrator';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($admin) ) {
+			// $reached = licencereached($level="administrator");
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count administrator users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for administrator';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($leader) ) {
-			$reached = licencereached($level="leader");
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count leader users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for leader';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($leader) ) {
+			// $reached = licencereached($level="leader");
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count leader users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for leader';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($tester) ) {
-			$reached = licencereached($level="tester");
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count tester users");
-				return $rsp;
-			} elseif ($reached == true) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for tester';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($tester) ) {
+			// $reached = licencereached($level="tester");
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count tester users");
+				// return $rsp;
+			// } elseif ($reached == true) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for tester';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($developer) ) {
-			$reached = licencereached($level="developer");
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count developer users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for developer';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($developer) ) {
+			// $reached = licencereached($level="developer");
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count developer users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for developer';
+				// return $rsp;
+			// }
+		// }
 
 		// notifications
 		$regex = '/^(((true)|(false));){7}/'; 
@@ -641,64 +635,64 @@
 		}
 
 		// check the license
-		$CORE->read_license();
-		if ( $CORE->license == null ) {
-			$rsp["code"] = 603;
-			$rsp["msg"] = $CORE->license_error;
-			return $rsp;
-		} 
+		// $CORE->read_license();
+		// if ( $CORE->license == null ) {
+			// $rsp["code"] = 603;
+			// $rsp["msg"] = $CORE->license_error;
+			// return $rsp;
+		// } 
 
-		if ( strbool2int($admin) ) {
-			$reached = licencereached($level="administrator", $uid=$uid);
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count administrator users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for administrator';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($admin) ) {
+			// $reached = licencereached($level="administrator", $uid=$uid);
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count administrator users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for administrator';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($leader) ) {
-			$reached = licencereached($level="leader", $uid=$uid);
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count leader users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for leader';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($leader) ) {
+			// $reached = licencereached($level="leader", $uid=$uid);
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count leader users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for leader';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($tester) ) {
-			$reached = licencereached($level="tester", $uid=$uid);
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count tester users");
-				return $rsp;
-			} elseif ($reached == true) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for tester';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($tester) ) {
+			// $reached = licencereached($level="tester", $uid=$uid);
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count tester users");
+				// return $rsp;
+			// } elseif ($reached == true) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for tester';
+				// return $rsp;
+			// }
+		// }
 
-		if ( strbool2int($developer) ) {
-			$reached = licencereached($level="developer", $uid=$uid);
-			if ( $reached === -1) {
-				$rsp["code"] = 500;
-				$rsp["msg"] = $db->str_error("Unable to count developer users");
-				return $rsp;
-			} elseif ($reached) {
-				$rsp["code"] = 603;
-				$rsp["msg"] = 'The license limit is reached for developer';
-				return $rsp;
-			}
-		}
+		// if ( strbool2int($developer) ) {
+			// $reached = licencereached($level="developer", $uid=$uid);
+			// if ( $reached === -1) {
+				// $rsp["code"] = 500;
+				// $rsp["msg"] = $db->str_error("Unable to count developer users");
+				// return $rsp;
+			// } elseif ($reached) {
+				// $rsp["code"] = 603;
+				// $rsp["msg"] = 'The license limit is reached for developer';
+				// return $rsp;
+			// }
+		// }
 
 
 		// notifications

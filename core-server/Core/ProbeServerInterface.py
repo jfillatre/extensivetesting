@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -288,10 +288,7 @@ class ProbeServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         self.trace(" on registration" )
         self.__mutex.acquire()
         doNotify=False
-        if len(self.probesRegistered) >= self.context.getLicence()[ 'probes' ] [ 'instance' ]:
-            self.info('license probes reached')
-            NetLayerLib.ServerAgent.forbidden(self, client, tid)
-        elif request['userid'] in  self.probesRegistered:
+        if request['userid'] in  self.probesRegistered:
             self.info('duplicate probe registration: %s' % request['userid'] )
             NetLayerLib.ServerAgent.failed(self, client, tid)
         else:

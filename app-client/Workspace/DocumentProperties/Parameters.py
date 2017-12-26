@@ -3331,7 +3331,7 @@ class ParametersTableView(QTableView, Logger.ClassLogger):
                 fileName = row['value'].split('):/', 1)[1]
                 projectName = row['value'].split('remote-tests(', 1)[1].split('):/', 1)[0]
                 projectId = Workspace.WRepositories.instance().remote().getProjectId(projectName)
-                # UCI.instance().openFileRepo(pathFile=fileName, repo=UCI.REPO_TESTS, project=projectId)
+
                 RCI.instance().openFileTests(projectId=int(projectId), filePath=fileName)
                                                          
             elif row['value'].startswith('local-tests:/'):

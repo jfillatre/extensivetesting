@@ -84,7 +84,6 @@ def _to_yaml(wrapped, instance, args, kwargs):
     """
     return wrapped(*args, **kwargs)
 
-
 def _get_user(request):
     """
     Lookup a user session or return None if one doesn't exist
@@ -1287,64 +1286,13 @@ class LibrariesReset(Handler):
             raise HTTP_500("Unable to reset libraries")
             
         return { "cmd": self.request.path, "message": "reseted" }
-
-
-"""
-System handlers
-"""
-class SystemStatus(Handler):
-    """
-    /rest/system/status
-    """
-    @_to_yaml  
-    def get(self):
-        """
-        tags:
-          - system
-        summary: get system status
-        description: ''
-        operationId: systemStatus
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-        responses:
-          '200':
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "status": {...},
-                  "cmd": "/system/status"
-                }
-          '401':
-            description: Access denied
-        """
-        user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-            
-        status = {}
-        status["start-at"] = Context.instance().startedAt
-        status["current-date"] = Context.instance().getServerDateTime()
-        status["uptime"] = Context.instance().getUptime()
-        
-        return { "cmd": self.request.path, "status": status }
-
-        
+  
 """
 Administration handlers
 """
 class AdminConfigListing(Handler):
     """
-    /rest/admin/configurationg/listing
+    /rest/administration/configurationg/listing
     """
     @_to_yaml    
     def get(self):
@@ -1384,7 +1332,7 @@ class AdminConfigListing(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -1405,7 +1353,7 @@ class AdminConfigListing(Handler):
 
 class AdminConfigReload(Handler):
     """
-    /rest/admin/configuration/reload
+    /rest/administration/configuration/reload
     """
     @_to_yaml    
     def get(self):
@@ -1445,7 +1393,7 @@ class AdminConfigReload(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -1463,7 +1411,7 @@ class AdminConfigReload(Handler):
         
 class AdminClientsDeploy(Handler):
     """
-    /rest/admin/clients/deploy
+    /rest/administration/clients/deploy
     """
     @_to_yaml     
     def get(self):
@@ -1503,7 +1451,7 @@ class AdminClientsDeploy(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -1522,7 +1470,7 @@ class AdminClientsDeploy(Handler):
 
 class AdminProjectsListing(Handler):
     """
-    /rest/admin/projects/listing
+    /rest/administration/projects/listing
     """
     @_to_yaml   
     def get(self):
@@ -1557,23 +1505,22 @@ class AdminProjectsListing(Handler):
               properties:
                 cmd:
                   type: string
-                message:
+                projects:
                   type: string
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/listing", 
+                  "projects: "...."
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']:
-            raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_401("Access refused")
             
         success, details = ProjectsManager.instance().getProjectsFromDB()
         if success == Context.instance().CODE_ERROR:
@@ -1583,7 +1530,7 @@ class AdminProjectsListing(Handler):
         
 class AdminProjectsStatistics(Handler):
     """
-    /rest/admin/projects/statistics
+    /rest/administration/projects/statistics
     """
     @_to_yaml   
     def get(self):
@@ -1623,13 +1570,13 @@ class AdminProjectsStatistics(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/statistics", 
+                  "projects-statistics: "...."
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -1643,7 +1590,7 @@ class AdminProjectsStatistics(Handler):
         
 class AdminProjectsAdd(Handler):
     """
-    /rest/admin/projects/add
+    /rest/administration/projects/add
     """
     @_to_yaml   
     def post(self):
@@ -1667,10 +1614,10 @@ class AdminProjectsAdd(Handler):
             in: body
             required: true
             schema:
-              required: [ shift ]
+              required: [ project-name ]
               properties:
-                shift:
-                  type: integer
+                project-name:
+                  type: string
         responses:
           '200':
             description: 
@@ -1683,13 +1630,15 @@ class AdminProjectsAdd(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/add", 
+                  "message: "project successfully added"
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '403':
+            description: Project name already used
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -1697,7 +1646,7 @@ class AdminProjectsAdd(Handler):
             
         try:
             projectName = self.request.data.get("project-name")
-            if not projectName : raise HTTP_400("Please specify a project name")
+            if projectName is None : raise HTTP_400("Please specify a project name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
@@ -1707,13 +1656,13 @@ class AdminProjectsAdd(Handler):
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500(details)
         if success == Context.instance().CODE_ALLREADY_EXISTS:
-            raise HTTP_400(details)
-            
+            raise HTTP_403(details)
+
         return { "cmd": self.request.path, "message": "project successfully added", "project-id": details }
 
 class AdminProjectsRename(Handler):
     """
-    /rest/admin/projects/rename
+    /rest/administration/projects/rename
     """
     @_to_yaml   
     def post(self):
@@ -1737,10 +1686,12 @@ class AdminProjectsRename(Handler):
             in: body
             required: true
             schema:
-              required: [ shift ]
+              required: [ project-name, project-ic ]
               properties:
-                shift:
+                project-id:
                   type: integer
+                project-name:
+                  type: string
         responses:
           '200':
             description: 
@@ -1753,41 +1704,47 @@ class AdminProjectsRename(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/rename", 
+                  "message: "project successfully renamed"
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '403':
+            description: Name already exist or rename not authorized
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']:
-            raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_401("Access refused")
 
         try:
             projectId = self.request.data.get("project-id")
-            if not projectId : raise HTTP_400("Please specify a project id")
+            if projectId is None: raise HTTP_400("Please specify a project id")
             
             projectName = self.request.data.get("project-name")
-            if not projectName : raise HTTP_400("Please specify a project name")
+            if projectName is None: raise HTTP_400("Please specify a project name")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
-        success, details = ProjectsManager.instance().updateProjectFromDB(projectName=projectName, projectId=projectId)
+        # checking input    
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+
+        success, details = ProjectsManager.instance().updateProjectFromDB(projectName=projectName, 
+                                                                          projectId=projectId)
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500(details)
         if success == Context.instance().CODE_ALLREADY_EXISTS:
-            raise HTTP_400(details)
+            raise HTTP_403(details)
             
         return { "cmd": self.request.path, "message": "project successfully updated" }
 
 class AdminProjectsRemove(Handler):
     """
-    /rest/admin/projects/remove
+    /rest/administration/projects/remove
     """
     @_to_yaml   
     def post(self):
@@ -1811,9 +1768,9 @@ class AdminProjectsRemove(Handler):
             in: body
             required: true
             schema:
-              required: [ shift ]
+              required: [ project-id ]
               properties:
-                shift:
+                project-id:
                   type: integer
         responses:
           '200':
@@ -1827,13 +1784,15 @@ class AdminProjectsRemove(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/remove", 
+                  "message: "project successfully removed"
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '403':
+            description: Deletion not authorized
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -1841,30 +1800,36 @@ class AdminProjectsRemove(Handler):
             
         try:
             projectId = self.request.data.get("project-id")
-            if not projectId : raise HTTP_400("Please specify a project id")
+            if projectId is None: raise HTTP_400("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
+        # checking input    
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+        
+        if projectId == 1: raise HTTP_403("Remove this project is not authorized")
+        
         success, details = ProjectsManager.instance().delProjectFromDB(projectId=projectId)
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500(details)
 
         return { "cmd": self.request.path, "message": "project successfully removed" } 
         
-class AdminProjectsSearch(Handler):
+class AdminProjectsSearchByName(Handler):
     """
-    /rest/admin/projects/search
+    /rest/administration/projects/search/by/name
     """
     @_to_yaml   
     def post(self):
         """
         tags:
           - admin
-        summary: Search a project
+        summary: Search a project by name
         description: ''
-        operationId: adminProjectsSearch
+        operationId: adminProjectsSearchByName
         consumes:
           - application/json
         produces:
@@ -1879,10 +1844,10 @@ class AdminProjectsSearch(Handler):
             in: body
             required: true
             schema:
-              required: [ shift ]
+              required: [ project-name ]
               properties:
-                shift:
-                  type: integer
+                project-name:
+                  type: string
         responses:
           '200':
             description: 
@@ -1890,18 +1855,15 @@ class AdminProjectsSearch(Handler):
               properties:
                 cmd:
                   type: string
-                message:
-                  type: string
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/projects/search/by/name"
                 }
           '400':
             description: Bad request provided
-          '404':
-            description: Probe not found
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
@@ -1909,15 +1871,13 @@ class AdminProjectsSearch(Handler):
         
         try:
             projectName = self.request.data.get("project-name")
-            projectId = self.request.data.get("project-id")
-            
-            if projectName is None and projectId is None: raise EmptyValue("Please specify the name/id of the project")
+            if projectName is None: raise EmptyValue("Please specify the name of the project")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        success, details = ProjectsManager.instance().getProjectFromDB(projectName=projectName, projectId=projectId)
+        success, details = ProjectsManager.instance().getProjectFromDB(projectName=projectName)
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500(details)
         if len(details) == 0:
@@ -1930,7 +1890,7 @@ class AdminProjectsSearch(Handler):
 
 class AdminUsersProfile(Handler):
     """
-    /rest/admin/users/profile
+    /rest/administration/users/profile
     """
     @_to_yaml    
     def post(self):
@@ -1970,7 +1930,7 @@ class AdminUsersProfile(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2001,7 +1961,7 @@ class AdminUsersProfile(Handler):
 
 class AdminUsersListing(Handler):
     """
-    /rest/admin/users/listing
+    /rest/administration/users/listing
     """
     @_to_yaml   
     def get(self):
@@ -2041,7 +2001,7 @@ class AdminUsersListing(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2062,7 +2022,7 @@ class AdminUsersListing(Handler):
         
 class AdminUsersStatistics(Handler):
     """
-    /rest/admin/users/statistics
+    /rest/administration/users/statistics
     """
     @_to_yaml 
     def get(self):
@@ -2102,7 +2062,7 @@ class AdminUsersStatistics(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2122,7 +2082,7 @@ class AdminUsersStatistics(Handler):
         
 class AdminUsersAdd(Handler):
     """
-    /rest/admin/users/add
+    /rest/administration/users/add
     """
     @_to_yaml 
     def post(self):
@@ -2162,7 +2122,7 @@ class AdminUsersAdd(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2198,7 +2158,7 @@ class AdminUsersAdd(Handler):
 
 class AdminUsersUpdate(Handler):
     """
-    /rest/admin/users/update
+    /rest/administration/users/update
     """
     @_to_yaml    
     def post(self):
@@ -2238,7 +2198,7 @@ class AdminUsersUpdate(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2271,7 +2231,7 @@ class AdminUsersUpdate(Handler):
 
 class AdminUsersRemove(Handler):
     """
-    /rest/admin/users/remove
+    /rest/administration/users/remove
     """
     @_to_yaml   
     def post(self):
@@ -2311,7 +2271,7 @@ class AdminUsersRemove(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2345,7 +2305,7 @@ class AdminUsersRemove(Handler):
 
 class AdminUsersStatus(Handler):
     """
-    /rest/admin/users/status
+    /rest/administration/users/status
     """
     @_to_yaml  
     def post(self):
@@ -2385,7 +2345,7 @@ class AdminUsersStatus(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2419,18 +2379,18 @@ class AdminUsersStatus(Handler):
         else:
             return { "cmd": self.request.path, "message": "user successfully disabled" } 
         
-class AdminUsersDisconnect(Handler):
+class AdminUsersChannelDisconnect(Handler):
     """
-    /rest/admin/users/disconnect
+    /rest/administration/users/channel/disconnect
     """
     @_to_yaml    
     def post(self):
         """
         tags:
           - admin
-        summary: Disconnect a users
+        summary: Force channel disconnection for a user
         description: ''
-        operationId: adminUsersDisconnect
+        operationId: adminUsersChannelDisconnect
         consumes:
           - application/json
         produces:
@@ -2445,10 +2405,10 @@ class AdminUsersDisconnect(Handler):
             in: body
             required: true
             schema:
-              required: [ shift ]
+              required: [ login ]
               properties:
-                shift:
-                  type: integer
+                login:
+                  type: string
         responses:
           '200':
             description: 
@@ -2461,13 +2421,13 @@ class AdminUsersDisconnect(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
-                  "message: "probe successfully disconnected"
+                  "cmd": "/administration/users/channel/disconnect", 
+                  "message: "user successfully disconnected"
                 }
           '400':
             description: Bad request provided
           '404':
-            description: Probe not found
+            description: User not found
         """
         user_profile = _get_user(request=self.request)
         
@@ -2475,13 +2435,13 @@ class AdminUsersDisconnect(Handler):
             
         try:
             userLogin = self.request.data.get("login")
-            if not userLogin : raise HTTP_400("Please specify a login")
+            if userLogin is None: raise HTTP_400("Please specify a login")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        disconnected = Context.instance().unregisterUserFromXmlrpc(login=userLogin)
+        disconnected = Context.instance().unregisterChannelUser(login=userLogin)
         if disconnected == Context.instance().CODE_NOT_FOUND:
             raise HTTP_404("user not found")
             
@@ -2489,7 +2449,7 @@ class AdminUsersDisconnect(Handler):
   
 class AdminUsersDuplicate(Handler):
     """
-    /rest/admin/users/duplicate
+    /rest/administration/users/duplicate
     """
     @_to_yaml  
     def post(self):
@@ -2529,7 +2489,7 @@ class AdminUsersDuplicate(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2559,7 +2519,7 @@ class AdminUsersDuplicate(Handler):
 
 class AdminUsersPasswordReset(Handler):
     """
-    /rest/admin/users/password/reset
+    /rest/administration/users/password/reset
     """
     @_to_yaml  
     def post(self):
@@ -2599,7 +2559,7 @@ class AdminUsersPasswordReset(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2629,7 +2589,7 @@ class AdminUsersPasswordReset(Handler):
         
 class AdminUsersPasswordUpdate(Handler):
     """
-    /rest/admin/users/password/update
+    /rest/administration/users/password/update
     """
     @_to_yaml 
     def post(self):
@@ -2669,7 +2629,7 @@ class AdminUsersPasswordUpdate(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2712,7 +2672,7 @@ class AdminUsersPasswordUpdate(Handler):
 
 class AdminUsersSearch(Handler):
     """
-    /rest/admin/users/search
+    /rest/administration/users/search
     """
     @_to_yaml 
     def post(self):
@@ -2752,7 +2712,7 @@ class AdminUsersSearch(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -2787,7 +2747,7 @@ class AdminUsersSearch(Handler):
 
 class AdminTimeShift(Handler):
     """
-    /rest/admin/time/shift
+    /rest/administration/time/shift
     """
     @_to_yaml   
     def post(self):
@@ -2827,7 +2787,7 @@ class AdminTimeShift(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/probes/disconnect", 
+                  "cmd": "/administration/disconnect", 
                   "message: "probe successfully disconnected"
                 }
           '400':
@@ -3094,9 +3054,8 @@ class TestsStatistics(Handler):
             in: body
             required: true
             schema:
+              required: [ project-id ]
               properties:
-                project-name:
-                  type: string
                 project-id:
                   type: string
         responses:
@@ -3121,28 +3080,21 @@ class TestsStatistics(Handler):
 
         try:
             projectId = self.request.data.get("project-id")
-            projectName = self.request.data.get("project-name")
-            if not projectId and not projectName: raise EmptyValue("Please specify a project name or a project id")
+            if projectId is None: raise EmptyValue("Please specify a project id")
         except EmptyValue as e:
             raise HTTP_400("%s" % e)
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
-            
+  
         # checking input    
-        if projectId is not None:
-            if not isinstance(projectId, int):
-                raise HTTP_400("Bad project id provided in request, int expected")
-                
-        # get the project id according to the name and checking authorization
-        prjId = projectId
-        if projectName: prjId = ProjectsManager.instance().getProjectID(name=projectName)   
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], projectId=prjId)
-        if not projectAuthorized:
-            raise HTTP_403('Access denied to this project')
+        if not isinstance(projectId, int):
+            raise HTTP_400("Bad project id provided in request, int expected")
+
+        if projectId == 0: projectId=''
         
-        _, _, _, statistics = RepoTests.instance().getTree(b64=True,  project=prjId )
+        _, _, _, statistics = RepoTests.instance().getTree(b64=True,  project=projectId )
         
-        return { "cmd": self.request.path, "statistics": statistics, "project-id": prjId }
+        return { "cmd": self.request.path, "statistics": statistics, "project-id": projectId }
 
 class TestsDirectoryRemoveAll(Handler):
     """
@@ -3215,12 +3167,6 @@ class TestsDirectoryRemoveAll(Handler):
         # checking input    
         if not isinstance(projectId, int):
             raise HTTP_400("Bad project id provided in request, int expected")
-                
-        # get the project id according to the name and checking authorization
-        projectAuthorized = ProjectsManager.instance().checkProjectsAuthorization(user=user_profile['login'], 
-                                                                                  projectId=projectId)
-        if not projectAuthorized:
-            raise HTTP_403('Access denied to this project')
 
         # avoid directory traversal
         folderPath = os.path.normpath("/" + folderPath )

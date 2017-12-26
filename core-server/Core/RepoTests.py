@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -238,7 +238,10 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         tests_ret = []
         nb_tests, nb_tests_f, tests, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, str(project)), 
                                                                     project=project, supportSnapshot=True  )
-        tests_ret = self.encodeData(data=tests)
+        if b64:
+            tests_ret = self.encodeData(data=tests)
+        else:
+            tests_ret = tests
         return nb_tests, nb_tests_f, tests_ret, stats
 
     def __getBasicListing(self, testPath, initialPath):
@@ -619,8 +622,9 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                         elif fileExt == RepoManager.TEST_PLAN_EXT:
                             self.trace('Reading sub test plan')
                             sortedTests = doc.getSorted()
-                            ret, error_msg = self.addtf2tp( data_=sortedTests, tpid=ts['id'] )
-                            if ret is not None:
+                            subret, suberr = self.addtf2tp( data_=sortedTests, tpid=ts['id'] )
+                            ret = (subret, suberr)
+                            if subret != self.context.CODE_OK:
                                 del sortedTests
                                 break
                             else:
@@ -659,8 +663,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                                 alltests.extend( [{ 'extension': 'tpx', 'separator': 'terminated',  
                                                     'enable': "0" , 'depth': 1, 
                                                     'id': ts['id'], 'testname': filenameTs, 
-                                                    'parent': ts['parent'], 'alias': alias_ts }] ) 
-
+                                                    'parent': ts['parent'], 'alias': alias_ts }] )
         return ret + (alltests, )
 
     def addtf2tp(self, data_, tpid=0):
@@ -739,7 +742,8 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                         # end of fix
                         
                         if fileExt == RepoManager.TEST_SUITE_EXT:
-                            ts.update( { 'test-definition': doc.testdef, 'test-execution': doc.testexec, 'path': filenameTs, 'tpid': tpid } )
+                            ts.update( { 'test-definition': doc.testdef, 'test-execution': doc.testexec, 
+                                         'path': filenameTs, 'tpid': tpid } )
                         elif fileExt == RepoManager.TEST_ABSTRACT_EXT:
                             ts.update( { 'test-definition': doc.testdef, 'path': filenameTs, 'tpid': tpid } )
                         else:

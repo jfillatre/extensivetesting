@@ -251,7 +251,7 @@ CMD_TR_UNCOMPLETE               =   "/results/download/uncomplete"
 CMD_TR_LISTING                  =   "/results/listing/files"
 CMD_TR_GET_REPORTS              =   "/results/reports"
 CMD_TR_GET_IMAGE                =   "/results/download/image"
-CMD_TR_REMOVE                   =   "/results/remove"
+CMD_TR_REMOVE                   =   "/results/reset"
 CMD_TR_DELETE                   =   "/results/remove/by/id"
 CMD_TR_DELETE_BY_DATE           =   "/results/remove/by/date"
 CMD_TR_BACKUP                   =   "/results/backup"
@@ -320,7 +320,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
     RefreshDefaultAgents = pyqtSignal(list)
     RefreshDefaultProbes = pyqtSignal(list)
     Connected = pyqtSignal(dict)
-    RefreshTestsRepo = pyqtSignal(str, int, bool, bool)
+    RefreshTestsRepo = pyqtSignal(list, int, bool, bool)
     RefreshAdaptersRepo = pyqtSignal(str)
     RefreshLibrariesRepo = pyqtSignal(str)
     FolderTestsRenamed = pyqtSignal(int, str, str, str)
@@ -2872,6 +2872,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
                 self.updateTimer.stop()
                 if QtHelper.str2bool( Settings.instance().readValue( key = 'Update/enable' ) ):
                     self.updateTimer.start( int(Settings.instance().readValue( key = 'Update/retry' )) )
+            else:
+                self.InformationMsg.emit( self.tr("Check for update") , self.tr("No update available") )
         else:
             # a new client is available
             majorVersion = False
@@ -3035,7 +3037,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         """
         self.trace("on tests listing")
-        self.RefreshTestsRepo.emit(details["tests-listing"], 
+
+        self.RefreshTestsRepo.emit(details["listing"], 
                                    details["project-id"],
                                    details["for-saveas"],
                                    details["for-runs"])

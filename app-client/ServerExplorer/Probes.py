@@ -205,13 +205,13 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.statsBox.setLayout(layout2)
 
         # group licence
-        self.licenceBox = QGroupBox("Licences")
-        self.nbRegistrationLabel = QLabel("0")
-        self.nbDefaultLabel = QLabel("0")
-        layoutNbLicence = QFormLayout()
-        layoutNbLicence.addRow(QLabel("Max Registrations"), self.nbRegistrationLabel )
-        layoutNbLicence.addRow(QLabel("Max Defaults"), self.nbDefaultLabel )
-        self.licenceBox.setLayout(layoutNbLicence)
+        # self.licenceBox = QGroupBox("Licences")
+        # self.nbRegistrationLabel = QLabel("0")
+        # self.nbDefaultLabel = QLabel("0")
+        # layoutNbLicence = QFormLayout()
+        # layoutNbLicence.addRow(QLabel("Max Registrations"), self.nbRegistrationLabel )
+        # layoutNbLicence.addRow(QLabel("Max Defaults"), self.nbDefaultLabel )
+        # self.licenceBox.setLayout(layoutNbLicence)
 
 
         self.nbRunningBox = QGroupBox("Running")
@@ -303,7 +303,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         layoutRightTop = QHBoxLayout()
         layoutRightTop.addWidget(self.statsBox)
         layoutRightTop.addWidget(self.nbRunningBox)
-        layoutRightTop.addWidget(self.licenceBox)
+        # layoutRightTop.addWidget(self.licenceBox)
 
         layoutRight = QVBoxLayout()
         layoutRight.addLayout(layoutRightTop)
@@ -539,7 +539,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.runningBox.setEnabled(True)
         self.statsBox.setEnabled(True)
         self.nbRunningBox.setEnabled(True)
-        self.licenceBox.setEnabled(True)
+        # self.licenceBox.setEnabled(True)
 
         self.refreshRunningAction.setEnabled(True)
 
@@ -547,8 +547,8 @@ class WProbes(QWidget, Logger.ClassLogger):
         """
         Clears QTreeWidget and disables it
         """
-        self.nbRegistrationLabel.setText( "0" )
-        self.nbDefaultLabel.setText( "0" )
+        # self.nbRegistrationLabel.setText( "0" )
+        # self.nbDefaultLabel.setText( "0" )
         self.checkAutoStartOption.setCheckState(Qt.Unchecked) 
         self.checkStartNowOption.setCheckState(Qt.Unchecked) 
 
@@ -563,7 +563,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probesAvailable.setEnabled(False)
         self.deployBox.setEnabled(False)
         self.runningBox.setEnabled(False)
-        self.licenceBox.setEnabled(False)
+        # self.licenceBox.setEnabled(False)
 
         # actions
         self.stopAction.setEnabled(False)
@@ -615,8 +615,9 @@ class WProbes(QWidget, Logger.ClassLogger):
         @param data: 
         @type data: dict
         """
-        self.nbRegistrationLabel.setText( str(data['max-reg']) )
-        self.nbDefaultLabel.setText( str(data['max-def']) )
+        pass
+        # self.nbRegistrationLabel.setText( str(data['max-reg']) )
+        # self.nbDefaultLabel.setText( str(data['max-def']) )
 
     def loadDefault (self, data):
         """

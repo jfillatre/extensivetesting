@@ -1095,7 +1095,6 @@ class WHelper(QWidget, Logger.ClassLogger):
         """
         Set not connected
         """
-        # self.labelHelp.setEnabled(False)
         self.textEdit.setSytleSheetTextEdit()
         self.setDefaultActionsValues()
 

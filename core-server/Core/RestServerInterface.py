@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -37,9 +37,11 @@ from Libs import Settings, Logger
 try:
     import RestTesterFunctions
     import RestAdminFunctions
+    import RestCommonFunctions
 except ImportError: # python3 support
     from . import RestTesterFunctions
     from . import RestAdminFunctions
+    from . import RestCommonFunctions
 
 @wrapt.decorator
 def _to_yaml(wrapped, instance, args, kwargs):
@@ -157,11 +159,12 @@ class _WebServices(WSGI):
     debug = False
     routes = [
         # session
-        ('/session/login',                              RestTesterFunctions.SessionLogin()),
-        ('/session/logout',                             RestTesterFunctions.SessionLogout()),
-        ('/session/refresh',                            RestTesterFunctions.SessionRefresh()),
-        ('/session/context',                            RestTesterFunctions.SessionContext()),
-        ('/session/context/all',                        RestTesterFunctions.SessionContextAll()),
+        ('/session/login',                              RestCommonFunctions.SessionLogin()),
+        ('/session/logout',                             RestCommonFunctions.SessionLogout()),
+        ('/session/refresh',                            RestCommonFunctions.SessionRefresh()),
+        ('/session/context',                            RestCommonFunctions.SessionContext()),
+        ('/session/context/notify',                     RestCommonFunctions.SessionContextNotify()),
+        ('/session/context/all',                        RestCommonFunctions.SessionContextAll()),
         
         # agents
         ('/agents/running',                             RestTesterFunctions.AgentsRunning()),
@@ -180,23 +183,23 @@ class _WebServices(WSGI):
         ('/probes/remove',                              RestTesterFunctions.ProbesRemove()),
         
         # tasks
-        ('/tasks/running',                              RestTesterFunctions.TasksRunning()),
-        ('/tasks/waiting',                              RestTesterFunctions.TasksWaiting()),
-        ('/tasks/history',                              RestTesterFunctions.TasksHistory()),
-        ('/tasks/history/all',                          RestTesterFunctions.TasksHistoryAll()),
-        ('/tasks/cancel',                               RestTesterFunctions.TasksCancel()),
-        ('/tasks/cancel/selective',                     RestTesterFunctions.TasksCancelSelective()),
+        ('/tasks/running',                              RestCommonFunctions.TasksRunning()),
+        ('/tasks/waiting',                              RestCommonFunctions.TasksWaiting()),
+        ('/tasks/history',                              RestCommonFunctions.TasksHistory()),
+        ('/tasks/history/all',                          RestCommonFunctions.TasksHistoryAll()),
+        ('/tasks/cancel',                               RestCommonFunctions.TasksCancel()),
+        ('/tasks/cancel/selective',                     RestCommonFunctions.TasksCancelSelective()),
         ('/tasks/cancel/all',                           RestAdminFunctions.TasksCancelAll()),
         ('/tasks/history/clear',                        RestAdminFunctions.TasksHistoryClear()),
-        ('/tasks/replay',                               RestTesterFunctions.TasksReplay()),
-        ('/tasks/verdict',                              RestTesterFunctions.TasksVerdict()),
-        ('/tasks/review',                               RestTesterFunctions.TasksReview()),
-        ('/tasks/design',                               RestTesterFunctions.TasksDesign()),
-        ('/tasks/comment',                              RestTesterFunctions.TasksComment()),
-        ('/tasks/kill',                                 RestTesterFunctions.TasksKill()),
+        ('/tasks/replay',                               RestCommonFunctions.TasksReplay()),
+        ('/tasks/verdict',                              RestCommonFunctions.TasksVerdict()),
+        ('/tasks/review',                               RestCommonFunctions.TasksReview()),
+        ('/tasks/design',                               RestCommonFunctions.TasksDesign()),
+        ('/tasks/comment',                              RestCommonFunctions.TasksComment()),
+        ('/tasks/kill',                                 RestCommonFunctions.TasksKill()),
         ('/tasks/kill/all',                             RestAdminFunctions.TasksKillAll()),
-        ('/tasks/kill/selective',                       RestTesterFunctions.TasksKillSelective()),
-        ('/tasks/reschedule',                           RestTesterFunctions.TasksReschedule()),
+        ('/tasks/kill/selective',                       RestCommonFunctions.TasksKillSelective()),
+        ('/tasks/reschedule',                           RestCommonFunctions.TasksReschedule()),
         
         # public storage
         ('/public/basic/listing',                       RestTesterFunctions.PublicListing()),
@@ -353,13 +356,13 @@ class _WebServices(WSGI):
         ( '/libraries/directory/add',                   RestTesterFunctions.LibrariesDirectoryAdd()),
         
         # documentation
-        ( '/documentations/cache',                      RestTesterFunctions.DocumentationsCache()),
-        ( '/documentations/build',                      RestTesterFunctions.DocumentationsBuild()),
+        ( '/documentations/cache',                      RestCommonFunctions.DocumentationsCache()),
+        ( '/documentations/build',                      RestCommonFunctions.DocumentationsBuild()),
         
         # system
-        ( '/system/status',                             RestAdminFunctions.SystemStatus()),
-        ( '/system/usages',                             RestTesterFunctions.SystemUsages()),
-        ( '/system/about',                              RestTesterFunctions.SystemAbout()),
+        ( '/system/status',                             RestCommonFunctions.SystemStatus()),
+        ( '/system/usages',                             RestCommonFunctions.SystemUsages()),
+        ( '/system/about',                              RestCommonFunctions.SystemAbout()),
 
         # administration
         ( '/administration/configuration/listing',      RestAdminFunctions.AdminConfigListing()),
@@ -369,7 +372,7 @@ class _WebServices(WSGI):
         ( '/administration/users/listing',              RestAdminFunctions.AdminUsersListing()),
         ( '/administration/users/add',                  RestAdminFunctions.AdminUsersAdd()),
         ( '/administration/users/remove',               RestAdminFunctions.AdminUsersRemove()),
-        ( '/administration/users/disconnect',           RestAdminFunctions.AdminUsersDisconnect()),
+        ( '/administration/users/channel/disconnect',   RestAdminFunctions.AdminUsersChannelDisconnect()),
         ( '/administration/users/update',               RestAdminFunctions.AdminUsersUpdate()),
         ( '/administration/users/status',               RestAdminFunctions.AdminUsersStatus()),
         ( '/administration/users/duplicate',            RestAdminFunctions.AdminUsersDuplicate()),
@@ -381,13 +384,13 @@ class _WebServices(WSGI):
         ( '/administration/projects/add',               RestAdminFunctions.AdminProjectsAdd()),
         ( '/administration/projects/remove',            RestAdminFunctions.AdminProjectsRemove()),
         ( '/administration/projects/rename',            RestAdminFunctions.AdminProjectsRename()),
-        ( '/administration/projects/search',            RestAdminFunctions.AdminProjectsSearch()),
+        ( '/administration/projects/search/by/name',    RestAdminFunctions.AdminProjectsSearchByName()),
         ( '/administration/projects/statistics',        RestAdminFunctions.AdminProjectsStatistics()),
         ( '/administration/time/shift',                 RestAdminFunctions.AdminTimeShift()),
         
         # client
-        ( '/clients/available',                         RestTesterFunctions.ClientsAvailable()),
-        ( '/clients/download',                          RestTesterFunctions.ClientsDownload())
+        ( '/clients/available',                         RestCommonFunctions.ClientsAvailable()),
+        ( '/clients/download',                          RestCommonFunctions.ClientsDownload())
     ]
 
 class _RestServerInterface(Logger.ClassLogger, threading.Thread):
