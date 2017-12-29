@@ -17,6 +17,10 @@
 		13. (minor) licence feature removed from the product, code simplification
 		14. (major) Web server: no more support php 5.1
 		15. (major) Web server: xmlrpc api no more used
+		16. (minor) Test Interop: new function to search a project by name
+		17. (major) Test Interop: update runTest, [add|Update]Variable function to the support the new rest api
+		18. (minor) xtcpyrc-3.0.tar.gz removed from the project, no more development on it
+		19. (minor) code cleanup to support python3 in future
 	Issues Fixed
 		1. (minor) test library: undefined variable in virtualRun function #issue1
 		2. (minor) unable to reset libraries and adapters repositories

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -32,15 +32,23 @@ if sys.version_info > (3,):
     unicode = str
     
 import threading
-import SocketServer
+try:
+    import SocketServer
+except ImportError: # python3 support
+    import socketserver as SocketServer
 import select
-import Queue
+try:
+    import Queue
+except ImportError: # support python 3
+    import queue as Queue
 import time
 import socket
 import ssl
 
-import WebSocket
-
+try:
+    import WebSocket
+except ImportError: # python3 support
+    from . import WebSocket
 
 try:
     xrange
@@ -148,7 +156,7 @@ class TcpRequestHandler(SocketServer.BaseRequestHandler):
                         break
                 except Queue.Empty:
                     pass
-                except IOError, e:
+                except IOError as e:
                     self.error("IOError while sending a packet to client (%s) - disconnecting" % str(e))
                     self.stop()
                 except Exception as e:
@@ -322,7 +330,7 @@ class TcpRequestHandler(SocketServer.BaseRequestHandler):
         while not self.stopEvent.isSet():
             try:
                 self.mainReceiveSendLoop()
-            except NoMoreData, e:
+            except NoMoreData as e:
                 self.trace( "handle no more data: %s" % e)
                 self.stop()
             except Exception as e:

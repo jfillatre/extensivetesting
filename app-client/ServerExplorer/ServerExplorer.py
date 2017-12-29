@@ -77,10 +77,10 @@ import hashlib
 import base64
 import json
 import zlib
-try:
-    import xmlrpclib
-except ImportError: # support python3
-    import xmlrpc.client as xmlrpclib
+# try:
+    # import xmlrpclib
+# except ImportError: # support python3
+    # import xmlrpc.client as xmlrpclib
     
 from Libs import PyBlowFish
 
@@ -171,11 +171,11 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
                 
             self.trace("rest http code response: %s" % httpCode)
             if httpCode is None: 
-                self.error("no http code, timeout?")
-                self.stopWorking()
+                # self.error("no http code, timeout?")
+                # self.stopWorking()
                 # RCI.instance().onGenericError( title=self.tr("REST Error"), 
                                                 # err="Connection lost!" )
-                self.__parent.stopConnection()
+                # self.__parent.stopConnection()
                 return
             
             if int(httpCode) in [ 401 ]:
@@ -680,14 +680,17 @@ class DServerConnection(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         Called on connect button
         """
         if not len(self.addrComboBox.currentText()):
-            QMessageBox.warning(self, self.tr("Connection") , self.tr("Please to set a destination address!") )
+            QMessageBox.warning(self, self.tr("Connection") , 
+                                self.tr("Please to set a destination address!") )
             return
         if self.withProxyCheckBox.checkState() :
             if not len(self.proxyHttpAddrEdit.text()):
-                QMessageBox.warning(self, self.tr("Connection") , self.tr("Please to set a http proxy!") )
+                QMessageBox.warning(self, self.tr("Connection") , 
+                                    self.tr("Please to set a http proxy!") )
                 return
             if not len(self.proxyHttpPortEdit.text()):
-                QMessageBox.warning(self, self.tr("Connection") , self.tr("Please to set a port the http proxy!") )
+                QMessageBox.warning(self, self.tr("Connection") , 
+                                    self.tr("Please to set a port the http proxy!") )
                 return
             
         self.accept()
@@ -755,18 +758,22 @@ class DServerConnection(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         if self.withProxyCheckBox.checkState():
             proxyActivated = True
             
-        Settings.instance().setValue( key = 'Server/proxy-active', value = "%s" % proxyActivated )
+        Settings.instance().setValue( key = 'Server/proxy-active', 
+                                      value = "%s" % proxyActivated )
         
         if self.withProxyCheckBox.checkState() :
 
             # in this case, active also proxy for the internal web browser and test report
-            Settings.instance().setValue( key = 'Server/proxy-web-active', value = "%s" % proxyActivated )
+            Settings.instance().setValue( key = 'Server/proxy-web-active', 
+                                          value = "%s" % proxyActivated )
 
             # retrieve http connection
             portProxyHttp = self.proxyHttpPortEdit.text()
-            Settings.instance().setValue( key = 'Server/port-proxy-http', value = portProxyHttp )
+            Settings.instance().setValue( key = 'Server/port-proxy-http', 
+                                          value = portProxyHttp )
             addressProxyHttp = self.proxyHttpAddrEdit.text()
-            Settings.instance().setValue( key = 'Server/addr-proxy-http', value = addressProxyHttp )
+            Settings.instance().setValue( key = 'Server/addr-proxy-http', 
+                                          value = addressProxyHttp )
         
       
             
@@ -797,7 +804,8 @@ class DServerConnection(QtHelper.EnhancedQDialog, Logger.ClassLogger):
                     
                     # encrypt password to config file
                     if password != '':
-                        Settings.instance().setValue( key = 'Server/last-pwd', value = self.oEncryptor.encrypt( password )  )
+                        Settings.instance().setValue( key = 'Server/last-pwd', 
+                                                      value = self.oEncryptor.encrypt( password )  )
                     else:
                         Settings.instance().setValue( key = 'Server/last-pwd', value ='' )
                 ret = ( address, username, password, self.withProxyCheckBox.checkState(), addressProxyHttp, portProxyHttp)
@@ -953,21 +961,29 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         Repositories.instance().setEnabled(False)
         Counters.instance().setEnabled(False)
 
-        self.serverTab.addTab( Archives.instance(), QIcon(":/archives.png") , Archives.instance().name )
+        self.serverTab.addTab( Archives.instance(), QIcon(":/archives.png") , 
+                               Archives.instance().name )
         self.serverTab.setTabEnabled( TAB_ARCHIVES_POS, False )
-        self.serverTab.addTab( Repositories.instance() , QIcon(":/repositories.png"), Repositories.instance().name  )
+        self.serverTab.addTab( Repositories.instance() , QIcon(":/repositories.png"), 
+                               Repositories.instance().name  )
         self.serverTab.setTabEnabled( TAB_REPO_POS, False )
-        self.serverTab.addTab( TestManager.instance() , QIcon(":/processes.png"), TestManager.instance().name )
+        self.serverTab.addTab( TestManager.instance() , QIcon(":/processes.png"), 
+                               TestManager.instance().name )
         self.serverTab.setTabEnabled( TAB_TESTMGR_POS, False )
-        self.serverTab.addTab( Agents.instance() , QIcon(":/agent.png") , Agents.instance().name )
+        self.serverTab.addTab( Agents.instance() , QIcon(":/agent.png") , 
+                               Agents.instance().name )
         self.serverTab.setTabEnabled( TAB_AGENTS_POS, False )
-        self.serverTab.addTab( Probes.instance() , QIcon(":/probe.png") , Probes.instance().name )
+        self.serverTab.addTab( Probes.instance() , QIcon(":/probe.png") , 
+                               Probes.instance().name )
         self.serverTab.setTabEnabled( TAB_PROBES_POS, False )
-        self.serverTab.addTab( Miscellaneous.instance(), QIcon(":/server-config.png") , Miscellaneous.instance().name )
+        self.serverTab.addTab( Miscellaneous.instance(), QIcon(":/server-config.png"), 
+                               Miscellaneous.instance().name )
         self.serverTab.setTabEnabled( TAB_MISC_POS, False )
-        self.serverTab.addTab( Counters.instance(), QIcon(":/reset-counter.png") , Counters.instance().name )
+        self.serverTab.addTab( Counters.instance(), QIcon(":/reset-counter.png"), 
+                               Counters.instance().name )
         self.serverTab.setTabEnabled( TAB_CT_POS, False )
-        self.serverTab.addTab( ReleaseNotes.instance(), QIcon(":/releasenotes.png") , ReleaseNotes.instance().name )
+        self.serverTab.addTab( ReleaseNotes.instance(), QIcon(":/releasenotes.png"), 
+                               ReleaseNotes.instance().name )
         self.serverTab.setTabEnabled( TAB_RN_POS, False )
         self.serverTab.setCurrentIndex(-1)
 
@@ -981,12 +997,15 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
          * disconnect from the server
          * check update of the client
         """
-        self.connectAction = QtHelper.createAction(self, self.tr("Connect"), self.startConnection, 
+        self.connectAction = QtHelper.createAction(self, self.tr("Connect"), 
+                                            self.startConnection, 
                                             icon = QIcon(":/ok.png"))
-        self.disconnectAction = QtHelper.createAction(self, self.tr("Disconnect"), self.stopConnection, 
+        self.disconnectAction = QtHelper.createAction(self, self.tr("Disconnect"), 
+                                            self.stopConnection, 
                                             icon = QIcon(":/ko.png"))
         self.disconnectAction.setEnabled( False )
-        self.checkUpdateAction = QtHelper.createAction(self, self.tr("Check for update"), self.checkUpdate)
+        self.checkUpdateAction = QtHelper.createAction(self, self.tr("Check for update"), 
+                                            self.checkUpdate)
         self.checkUpdateAction.setEnabled(False)
 
     def checkUpdateAuto(self):
@@ -1204,8 +1223,11 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 started = self.RestService.startWorking()
                 addr, login, pwd, supportProxy, addrProxyHttp, portProxyHttp  = retCtx
                 if started:
-                    ret = UCI.instance().setCtx(address = addr, login = login, password = pwd, 
-                                                supportProxy=supportProxy, addressProxyHttp=addrProxyHttp,
+                    ret = UCI.instance().setCtx(address = addr, 
+                                                login = login, 
+                                                password = pwd, 
+                                                supportProxy=supportProxy, 
+                                                addressProxyHttp=addrProxyHttp,
                                                 portProxyHttp=portProxyHttp)
                     if ret is not None:
                         self.connectAction.setEnabled(False)

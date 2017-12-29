@@ -25,7 +25,6 @@ import time
 import sys
 import threading
 import os
-# import commands
 import zlib
 import base64
 import copy
@@ -326,76 +325,6 @@ class Context(Logger.ClassLogger):
         total = st.f_blocks * st.f_frsize
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
         return (total, used, free)
-
-    # def readLicence(self):
-        # """
-        # Read licence
-        # """
-        # self.trace('Detecting the licence')
-        # if not os.path.isfile('%s/Scripts/product.lic' % Settings.getDirExec() ):
-            # raise Exception('the licence is missing')
-        
-        # if not os.path.isfile('%s/Scripts/product.key' % Settings.getDirExec() ):
-            # raise Exception('the licence key is missing')
-        
-        # if not os.path.exists( Settings.get('Bin', 'openssl') ):
-            # raise Exception('openssl is needed')
-
-        # try:
-            # fd_key = open( '%s/Scripts/product.key' % (Settings.getDirExec()) , 'r')
-            # keyiv_raw = fd_key.read()
-            # fd_key.close()
-        # except Exception as e:
-            # raise Exception('unable to read the licence key: %s'  % str(e) )
-    
-        # try:
-            # salt=A74785B240B0CA91
-            # key=4835CA963AB4C373B8334738162DBC815F812FB33E06FF594D23A62FE4C44A66
-            # iv =C4B0F6D76926ECA8EDA66230AAFB153A
-            # key = keyiv_raw.splitlines()[1].split('=')[1]
-            # iv = keyiv_raw.splitlines()[2].split('=')[1]
-        # except Exception as e:
-            # raise Exception('unable to extract key and iv: %s' % str(e) )
-
-        
-        # openssl_cmd = "%s aes-256-cbc -K %s -iv %s -d -in %s/Scripts/product.lic" % ( Settings.get('Bin', 'openssl'), 
-                                                                                      # key, iv, 
-                                                                                        # Settings.getDirExec() ) 
-        # code_ret, lic_str = commands.getstatusoutput(openssl_cmd)
-        # code_ret, lic_str = getstatusoutput(openssl_cmd)
-        # if code_ret:
-            # raise Exception('unable to decode licence' )
-
-        # try:
-            # licence = eval(lic_str)
-        # except Exception as e:
-            # raise Exception('unable to eval licence: %s' % str(e) )
-
-        # if not 'users' in licence or not 'probes' in licence or not 'agents' in licence or not 'projects' in licence:
-            # raise Exception('invalid licence, users or probes, projects or agents part are missing' )
-
-        # if not 'administrator' in licence['users'] or not 'developer' in licence['users'] \
-            # or not 'tester' in licence['users'] or not 'tester' in licence['users']:
-            # raise Exception('invalid licence, part users incorrect.' )
-
-        # if not 'default' in licence['probes'] or not 'instance' in licence['probes']:
-            # raise Exception('invalid licence, part probes incorrect.' )
-
-        # if not 'default' in licence['agents'] or not 'instance' in licence['agents']:
-            # raise Exception('invalid licence, part agents incorrect.' )
-
-        # if not 'instance' in licence['projects']:
-            # raise Exception('invalid licence, part projects incorrect.' )
-
-        # the licence is correct, save it
-        # self.licence = licence
-        # self.trace('The licence is correct')
-
-    # def getLicence(self):
-        # """
-        # Return the licence
-        # """
-        # return self.licence
 
     def getUniqueId(self):
         """
@@ -740,9 +669,9 @@ class Context(Logger.ClassLogger):
             self.trace( "%s account not active" % login )
             return (self.CODE_DISABLED, expires)
             
-        if not user_profile['web']: 
-            self.trace( "api access not authorized for %s account" % login )
-            return (self.CODE_FORBIDDEN, expires)
+        # if not user_profile['web']: 
+            # self.trace( "api access not authorized for %s account" % login )
+            # return (self.CODE_FORBIDDEN, expires)
             
         # check password, create a sha1 hash with salt: sha1( salt + sha1(password) )
         sha1 = sha1_constructor()
@@ -773,171 +702,6 @@ class Context(Logger.ClassLogger):
             expires = time.strftime("%a, %d-%b-%Y %T GMT", end) 
             return  expires
         return ''
-        
-    def checkAuthorization (self, login, password, rightsExpected = [], fromGui=False ):
-        """
-        Check authorization on ws call, check authorization from the context
-
-        @param login: 
-        @type login: string
-
-        @param password:
-        @type password: string
-
-        @param rightsExpected:
-        @type rightsExpected: list
-
-        @return:
-        @rtype: tuple
-        """
-        try:
-            self.trace( 'Checking access for Login=%s, Password=%s, FromGui=%s' % (login, password, fromGui) )
-            ret = self.CODE_ERROR
-            level = []
-
-            if not fromGui:
-                self.trace('Check API authorization for Login=%s' % login)
-                # check if this login exists on the database
-                usersDb = UsersManager.instance().getUsersByLogin()
-                if not login in usersDb:
-                    ret = self.CODE_NOT_FOUND
-                else:
-                    # login exist in db and not already connected so continue
-                    user_profile = usersDb[login]
-                    rightsLst = self.getLevels(userProfile=user_profile)
-                    self.trace("Get level for the Login=%s Access=%s ExpectedAccess=%s" % (login, 
-                                                                                            ','.join(rightsLst), 
-                                                                                            ','.join(rightsExpected)) )
-
-                    if not user_profile['active']: 
-                        self.trace('API failed because Login=%s is not activated' % login)
-                        ret = self.CODE_NOT_FOUND
-                    else:
-                        if not ( user_profile['web'] or user_profile['cli'] ): 
-                            self.trace("user profile: %s" % user_profile)
-                            self.trace( "API not authorized for Login=%s account" % login )
-                            return ( self.CODE_FORBIDDEN, level )
-                            
-                        # check the password, create a sha1 hash with salt: sha1( salt + sha1(password) )
-                        sha1 = sha1_constructor()
-                        sha1.update( "%s%s" % ( Settings.get('Misc', 'salt'), password ) )
-                        if user_profile['password'] != sha1.hexdigest():
-                            self.trace( "API failed, bad password for Login=%s account Pass=%s PassComputed=%s" % 
-                                            (login, user_profile['password'], sha1.hexdigest()) )
-                            ret = self.CODE_FORBIDDEN
-                        else:
-                            # check rights
-                            rightFounded = False
-                            for rght in rightsLst:
-                                if rght in rightsExpected:
-                                    rightFounded = True
-                                    break
-                            if not rightFounded:
-                                ret = self.CODE_FAILED
-                                self.trace( 'API forbidden, rights failed for Login=%s' %  login )
-                            else:
-                                ret = self.CODE_OK
-                                level = rightsLst
-                                self.trace( 'API granted for Login=%s' % login )
-            else:
-                # check if the login is already connected
-                if not login in self.usersConnected:
-                    self.trace('Authentication failed, user Login=%s not connected' % login)
-                    ret = self.CODE_NOT_FOUND
-                else:
-                    user_connected = self.usersConnected[login]
-                    user_profile = user_connected['profile']
-                    rightsLst = self.getLevels(userProfile=user_profile)
-                    self.trace("Get level for the Login=%s Access=%s ExpectedAccess=%s" % (login, 
-                                                                                            ','.join(rightsLst), 
-                                                                                            ','.join(rightsExpected) ) )
-                    
-                    # check the password, create a sha1 hash with salt: sha1( salt + sha1(password) )
-                    sha1 = sha1_constructor()
-                    sha1.update( "%s%s" % ( Settings.get('Misc', 'salt'), password ) )
-                    if user_profile['password'] != sha1.hexdigest():
-                        self.trace( 'Authentication failed, bad password for Login=%s' % login )
-                        ret = self.CODE_FORBIDDEN
-                    else:
-                        # check rights
-                        rightFounded = False
-                        for rght in rightsLst:
-                            if rght in rightsExpected:
-                                rightFounded = True
-                                break
-                        if not rightFounded:
-                            ret = self.CODE_FAILED
-                            self.trace( 'Access refused, rights failed for Login=%s' % login )
-                        else:
-                            ret = self.CODE_OK
-                            level = rightsLst
-                            self.trace( 'Access granted for Login=%s' % login )
-        except Exception as e:
-            self.error( "unable to check authorization: %s" % e )
-        return (ret, level)
-
-    def isAuthorized (self, client, login, password, fromGui=False):
-        """
-        Function called on xmlrpc_authenticateClient
-        Authenticate the user, check from the database
-        if authorization is ok then registered it
-
-        @param client:
-        @type client: tuple
-
-        @param login:
-        @type login: string
-
-        @param password:
-        @type password: string
-
-        @return:
-        @rtype: tuple
-        """
-        self.trace('[Login=%s] is authorization [fromGui=%s]' % (login, fromGui) )
-
-        # check if this login exists on the database
-        usersDb = UsersManager.instance().getUsersByLogin()
-        if not login in usersDb:
-            self.trace( "%s account not found" % login )
-            return ( self.CODE_NOT_FOUND, False, 0 )
-
-        if fromGui:
-            # check duplicate connection from the context
-            if login in self.usersConnected:
-                self.trace( "%s account already connected" % login )
-                return ( self.CODE_ALLREADY_CONNECTED, False, 0 )
-
-        # login exist in db and not already connected so continue
-        user_profile = usersDb[login]
-        
-        if not user_profile['active']: 
-            self.trace( "%s account not active" % login )
-            return ( self.CODE_DISABLED, False, 0 )
-        
-        if fromGui:
-            if not user_profile['gui']: 
-                self.trace( "gui access not authorized for %s account" % login )
-                return ( self.CODE_FORBIDDEN, False, 0 )
-        else:
-            if not user_profile['web']: 
-                self.trace( "api access not authorized for %s account" % login )
-                return ( self.CODE_FORBIDDEN, False, 0 )
-                
-        # check password, create a sha1 hash with salt: sha1( salt + sha1(password) )
-        sha1 = sha1_constructor()
-        sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), password )  )
-        if user_profile['password'] != sha1.hexdigest():
-            self.trace( "incorrect password for %s account" % login )
-            return ( self.CODE_FORBIDDEN, False, 0 )
-
-        if fromGui:
-            # Authent OK, continue register this user on the context
-            registered = self.registerUser( { 'address' : client, 'profile': user_profile } )
-
-        # append level of the user authorized and return it
-        levels = self.getLevels(userProfile=user_profile)
-        return ( self.CODE_OK, levels, user_profile['id'] )
 
     def getLevels(self, userProfile):
         """
@@ -1182,14 +946,7 @@ class Context(Logger.ClassLogger):
             inet 10.9.1.132/8 brd 10.255.255.255 scope global eth1
         """
         eths = []
-        
-        # detect installed language 
-        # currentLang = self.detectLanguage()
-        # if currentLang is None:
-            # self.error( 'System language unknown')
-            # return eths
-            
-        # ipaddr = commands.getoutput( Settings.get('Bin', 'ipaddr') )
+
         ipaddr = subprocess.check_output( Settings.get('Bin', 'ipaddr'), 
                                           stderr=subprocess.STDOUT, shell=True )
         ipaddr = ipaddr.strip()
@@ -1229,15 +986,7 @@ class Context(Logger.ClassLogger):
         @rtype: list
         """
         eths = []
-        
-        # detect installed language 
-        # currentLang = self.detectLanguage()
-        # if currentLang is None:
-            # self.error( 'System language unknown')
-            # return eths
-            
-        # retrieve ifconfig command
-        # ifconfig = commands.getoutput( Settings.get('Bin', 'ifconfig') )
+
         ifconfig = subprocess.check_output( Settings.get('Bin', 'ifconfig'),
                                             stderr=subprocess.STDOUT, shell=True )
         self.trace( 'ifconfig: %s' % ifconfig )

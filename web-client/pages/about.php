@@ -86,7 +86,6 @@
 			$tabsbody = array();
 			$tb = "<h3>".$__LWF_APP_NAME." ".$__LWF_CFG['server-version']."</h3>".'<p>'.lang('about-product-description', $htmlentities=true).'<br /><br /><em>'.lang('about-developped-by').' '.$__LWF_APP_AUTHOR.'</em></p>';
 			$tb .= '<h4>'.lang('contributors').'</h4>';
-			$tb .= '<em>Jean-Vianney Oblin (xtcpyrc)</em>';
 			$tb .= '<br /><em>Emmanuel Monsoro (extensive testing logo, ssh console adapter)</em>';
 			$tb .= '<br /><em>Blaise Cador (security recommendations)</em>';
 			$tb .= '<br /><em>Jean-Luc Pascal (support excel writting mode)</em>';
@@ -103,8 +102,10 @@
 			echo '<div class="about-title-index">'.lang('about-release-notes').'</div>';
 			
 			// construct tab menu
-			$tabsmenu = array(	 lang('about-rn-server'), lang('about-rn-adapters'), lang('about-rn-libraries'), 
-                                    lang('about-rn-toolbox') );
+			$tabsmenu = array(	 lang('about-rn-server'), 
+                                 lang('about-rn-adapters'), 
+                                 lang('about-rn-libraries'), 
+                                 lang('about-rn-toolbox') );
 			echo construct_tabmenu($tabsmenu);
 
 			// body

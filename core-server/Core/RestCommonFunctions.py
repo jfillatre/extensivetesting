@@ -531,6 +531,77 @@ class SessionContextAll(Handler):
         return rsp
 
 """
+Administration handlers
+"""  
+class AdminProjectsSearchByName(Handler):
+    """
+    /rest/administration/projects/search/by/name
+    """
+    @_to_yaml   
+    def post(self):
+        """
+        tags:
+          - admin
+        summary: Search a project by name
+        description: ''
+        operationId: adminProjectsSearchByName
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ project-name ]
+              properties:
+                project-name:
+                  type: string
+        responses:
+          '200':
+            description: 
+            schema :
+              properties:
+                cmd:
+                  type: string
+                project:
+                  type: object
+            examples:
+              application/json: |
+                {
+                  "cmd": "/administration/projects/search/by/name",
+                  "project: {}
+                }
+          '400':
+            description: Bad request provided
+          '500':
+            description: Server error
+        """
+        user_profile = _get_user(request=self.request)
+
+        try:
+            projectName = self.request.data.get("project-name")
+            if projectName is None: raise EmptyValue("Please specify the name of the project")
+        except EmptyValue as e:
+            raise HTTP_400("%s" % e)
+        except Exception as e:
+            raise HTTP_400("Bad request provided (%s ?)" % e)
+
+        success, details = ProjectsManager.instance().getProjectFromDB(projectName=projectName)
+        if success == Context.instance().CODE_ERROR:
+            raise HTTP_500(details)
+        if len(details) == 0:
+            raise HTTP_500("no project found")
+
+        return { "cmd": self.request.path, "project": details[0] }
+
+"""
 System handlers
 """
 class SystemUsages(Handler):
@@ -1049,6 +1120,8 @@ class TasksRunning(Handler):
                   type: string
                 tasks-running:
                   type: array
+                  items:
+                    type: integer
             examples:
               application/json: |
                 {
@@ -1095,6 +1168,8 @@ class TasksWaiting(Handler):
                   type: string
                 tasks-waiting:
                   type: array
+                  items:
+                    type: string
             examples:
               application/json: |
                 {
@@ -1141,6 +1216,8 @@ class TasksHistory(Handler):
                   type: string
                 tasks-history:
                   type: array
+                  items:
+                    type: string
             examples:
               application/json: |
                 {
@@ -1187,6 +1264,8 @@ class TasksHistoryAll(Handler):
                   type: string
                 tasks-history:
                   type: array
+                  items:
+                    type: string
             examples:
               application/json: |
                 {
@@ -1308,6 +1387,8 @@ class TasksCancelSelective(Handler):
                 tasks-id:
                   type: array
                   description: list of tasks id to cancel
+                  items:
+                    type: string
         responses:
           '200':
             description: Tasks successfully cancelled
@@ -1459,6 +1540,8 @@ class TasksKillSelective(Handler):
                 tasks-id:
                   type: array
                   description: list of tasks id to kill
+                  items:
+                    type: string
         responses:
           '200':
             description: Tasks successfully killed
@@ -1545,6 +1628,8 @@ class TasksReschedule(Handler):
                 schedule-at:
                   type: array
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 schedule-repeat:
                   type: integer
                 probes-enabled:
@@ -1558,9 +1643,13 @@ class TasksReschedule(Handler):
                 from-time:
                   type: array
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 to-time:
                   type: array 
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
         responses:
           '200':
             description: task successfully rescheduled

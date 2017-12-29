@@ -384,7 +384,7 @@ class _WebServices(WSGI):
         ( '/administration/projects/add',               RestAdminFunctions.AdminProjectsAdd()),
         ( '/administration/projects/remove',            RestAdminFunctions.AdminProjectsRemove()),
         ( '/administration/projects/rename',            RestAdminFunctions.AdminProjectsRename()),
-        ( '/administration/projects/search/by/name',    RestAdminFunctions.AdminProjectsSearchByName()),
+        ( '/administration/projects/search/by/name',    RestCommonFunctions.AdminProjectsSearchByName()),
         ( '/administration/projects/statistics',        RestAdminFunctions.AdminProjectsStatistics()),
         ( '/administration/time/shift',                 RestAdminFunctions.AdminTimeShift()),
         

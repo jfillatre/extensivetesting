@@ -149,7 +149,7 @@ class AdaptersAdapterAddByWsdlFile(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/adapters-listing/adapter/add/by/wsdl/file", 
+                  "cmd": "/adapters/adapter/add/by/wsdl/file", 
                   "message": "adapter added"
                 }
           '400':
@@ -229,7 +229,7 @@ class AdaptersAdapterAddByWsdlUrl(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/adapters-listing/adapter/add/by/wsdl/url", 
+                  "cmd": "/adapters/adapter/add/by/wsdl/url", 
                   "message": "adapter added"
                 }
           '400':
@@ -893,6 +893,9 @@ class AdaptersDirectoryMove(Handler):
         folderPath = os.path.normpath("/" + folderPath )
         newFolderPath = os.path.normpath("/" + newFolderPath )
         
+        if "%s/%s" % (folderPath, folderName) == newFolderPath:
+            raise HTTP_403( "Destination same as origin" )
+            
         # all ok, do the duplication
         success = RepoAdapters.instance().moveDir(
                                                     mainPath=folderPath, 
@@ -2565,6 +2568,9 @@ class LibrariesDirectoryMove(Handler):
         folderPath = os.path.normpath("/" + folderPath )
         newFolderPath = os.path.normpath("/" + newFolderPath )
         
+        if "%s/%s" % (folderPath, folderName) == newFolderPath:
+            raise HTTP_403( "Destination same as origin" )
+            
         # all ok, do the duplication
         success = RepoLibraries.instance().moveDir(
                                                     mainPath=folderPath, 
@@ -4420,6 +4426,8 @@ class PublicListing(Handler):
                   type: string
                 public-listing:
                   type: array
+                  items:
+                    type: string
             examples:
               application/json: |
                 {
@@ -5061,12 +5069,11 @@ class TestsBasicListing(Handler):
                   type: integer
         responses:
           '200':
-            description: tests listing
             schema :
               properties:
                 cmd:
                   type: string
-                tests-listing:
+                listing:
                   type: array
                   items:
                     type: string
@@ -5076,7 +5083,7 @@ class TestsBasicListing(Handler):
               application/json: |
                 {
                   "cmd": "/tests/basic/listing", 
-                  "tests-listing": ["/Snippets/UI/03_OpenBrowser.tux", "/Snippets/UI/05_MaximizeBrowser.tux"],
+                  "listing": ["/Snippets/UI/03_OpenBrowser.tux", "/Snippets/UI/05_MaximizeBrowser.tux"],
                   "project-id": 1
                 }
           '400':
@@ -5109,7 +5116,7 @@ class TestsBasicListing(Handler):
         
         listing = RepoTests.instance().getBasicListing(projectId=prjId)  
         
-        return { "cmd": self.request.path, "tests-listing": listing, "project-id": projectId }
+        return { "cmd": self.request.path, "listing": listing, "project-id": projectId }
 
 class TestsScheduleGroup(Handler):
     """
@@ -5141,9 +5148,13 @@ class TestsScheduleGroup(Handler):
               properties:
                 tests:
                   type: array
+                  items:
+                    type: string
                 postpone-at:
                   type: array
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 parallel-mode:
                   type: boolean
                 postpone-mode:
@@ -5353,6 +5364,8 @@ class TestsSchedule(Handler):
                 schedule-at:
                   type: array
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 schedule-repeat:
                   type: integer
                 probes-enabled:
@@ -5366,9 +5379,13 @@ class TestsSchedule(Handler):
                 from-time:
                   type: array
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 to-time:
                   type: array 
                   description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
                 tab-id:
                   type: integer
                 step-mode:
@@ -5406,7 +5423,7 @@ class TestsSchedule(Handler):
                 test-adapters:
                   type: string
                   description: adapters options can be used to select the adapters or libraries
-                test-librairies:
+                test-libraries:
                   type: string
                   description: libraries options can be used to select the adapters or libraries
                 test-agents:
@@ -5429,11 +5446,15 @@ class TestsSchedule(Handler):
               properties:
                 cmd:
                   type: string
-                tests-listing:
-                  type: array
-                  items:
-                    type: string
-                project-id:
+                test-id:
+                  type: string
+                task-id:
+                  type: string
+                tab-id:
+                  type: string
+                test-name:
+                  type: string
+                message:
                   type: string
             examples:
               application/json: |
@@ -5557,9 +5578,10 @@ class TestsSchedule(Handler):
         if not len(testDefinition) and not len(testExecution) and not len(testProperties): 
             if testExtension == 'tsx':
                 doc = TestSuite.DataModel()
-                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                res = doc.load( absPath = "%s/%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
                                                            projectId, 
                                                            testPath, 
+                                                           testName,
                                                            testExtension) )
                 if not res:
                     raise HTTP_500('Unable to read test suite: %s' % testPath)
@@ -5572,9 +5594,10 @@ class TestsSchedule(Handler):
 
             elif testExtension == 'tux':
                 doc = TestUnit.DataModel()
-                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                res = doc.load( absPath = "%s/%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
                                                            projectId, 
-                                                           testPath, 
+                                                           testPath,  
+                                                           testName,
                                                            testExtension) )
                 if not res:
                     raise HTTP_500('Unable to read test unit: %s' % testPath)
@@ -5586,9 +5609,10 @@ class TestsSchedule(Handler):
             
             elif testExtension == 'tax':
                 doc = TestAbstract.DataModel()
-                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                res = doc.load( absPath = "%s/%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
                                                            projectId, 
-                                                           testPath, 
+                                                           testPath,  
+                                                           testName,
                                                            testExtension) )
                 if not res:
                     raise HTTP_500('Unable to read test abstract: %s' % testPath)
@@ -5751,10 +5775,57 @@ class TestsScheduleTpg(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id ]
+              required: [ project-id, test-definition, test-execution, test-properties, test-extension, test-path, test-name, schedule-id, schedule-at]
               properties:
                 project-id:
                   type: integer
+                test-definition:
+                  type: string
+                test-execution:
+                  type: string 
+                test-properties:
+                  type: object 
+                test-extension:
+                  type: string 
+                test-path:
+                  type: string 
+                test-name:
+                  type: string
+                schedule-id:
+                  type: integer
+                schedule-at:
+                  type: array
+                  description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
+                schedule-repeat:
+                  type: integer
+                probes-enabled:
+                  type: boolean 
+                debug-enabled:
+                  type: boolean 
+                notifications-enabled:
+                  type: boolean 
+                logs-enabled:
+                  type: boolean 
+                from-time:
+                  type: array
+                  description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
+                to-time:
+                  type: array 
+                  description: [ Y,M,D,H,M,S ]
+                  items:
+                    type: integer
+                tab-id:
+                  type: integer
+                step-mode:
+                  type: boolean 
+                breakpoint-mode:
+                  type: boolean 
+                background-mode:
+                  type: boolean
                 test-inputs:
                   type: array
                   description: Test inputs parameters can be used to overwrite the original test parameters
@@ -5784,7 +5855,7 @@ class TestsScheduleTpg(Handler):
                 test-adapters:
                   type: string
                   description: adapters options can be used to select the adapters or libraries
-                test-librairies:
+                test-libraries:
                   type: string
                   description: libraries options can be used to select the adapters or libraries
                 test-agents:
@@ -5802,16 +5873,19 @@ class TestsScheduleTpg(Handler):
                         type: string
         responses:
           '200':
-            description: tests listing
             schema :
               properties:
                 cmd:
                   type: string
-                tests-listing:
-                  type: array
-                  items:
-                    type: string
-                project-id:
+                test-id:
+                  type: string
+                task-id:
+                  type: string
+                tab-id:
+                  type: string
+                test-name:
+                  type: string
+                message:
                   type: string
             examples:
               application/json: |
@@ -5932,9 +6006,10 @@ class TestsScheduleTpg(Handler):
         if not len(testExecution) and not len(testProperties): 
             if testExtension == 'tpx':
                 doc = TestPlan.DataModel()
-                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                res = doc.load( absPath = "%s/%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
                                                            projectId, 
-                                                           testPath, 
+                                                           testPath,  
+                                                           testName,
                                                            testExtension) )
                 if not res:
                     raise HTTP_500('Unable to read test plan: %s' % testPath)
@@ -5950,9 +6025,10 @@ class TestsScheduleTpg(Handler):
             
             elif testExtension == 'tgx':
                 doc = TestPlan.DataModel()
-                res = doc.load( absPath = "%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
+                res = doc.load( absPath = "%s/%s/%s/%s.%s" % (RepoTests.instance().testsPath, 
                                                            projectId, 
-                                                           testPath, 
+                                                           testPath,  
+                                                           testName,
                                                            testExtension) )
                 if not res:
                     raise HTTP_500('Unable to read test global: %s' % testPath)
@@ -6136,6 +6212,8 @@ class TestsListing(Handler):
                   type: string
                 listing:
                   type: array
+                  items:
+                    type: string
                 project-id:
                   type: integer
             examples:
@@ -6320,6 +6398,8 @@ class TestsCheckSyntaxTpg(Handler):
               properties:
                 test-execution:
                   type: array
+                  items:
+                    type: string
                 test-properties:
                   type: string
                 test-name:
@@ -6538,6 +6618,8 @@ class TestsCreateDesignTpg(Handler):
                   type: integer
                 test-execution:
                   type: array
+                  items:
+                    type: string
                 test-properties:
                   type: string
                 test-name:
@@ -8031,6 +8113,9 @@ class TestsDirectoryMove(Handler):
         folderPath = os.path.normpath("/" + folderPath )
         newFolderPath = os.path.normpath("/" + newFolderPath )
         
+        if "%s/%s" % (folderPath, folderName) == newFolderPath:
+            raise HTTP_403( "Destination same as origin" )
+        
         # all ok, do the duplication
         success = RepoTests.instance().moveDir(
                                                     mainPath=folderPath, 
@@ -9402,6 +9487,8 @@ class ResultsListingFiles(Handler):
                 listing:
                   type: list
                   description: listing all test results
+                  items:
+                    type: object
                 project-id:
                   type: string
             examples:
@@ -9450,8 +9537,12 @@ class ResultsListingFiles(Handler):
         nb_archs, nb_archs_f, archs, stats_archs = RepoArchives.instance().getTree(b64=False, 
                                                                                    fullTree=not partialListing, 
                                                                                    project=projectId)       
-        return { "cmd": self.request.path, "listing": archs, "nb-folders": nb_archs, "nb-files": nb_archs_f, 
-                 "statistics": stats_archs, 'project-id': projectId }
+        return { "cmd": self.request.path, 
+                 "listing": archs, 
+                 "nb-folders": nb_archs, 
+                 "nb-files": nb_archs_f, 
+                 "statistics": stats_archs, 
+                 'project-id': projectId }
 
 class ResultsListingIdByDateTime(Handler):
     """
@@ -9497,7 +9588,9 @@ class ResultsListingIdByDateTime(Handler):
                 cmd:
                   type: string
                 listing:
-                  type: list
+                  type: array
+                  items:
+                    type: object
                 project-id:
                   type: string
             examples:
@@ -9540,7 +9633,9 @@ class ResultsListingIdByDateTime(Handler):
                                                         dateFilter=dateFilter, 
                                                         timeFilter=timeFilter)  
         
-        return { "cmd": self.request.path, "listing": listing, 'project-id': projectId }
+        return { "cmd": self.request.path, 
+                 "listing": listing, 
+                 'project-id': projectId }
 
 class ResultsDownloadResult(Handler):
     """
@@ -10089,23 +10184,64 @@ class ResultsRemoveByDate(Handler):
 
 class ResultsFollow(Handler):
     """
-    Follow the result of one or severals results
-    """    
+    /rest/results/follow
+    """   
+    @_to_yaml  
     def post(self):
         """
-        Follow the result of one or severals results
-        Send POST request (uri /rest/results/follow) with the following body JSON 
-        { "test-ids": ["xxxxx"] [, "project-id": <integer>] [, "project-name": <string>] }
-        Cookie session_id is mandatory.
-        
-        @return: test status
-        @rtype: dict 
+        tags:
+          - results
+        summary: Follow the result of one or several tests
+        description: ''
+        operationId: resultsFollow
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - name: Cookie
+            in: header
+            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
+            required: true
+            type: string
+          - name: body
+            in: body
+            required: true
+            schema:
+              required: [ test-ids, project-id ]
+              properties:
+                test-ids:
+                  type: string
+                project-id:
+                  type: string
+        responses:
+          '200':
+            schema :
+              properties:
+                cmd:
+                  type: string
+                results:
+                  type: string
+                project-id:
+                  type: string
+            examples:
+              application/json: |
+                {
+                  "cmd": "/results/follow", 
+                  "project-id": 25
+                }
+          '400':
+            description: Bad request provided
+          '403':
+            description: Access denied to this project
+          '500':
+            description: Server error
         """
         user_profile = _get_user(request=self.request)
         
         try:
             testIds = self.request.data.get("test-ids")
-            if not testIds: raise HTTP_400("Please specify a project id and a list of test id")
+            if testIds is None: raise HTTP_400("Please specify a project id and a list of test id")
                 
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")

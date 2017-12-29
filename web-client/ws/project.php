@@ -31,7 +31,7 @@
 
 		$redirect_page_url = "./index.php?p=".get_pindex('administration')."&s=".get_subpindex( 'administration', 'admin-projects' );
 
-        list($code, $details) = $RESTAPI->delProject($pid=$pid);
+        list($code, $details) = $RESTAPI->delProject($pid=intval($pid));
         
         $rsp["code"] = 500;
 		if ($code == 401) {

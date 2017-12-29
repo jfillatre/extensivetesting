@@ -25,10 +25,8 @@ import Libs.NetLayerLib.ServerAgent as NetLayerLib
 from Libs import Logger, Settings
 
 try:
-    # import Context
     import ProjectsManager
 except ImportError: # python3 support
-    # from . import Context
     from . import ProjectsManager
 
 import threading

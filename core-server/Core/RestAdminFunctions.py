@@ -1817,76 +1817,6 @@ class AdminProjectsRemove(Handler):
             raise HTTP_500(details)
 
         return { "cmd": self.request.path, "message": "project successfully removed" } 
-        
-class AdminProjectsSearchByName(Handler):
-    """
-    /rest/administration/projects/search/by/name
-    """
-    @_to_yaml   
-    def post(self):
-        """
-        tags:
-          - admin
-        summary: Search a project by name
-        description: ''
-        operationId: adminProjectsSearchByName
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        parameters:
-          - name: Cookie
-            in: header
-            description: session_id=NjQyOTVmOWNlMDgyNGQ2MjlkNzAzNDdjNTQ3ODU5MmU5M 
-            required: true
-            type: string
-          - name: body
-            in: body
-            required: true
-            schema:
-              required: [ project-name ]
-              properties:
-                project-name:
-                  type: string
-        responses:
-          '200':
-            description: 
-            schema :
-              properties:
-                cmd:
-                  type: string
-            examples:
-              application/json: |
-                {
-                  "cmd": "/administration/projects/search/by/name"
-                }
-          '400':
-            description: Bad request provided
-          '500':
-            description: Server error
-        """
-        user_profile = _get_user(request=self.request)
-        
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
-        
-        try:
-            projectName = self.request.data.get("project-name")
-            if projectName is None: raise EmptyValue("Please specify the name of the project")
-        except EmptyValue as e:
-            raise HTTP_400("%s" % e)
-        except Exception as e:
-            raise HTTP_400("Bad request provided (%s ?)" % e)
-
-        success, details = ProjectsManager.instance().getProjectFromDB(projectName=projectName)
-        if success == Context.instance().CODE_ERROR:
-            raise HTTP_500(details)
-        if len(details) == 0:
-            raise HTTP_500("no project found")
-        
-        if len(details) == 1:
-            return { "cmd": self.request.path, "project": details[0] }
-        else:
-            return { "cmd": self.request.path, "projects": details }
 
 class AdminUsersProfile(Handler):
     """
@@ -2872,7 +2802,6 @@ class MetricsTestsReset(Handler):
 """
 Tests handlers
 """
-
 class TestsBuild(Handler):
     """
     /rest/tests/build/samples

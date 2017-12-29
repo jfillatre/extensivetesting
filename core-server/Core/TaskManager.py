@@ -33,7 +33,6 @@ import pickle
 import threading 
 import os
 import parser
-# import compiler
 try:
     import ConfigParser
 except ImportError: # python3 support
@@ -60,7 +59,6 @@ try:
     import SubTestModel
     import EventServerInterface as ESI
     import TestServerInterface as TSI
-    # import StatsManager
     import RepoManager
     import RepoArchives
     import RepoLibraries
@@ -68,19 +66,15 @@ try:
     import DbManager
     import StorageDataAdapters
     import UsersManager
-    # import Context
     import ProjectsManager
-    # new in v10.1
     import AgentsManager
     import ProbesManager
-    # end of new
 except ImportError:
     from . import Common
     from . import TestModel
     from . import SubTestModel
     from . import EventServerInterface as ESI
     from . import TestServerInterface as TSI
-    # from . import StatsManager
     from . import RepoManager
     from . import RepoArchives
     from . import RepoLibraries
@@ -88,7 +82,6 @@ except ImportError:
     from . import DbManager
     from . import StorageDataAdapters
     from . import UsersManager
-    # from . import Context
     from . import ProjectsManager
     from . import AgentsManager
     from . import ProbesManager

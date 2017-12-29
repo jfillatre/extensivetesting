@@ -44,11 +44,11 @@ __TESTERS__ = [ "Emmanuel Monsoro", "Thibault Lecoq"  ]
 # project start in year
 __BEGIN__="2010"
 # year of the latest build
-__END__="2018"
+__END__="2017"
 # date and time of the buid
-__BUILDTIME__="29/10/2017 09:38:08"
+__BUILDTIME__="29/12/2017 17:56:00"
 # Redirect stdout and stderr to log file only on production
-REDIRECT_STD=False
+REDIRECT_STD=True
 # disable warning from qt framework on production 
 QT_WARNING_MODE=False
 # workspace offline, for dev only
@@ -2193,9 +2193,11 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                                         QMessageBox.Yes | QMessageBox.No 
                                         )
             if reply == QMessageBox.Yes:
-                UCI.instance().closeConnection()
+                if UCI.instance() is not None:
+                    UCI.instance().closeConnection()
         else:
-            UCI.instance().closeConnection()
+            if UCI.instance() is not None:
+                UCI.instance().closeConnection()
         
     def setCursorBusy(self):
         """
