@@ -25,11 +25,7 @@ import scandir
 import os
 import base64
 import zlib
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 import shutil
 import time
 import scandir
@@ -47,13 +43,11 @@ except ImportError: # support python 3
 try:
     import RepoManager
     import EventServerInterface as ESI
-    # import Context
-    # import TaskManager
+    import Common
 except ImportError: # python3 support
     from . import RepoManager
     from . import EventServerInterface as ESI
-    # from . import Context
-    # from . import TaskManager
+    from . import Common
     
 from Libs import Scheduler, Settings, Logger
 import Libs.FileModels.TestResult as TestResult
@@ -162,12 +156,14 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         @return:
         @rtype: list
         """
-        nb, nbf, backups, stats = self.getListingFilesV2(path=self.destBackup, extensionsSupported=[RepoManager.ZIP_EXT])
-        if b64:
-            backups_ret = self.encodeData(data=backups)
-        else:
-            backups_ret = backups
-        return backups_ret
+        _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
+                                                         extensionsSupported=[RepoManager.ZIP_EXT])
+        # if b64:
+            # backups_ret = self.encodeData(data=backups)
+            # backups_ret = Common.encodeData(data=backups, logger=self)
+        # else:
+            # backups_ret = backups
+        return backups
 
     def getTree(self, b64=False, fullTree=False, project=1):
         """
@@ -180,7 +176,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
 
         if fullTree:
             nb=None
-        archs_ret = []
+        # archs_ret = []
         stats = {}
         res = os.path.exists( "%s/%s" % (self.testsPath, project) )
         if not res:
@@ -188,11 +184,12 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         else:
             nb_archs, nb_archs_f, archs, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, project),
                                                                         nbDirs=nb, project=project, archiveMode=True)
-        if b64:
-            archs_ret = self.encodeData(data=archs)
-        else:
-            archs_ret = archs
-        return nb_archs, nb_archs_f, archs_ret, stats
+        # if b64:
+            # archs_ret = self.encodeData(data=archs)
+            # archs_ret = Common.encodeData(data=archs, logger=self)
+        # else:
+            # archs_ret = archs
+        return nb_archs, nb_archs_f, archs, stats
 
     def getLastEventIndex(self, pathEvents ):
         """

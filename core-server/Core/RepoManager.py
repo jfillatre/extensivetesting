@@ -28,14 +28,14 @@ import shutil
 import zipfile
 import time
 import scandir
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 from Libs import Logger
-# import Context
+
+try:
+    import Common
+except ImportError: # python3 support
+    from . import Common
 
 TEST_ABSTRACT_EXT               = 'tax'
 TEST_UNIT_EXT                   = 'tux'
@@ -87,26 +87,26 @@ class RepoManager(Logger.ClassLogger):
         """
         Logger.ClassLogger.trace(self, txt="RMG - %s" % txt)
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def getTimestamp(self):
         """

@@ -30,17 +30,9 @@ import base64
 import copy
 import subprocess
 from datetime import timedelta
-try:
-    import hashlib
-    sha1_constructor = hashlib.sha1
-except ImportError as e: # support python 2.4
-    import sha
-    sha1_constructor = sha.new
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+
+import hashlib
+import json
 
 import platform
 import base64 
@@ -54,17 +46,22 @@ try:
     import RepoLibraries
     import RepoAdapters
     import ProjectsManager
+    import Common
 except ImportError: # python3 support
     from . import EventServerInterface as ESI
-    from . import  DbManager
-    from . import  UsersManager
-    from . import  StatsManager
-    from . import  RepoLibraries
-    from . import  RepoAdapters
-    from . import  ProjectsManager
+    from . import DbManager
+    from . import UsersManager
+    from . import StatsManager
+    from . import RepoLibraries
+    from . import RepoAdapters
+    from . import ProjectsManager
+    from . import Common
     
 from Libs import Settings, Logger
 
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
 
 def getstatusoutput(cmd):
     """
@@ -113,31 +110,32 @@ class UserContext(Logger.ClassLogger):
         """
         Return all projects 
         """
-        if b64:
-            return self.encodeData(data=self.projects)
-        else:
-            return self.projects
+        # if b64:
+            # return self.encodeData(data=self.projects)
+            # return Common.encodeData(data=self.projects, logger=self)
+        # else:
+        return self.projects
             
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
 class SessionExpireHandler(threading.Thread, Logger.ClassLogger):
     """
@@ -224,7 +222,6 @@ class Context(Logger.ClassLogger):
         self.mysqlVersion = None
         self.apacheVersion = None
         self.phpVersion = None
-        # self.licence = None
         self.networkInterfaces = None
         self.networkRoutes = None
         
@@ -255,7 +252,6 @@ class Context(Logger.ClassLogger):
         Set apache version
         """
         try:
-            # phpVersion = commands.getoutput( 'php -v' )
             phpVersion = subprocess.check_output( 'php -v', stderr=subprocess.STDOUT, shell=True )
             phpVersion = phpVersion.strip()
             self.trace("php version: %s" % phpVersion)
@@ -271,7 +267,6 @@ class Context(Logger.ClassLogger):
         Set apache version
         """
         try:
-            # versionHttpd = commands.getoutput( 'httpd -v' )
             versionHttpd = subprocess.check_output( 'httpd -v', stderr=subprocess.STDOUT, shell=True )
             versionHttpd = versionHttpd.strip()
             self.trace("httpd version: %s" % versionHttpd)
@@ -305,9 +300,10 @@ class Context(Logger.ClassLogger):
                                                                       Settings.get( 'Paths', 'tests')) )
         except Exception as e:
             self.error( "unable to get server usage: %s"  % e )
-        else:
-            if b64:
-                ret = self.encodeData(data=ret)
+        # else:
+            # if b64:
+                # ret = self.encodeData(data=ret)
+                # ret = Common.encodeData(data=ret, logger=self)
         return ret
 
     def diskUsage(self, p):
@@ -409,6 +405,7 @@ class Context(Logger.ClassLogger):
         Synchronize the dynamic config (dbb) with the file settings (tas.ini)
         """
         self.trace('Synchronize dynamic config')
+        
         # cleanup the database config
         ret, rows = DbManager.instance().querySQL( query = """DELETE FROM `%s`""" % self.table_name)
         if not ret:
@@ -473,26 +470,26 @@ class Context(Logger.ClassLogger):
         """
         return len(self.usersConnected)
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def getStats(self, b64=False):
         """
@@ -552,9 +549,10 @@ class Context(Logger.ClassLogger):
                                     + int(nbTests[0]['nbtg']) + int(nbTests[0]['nbta'])
         except Exception as e:
             self.error( "unable get statistics server: %s"  % e )
-        else:
-            if b64:
-                ret = self.encodeData(data=ret)
+        # else:
+            # if b64:
+                # ret = self.encodeData(data=ret)
+                # ret = Common.encodeData(data=ret, logger=self)
         return ret
 
     def getSize(self, folder):
@@ -622,7 +620,10 @@ class Context(Logger.ClassLogger):
         """
         uuid_val = (uuid.uuid4().hex + uuid.uuid4().hex).encode('utf-8')
         session_id = base64.b64encode( uuid_val )[:45] 
-        return session_id 
+        if sys.version_info > (3,):
+            return session_id.decode('utf8')
+        else:
+            return session_id
          
     def apiAuthorizationV2(self, authorization):
         """
@@ -653,13 +654,13 @@ class Context(Logger.ClassLogger):
         """
         Check authorization for rest api
         """
-        self.trace('[Login=%s] rest authorization called' % (login) )
+        self.trace('Rest authorization called for Login=%s' % (login) )
         expires = ''
         
         # check if this login exists on the database
         usersDb = UsersManager.instance().getUsersByLogin()
         if not login in usersDb:
-            self.trace( "%s account not found" % login )
+            self.trace( "Login=%s account not found" % login )
             return (self.CODE_NOT_FOUND, expires)
         
         user_profile = usersDb[login]
@@ -668,14 +669,11 @@ class Context(Logger.ClassLogger):
         if not user_profile['active']: 
             self.trace( "%s account not active" % login )
             return (self.CODE_DISABLED, expires)
-            
-        # if not user_profile['web']: 
-            # self.trace( "api access not authorized for %s account" % login )
-            # return (self.CODE_FORBIDDEN, expires)
-            
+
         # check password, create a sha1 hash with salt: sha1( salt + sha1(password) )
-        sha1 = sha1_constructor()
-        sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), password )  )
+        sha1 = hashlib.sha1()
+        _pwd = "%s%s" % ( Settings.get( 'Misc', 'salt'), password )
+        sha1.update( _pwd.encode('utf8')  )
         if user_profile['password'] != sha1.hexdigest():
             self.trace( "incorrect password for %s account" % login )
             return (self.CODE_FAILED, expires)
@@ -689,6 +687,7 @@ class Context(Logger.ClassLogger):
                 
         self.userSessions.update( {session_id: user_profile } )
         
+        self.trace('Rest authorized for Login=%s SessionId=%s Expires=%s' % (login, session_id, expires))
         return (session_id, expires)    
     
     def updateSession(self, sessionId):
@@ -801,11 +800,11 @@ class Context(Logger.ClassLogger):
         """
         found = None
         if not login in self.usersConnected:
-            self.trace( 'user %s not found' % str(login) )
+            self.trace( 'User Login=%s connected with channel? no' % str(login) )
             return found
         else:
             found = self.usersConnected[login]
-            self.trace( 'user %s found' % str(login) )
+            self.trace( 'User Login=%s connected with channel? yes' % str(login) )
         return found
 
     def getInformations(self, user=None, b64=False):
@@ -851,9 +850,10 @@ class Context(Logger.ClassLogger):
 
         except Exception as e:
             self.error( 'unable to construct servers settings: %s' % str(e) )
-        else:
-            if b64:
-                ret = self.encodeData(data=ret)
+        # else:
+            # if b64:
+                # ret = self.encodeData(data=ret)
+                # ret = Common.encodeData(data=ret, logger=self)
         return  ret
 
     def getUptime(self):
@@ -871,7 +871,6 @@ class Context(Logger.ClassLogger):
         @return: server date
         @rtype: string
         """
-        # dt = commands.getoutput( "%s --rfc-3339=seconds" % Settings.get('Bin', 'date') )
         dt = subprocess.check_output( "%s --rfc-3339=seconds" % Settings.get('Bin', 'date'), 
                                         stderr=subprocess.STDOUT, shell=True )
         dt = dt.strip()
@@ -892,23 +891,23 @@ class Context(Logger.ClassLogger):
         rn_ret = ''
         try:
             f = open( '%s/releasenotes.txt' % pathRn  )
-            rn = f.read()
+            rn_ret = f.read()
             f.close()
         except Exception as e:
             self.error( "Unable to read release notes: %s" % str(e) )
-        else:
-            if not b64:
-                rn_ret = rn
-            else:
-                try: 
-                    rn_zipped = zlib.compress(rn)
-                except Exception as e:
-                    self.error( "Unable to compress release notes: %s" % str(e) )
-                else:
-                    try: 
-                        rn_ret = base64.b64encode(rn_zipped)
-                    except Exception as e:
-                        self.error( "Unable to encode in base 64: %s" % str(e) )
+        # else:
+            # if not b64:
+                # rn_ret = rn
+            # else:
+                # try: 
+                    # rn_zipped = zlib.compress(rn)
+                # except Exception as e:
+                    # self.error( "Unable to compress release notes: %s" % str(e) )
+                # else:
+                    # try: 
+                        # rn_ret = base64.b64encode(rn_zipped)
+                    # except Exception as e:
+                        # self.error( "Unable to encode in base 64: %s" % str(e) )
         return rn_ret
 
     def listRoutes(self):
@@ -920,7 +919,6 @@ class Context(Logger.ClassLogger):
         10.0.0.0/8 dev eth1  proto kernel  scope link  src 10.9.1.132
         default via 204.62.14.1 dev eth0
         """
-        # iproute = commands.getoutput( Settings.get('Bin', 'iproute') )
         iproute = subprocess.check_output(  Settings.get('Bin', 'iproute'), 
                                             stderr=subprocess.STDOUT, shell=True )
         iproute = iproute.strip()
@@ -1011,7 +1009,6 @@ class Context(Logger.ClassLogger):
         """
         Detect the language
         """
-        # lang = commands.getoutput( Settings.get('Bin', 'locale') )
         lang = subprocess.check_output( Settings.get('Bin', 'locale'), 
                                         stderr=subprocess.STDOUT, shell=True )
         self.trace( 'lang: %s' % lang )
@@ -1226,10 +1223,11 @@ class Context(Logger.ClassLogger):
         
         self.trace( "Test environment retrieved for Login=%s" % (user) )
 
-        if b64:
-            return self.encodeData(data=testEnvironment)
-        else:
-            return testEnvironment
+        # if b64:
+            # return self.encodeData(data=testEnvironment)
+            # return Common.encodeData(data=testEnvironment, logger=self)
+        # else:
+        return testEnvironment
 
     def refreshTestEnvironment(self):
         """

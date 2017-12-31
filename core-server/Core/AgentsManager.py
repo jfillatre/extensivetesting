@@ -23,21 +23,15 @@
 
 import base64
 import zlib
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 try:
     import AgentServerInterface as ASI
     import EventServerInterface as ESI
-    # import Context
     import Common
 except ImportError: # python3 support
     from . import AgentServerInterface as ASI
     from . import  EventServerInterface as ESI
-    # from . import Context
     from . import  Common
     
 from Libs import Settings, Logger
@@ -69,39 +63,40 @@ class AgentsManager(Logger.ClassLogger):
         self.configsFile = None
         self.__pids__ = {}
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as  e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as  e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
-    def getStats(self, b64=False):
-        """
-        Constructs some statistics on agents
-            - Licence definition
+    # def getStats(self, b64=False):
+        # """
+        # Constructs some statistics on agents
+            # - Licence definition
 
-        @return: agents statistics
-        @rtype: dict
-        """
-        ret= {}
-        if b64:
-            ret = self.encodeData(data=ret)
-        return ret
+        # @return: agents statistics
+        # @rtype: dict
+        # """
+        # ret= {}
+        # if b64:
+            # ret = self.encodeData(data=ret)
+            # ret = Common.encodeData(data=ret, logger=self)
+        # return ret
 
     def getDefaultAgents(self, b64=False):
         """
@@ -122,8 +117,9 @@ class AgentsManager(Logger.ClassLogger):
                     tpl[optKey] = optValue
                 # {'enable': '1', 'type': 'textual', 'name': 'textual01', 'description': 'default probe'},
                 agents.append( tpl )  
-        if b64:
-            agents = self.encodeData(data=agents)
+        # if b64:
+            # agents = self.encodeData(data=agents)
+            # agents = Common.encodeData(data=agents, logger=self)
         return agents
 
     def addDefaultAgent(self, aName, aType, aDescr):
@@ -221,8 +217,9 @@ class AgentsManager(Logger.ClassLogger):
         """
         self.trace("get running agents" )
         ret = ASI.instance().getAgents()
-        if b64:
-            ret = self.encodeData(data=ret)
+        # if b64:
+            # ret = self.encodeData(data=ret)
+            # ret = Common.encodeData(data=ret, logger=self)
         return ret
 
     def getInstalled (self, b64=False):
@@ -254,8 +251,9 @@ class AgentsManager(Logger.ClassLogger):
                         a['description'] = agentDescr
                     if  len(a) > 0:
                         pluginsInstalled.append( a )
-        if b64:
-            pluginsInstalled = self.encodeData(data=pluginsInstalled)
+        # if b64:
+            # pluginsInstalled = self.encodeData(data=pluginsInstalled)
+            # pluginsInstalled = Common.encodeData(data=pluginsInstalled, logger=self)
         return pluginsInstalled
 
     def disconnectAgent(self, name):

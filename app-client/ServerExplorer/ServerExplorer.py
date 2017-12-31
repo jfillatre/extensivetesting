@@ -77,11 +77,7 @@ import hashlib
 import base64
 import json
 import zlib
-# try:
-    # import xmlrpclib
-# except ImportError: # support python3
-    # import xmlrpc.client as xmlrpclib
-    
+  
 from Libs import PyBlowFish
 
 NETWORK_ERRORS = {}
@@ -1076,27 +1072,27 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 TestManager.instance().active()
                 TestManager.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_TESTMGR_POS, True )
-                TestManager.instance().loadProjects( data= self.decodeData(data['projects']) )
-                TestManager.instance().loadRunning( data = self.decodeData(data['tasks-running']) )
-                TestManager.instance().loadWaiting( data = self.decodeData(data['tasks-waiting']) )
-                TestManager.instance().loadHistory( data = self.decodeData(data['tasks-history']) )
-                TestManager.instance().loadEnqueued( data = self.decodeData(data['tasks-enqueued']) )
+                TestManager.instance().loadProjects( data= data['projects'] )
+                TestManager.instance().loadRunning( data = data['tasks-running'] )
+                TestManager.instance().loadWaiting( data = data['tasks-waiting'] )
+                TestManager.instance().loadHistory( data = data['tasks-history'] )
+                TestManager.instance().loadEnqueued( data = data['tasks-enqueued'] )
 
                 Probes.instance().active()
                 Probes.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_PROBES_POS, True )
-                Probes.instance().loadData( data = self.decodeData(data['probes']), 
-                                            dataInstalled=self.decodeData(data['probes-installed']) )
-                Probes.instance().loadStats( data = self.decodeData(data['probes-stats']) )
-                Probes.instance().loadDefault( data = self.decodeData(data['probes-default']) )
+                Probes.instance().loadData( data = data['probes-running'],
+                                            dataInstalled=data['probes-installed']
+                                            )
+                Probes.instance().loadDefault( data = data['probes-default'] )
     
                 Agents.instance().active()
                 Agents.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_AGENTS_POS, True )
-                Agents.instance().loadData( data = self.decodeData(data['agents']), 
-                                            dataInstalled=self.decodeData(data['agents-installed']) )
-                Agents.instance().loadStats( data = self.decodeData(data['agents-stats']) )
-                Agents.instance().loadDefault( data = self.decodeData(data['agents-default']) )
+                Agents.instance().loadData( data = data['agents-running'],
+                                            dataInstalled=data['agents-installed']
+                                            )
+                Agents.instance().loadDefault( data = data['agents-default'] )
 
             if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights \
                   or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
@@ -1108,8 +1104,9 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Archives.instance().cleanTreeView()
                 Repositories.instance().cleanStatsArchives()
                 rootItem = Archives.instance().createRootItem()
-                Archives.instance().loadData( data = self.decodeData(data['archives']), parent=rootItem )
-                Archives.instance().initializeProjects( projects=self.decodeData(data['projects']), 
+                Archives.instance().loadData( data = data['archives'], 
+                                              parent=rootItem )
+                Archives.instance().initializeProjects( projects=data['projects'], 
                                                         defaultProject=data['default-project'] )
 
             if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
@@ -1117,42 +1114,38 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Miscellaneous.instance().active()
                 Miscellaneous.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_MISC_POS, True )
-                Miscellaneous.instance().loadData( data = self.decodeData(data['informations']) )
-                Miscellaneous.instance().loadStats( data = self.decodeData(data['stats-server']) )
+                Miscellaneous.instance().loadData( data = data['informations'] )
+                Miscellaneous.instance().loadStats( data = data['stats-server'] )
                 
                 Repositories.instance().active()
                 Repositories.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_REPO_POS, True )
                 
-                Repositories.instance().initializeProjects( projects=self.decodeData(data['projects']), 
+                Repositories.instance().initializeProjects( projects=data['projects'], 
                                                             defaultProject=data['default-project'] )
                 Repositories.instance().loadData(   data = data['stats-repo-tests'], 
-                                                    backups=self.decodeData(data['backups-repo-tests']) )
+                                                    backups=data['backups-repo-tests'] )
                 Repositories.instance().loadDataAdapters(   data = data['stats-repo-adapters'],
-                                                            backups=self.decodeData(data['backups-repo-adapters'])   )
+                                                            backups=data['backups-repo-adapters']   )
                 Repositories.instance().loadDataLibraries(  data = data['stats-repo-libraries'],
-                                                            backups=self.decodeData(data['backups-repo-libraries'])   )
+                                                            backups=data['backups-repo-libraries']   )
                 Repositories.instance().loadDataArchives( data = data['stats-repo-archives'],
-                                                            backups=self.decodeData(data['backups-repo-archives']) )
+                                                            backups=data['backups-repo-archives'] )
                 
             if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or \
                 UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
 
-                Settings.instance().setServerContext( self.decodeData(data['informations']) )
+                Settings.instance().setServerContext( data['informations'] )
                 ReleaseNotes.instance().active()
                 ReleaseNotes.instance().setEnabled(True)
                 self.serverTab.setTabEnabled( TAB_RN_POS, True )
                 if len(RCI.instance().userRights) == 1 and RCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
                     self.serverTab.setCurrentIndex(TAB_RN_POS)
-                
-                rnDecoded = base64.b64decode( data['core'] )
-                rnAdpDecoded = base64.b64decode( data['adapters'] )
-                rnLibAdpDecoded = base64.b64decode( data['libraries'] )
-                rnToolboxDecoded =  base64.b64decode( data['toolbox'] )
-                ReleaseNotes.instance().loadData(   data = rnDecoded, 
-                                                    dataAdp = rnAdpDecoded,
-                                                    dataLibAdp=rnLibAdpDecoded, 
-                                                    dataToolbox=rnToolboxDecoded  )
+
+                ReleaseNotes.instance().loadData(   data = data['core'], 
+                                                    dataAdp = data['adapters'],
+                                                    dataLibAdp=data['libraries'], 
+                                                    dataToolbox=data['toolbox']  )
 
                 Counters.instance().active()
                 Counters.instance().setEnabled(True)
@@ -1377,21 +1370,21 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        data_decoded =  self.decodeData(data)
-        Settings.instance().setServerContext(data_decoded)
+        # data_decoded =  self.decodeData(data)
+        Settings.instance().setServerContext(data)
         Miscellaneous.instance().cleanContext()
-        Miscellaneous.instance().loadData( data = data_decoded )
+        Miscellaneous.instance().loadData( data = data )
 
-    def onRefreshArchives(self, data):
-        """
-        Refresh data on xml rpc call, deprecated
+    # def onRefreshArchives(self, data):
+        # """
+        # Refresh data on xml rpc call, deprecated
 
-        @param data: 
-        @type data:     
-        """
-        Archives.instance().cleanTreeView()
-        rootItem = Archives.instance().createRootItem()
-        Archives.instance().loadData( data = self.decodeData(data), parent=rootItem )
+        # @param data: 
+        # @type data:     
+        # """
+        # Archives.instance().cleanTreeView()
+        # rootItem = Archives.instance().createRootItem()
+        # Archives.instance().loadData( data = self.decodeData(data), parent=rootItem )
 
     def onRefreshResults(self, listing):
         """

@@ -46,12 +46,7 @@ import base64
 import shutil
 import copy
 import hashlib
-
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 try:
     import Common
@@ -2300,10 +2295,11 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
 
             enqueuedTasks[ grpId[0] ] = [ grpId[1] , __grpTests ]
 
-        if not b64:
-            return enqueuedTasks
-        else:
-            return self.encodeData(data=enqueuedTasks)
+        # if not b64:
+        return enqueuedTasks
+        # else:
+            # return self.encodeData(data=enqueuedTasks)
+            # return Common.encodeData(data=enqueuedTasks, logger=self)
 
     def cancelTaskInQueue(self, groupId, userName):
         """
@@ -2641,26 +2637,26 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
             return False
         return True
 
-    def encodeData(self, data):
-        """
-        """
-        ret = ''
-        try:
-            #tasks_json = json.dumps(data)
-            tasks_json = json.dumps(data, ensure_ascii=False) # change in v12.1
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+            # tasks_json = json.dumps(data, ensure_ascii=False) # change in v12.1
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def getHistory(self, Full=False, b64=False, user=None):
         """
@@ -2701,8 +2697,9 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                     historyTasks = rows[siz:]
         else:
             self.error( 'unable to get history event from database' )
-        if b64:
-            historyTasks = self.encodeData(data=historyTasks)
+        # if b64:
+            # historyTasks = self.encodeData(data=historyTasks)
+            # historyTasks = Common.encodeData(data=historyTasks, logger=self)
         return historyTasks
 
     def getWaiting(self, b64=False, user=None):
@@ -2732,8 +2729,9 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                     if int(task.projectId) in prjsDict: 
                         waitingTasks.append( task.toTuple(withId=True, withGroupId=True) )
                     # end of new in v10
-        if b64:
-            waitingTasks = self.encodeData(data=waitingTasks)
+        # if b64:
+            # waitingTasks = self.encodeData(data=waitingTasks)
+            # waitingTasks = Common.encodeData(data=waitingTasks, logger=self)
         return waitingTasks
 
     def getRunning(self, b64=False, user=None):
@@ -2763,8 +2761,9 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                     if int(task.projectId) in prjsDict: 
                         runningTasks.append( task.toDict() )
                     # end of new in v10
-        if b64:
-            runningTasks = self.encodeData(data=runningTasks)
+        # if b64:
+            # runningTasks = self.encodeData(data=runningTasks)
+            # runningTasks = Common.encodeData(data=runningTasks, logger=self)
         return runningTasks
     
     def getTask (self, taskId):

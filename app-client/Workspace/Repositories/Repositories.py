@@ -337,7 +337,7 @@ class WRepositories(QWidget, Logger.ClassLogger):
             
             self.remoteRepository.defaultActions()
             self.remoteRepository.initialize(listing= data['repo']  )
-            self.remoteRepository.initializeProjects( projects=self.decodeData(data['projects']), 
+            self.remoteRepository.initializeProjects( projects=data['projects'], 
                                                       defaultProject=data['default-project'] )
         
         if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
@@ -364,12 +364,12 @@ class WRepositories(QWidget, Logger.ClassLogger):
             self.adaptersRemoteRepository.setConnected() 
             self.adaptersRemoteRepository.setEnabled(True)
             self.adaptersRemoteRepository.defaultActions()
-            self.adaptersRemoteRepository.initialize(listing=self.decodeData(data['repo-adp']) )
+            self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
 
             self.librariesRemoteRepository.setConnected() 
             self.librariesRemoteRepository.setEnabled(True)
             self.librariesRemoteRepository.defaultActions()
-            self.librariesRemoteRepository.initialize( listing=self.decodeData(data['repo-lib-adp']) )
+            self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
 
         if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
             self.remoteRepository.setConnected() 
@@ -393,19 +393,19 @@ class WRepositories(QWidget, Logger.ClassLogger):
                 self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
                     
             self.remoteRepository.defaultActions()
-            if self.remoteRepository.initializeProjects( projects= self.decodeData(data['projects']), 
+            if self.remoteRepository.initializeProjects( projects=data['projects'], 
                                                          defaultProject=data['default-project']  ) :
                 self.remoteRepository.initialize(listing= data['repo'])
 
             self.adaptersRemoteRepository.setConnected() 
             self.adaptersRemoteRepository.setEnabled(True)
             self.adaptersRemoteRepository.defaultActions()
-            self.adaptersRemoteRepository.initialize(listing=self.decodeData(data['repo-adp']) )
+            self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
 
             self.librariesRemoteRepository.setConnected() 
             self.librariesRemoteRepository.setEnabled(True)
             self.librariesRemoteRepository.defaultActions()
-            self.librariesRemoteRepository.initialize( listing=self.decodeData(data['repo-lib-adp']) )
+            self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
 
     def onResetRemote(self):
         """
@@ -441,28 +441,30 @@ class WRepositories(QWidget, Logger.ClassLogger):
             self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
             self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
             
-    def onRefreshRemote(self, repoType, data, saveAsOnly, projectid):
-        """
-        Dispatch received datas to the tests repo or adapters repo
-        """
-        if repoType == UCI.REPO_TESTS:
-            self.remoteRepository.defaultActions()
-            if saveAsOnly:
-                self.remoteRepository.initializeSaveAs(listing=self.decodeData(data), reloadItems=True )
-            else:
+    # def onRefreshRemote(self, repoType, data, saveAsOnly, projectid):
+        # """
+        # Dispatch received datas to the tests repo or adapters repo
+        # """
+        # if repoType == UCI.REPO_TESTS:
+            # self.remoteRepository.defaultActions()
+            # if saveAsOnly:
+                # self.remoteRepository.initializeSaveAs(listing=self.decodeData(data), reloadItems=True )
+            # else:
                 # update default project
-                projectName = self.remoteRepository.getProjectName(projectid)
-                self.remoteRepository.setDefaultProject(projectName=projectName)
+                # projectName = self.remoteRepository.getProjectName(projectid)
+                # self.remoteRepository.setDefaultProject(projectName=projectName)
                 # reconstruct
-                self.remoteRepository.initialize(listing=self.decodeData(data) )
-        elif repoType == UCI.REPO_ADAPTERS:
-            self.adaptersRemoteRepository.defaultActions()
-            self.adaptersRemoteRepository.initialize(listing=self.decodeData(data) )
-        elif repoType == UCI.REPO_LIBRARIES:
-            self.librariesRemoteRepository.defaultActions()
-            self.librariesRemoteRepository.initialize(listing=self.decodeData(data) )
-        else:
-            self.error( 'repo type unknown: %s' % repoType )
+                # self.remoteRepository.initialize(listing=self.decodeData(data) )
+                
+        # elif repoType == UCI.REPO_ADAPTERS:
+            # self.adaptersRemoteRepository.defaultActions()
+            # self.adaptersRemoteRepository.initialize(listing=self.decodeData(data) )
+            
+        # elif repoType == UCI.REPO_LIBRARIES:
+            # self.librariesRemoteRepository.defaultActions()
+            # self.librariesRemoteRepository.initialize(listing=self.decodeData(data) )
+        # else:
+            # self.error( 'repo type unknown: %s' % repoType )
 
     def onRefreshRemoteTests(self, data, projectId, forSaveAs=False):
         """
@@ -484,13 +486,13 @@ class WRepositories(QWidget, Logger.ClassLogger):
         """
         """
         self.adaptersRemoteRepository.defaultActions()
-        self.adaptersRemoteRepository.initialize(listing=self.decodeData(data) )
+        self.adaptersRemoteRepository.initialize(listing=data )
 
     def onRefreshRemoteLibraries(self, data):
         """
         """
         self.librariesRemoteRepository.defaultActions()
-        self.librariesRemoteRepository.initialize(listing=self.decodeData(data) )
+        self.librariesRemoteRepository.initialize(listing=data )
             
 WR = None # Singleton
 def instance ():

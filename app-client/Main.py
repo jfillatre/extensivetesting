@@ -48,7 +48,7 @@ __END__="2017"
 # date and time of the buid
 __BUILDTIME__="29/12/2017 17:56:00"
 # Redirect stdout and stderr to log file only on production
-REDIRECT_STD=True
+REDIRECT_STD=False
 # disable warning from qt framework on production 
 QT_WARNING_MODE=False
 # workspace offline, for dev only
@@ -74,7 +74,6 @@ import sys
 import os
 import platform
 import subprocess
-# from functools import partial
 import json
 import uuid
 import shutil
@@ -3152,17 +3151,17 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         rnDialog.parseRn( text = rn )
         rnDialog.exec_()
 
-    def onRefreshRepo(self, repoType, data, saveAsOnly, forRuns, projectid):
-        """
-        On refresh repo
-        """
-        if forRuns:
-            WWorkspace.WDocumentViewer.instance().onRefreshRepositoryRuns(repoType, data, projectid)
-        else:
-            if repoType == UCI.REPO_ARCHIVES:
-                WServerExplorer.instance().onRefreshArchives(data=data)
-            else:
-                WWorkspace.WRepositories.instance().onRefreshRemote(repoType, data, saveAsOnly, projectid)
+    # def onRefreshRepo(self, repoType, data, saveAsOnly, forRuns, projectid):
+        # """
+        # On refresh repo
+        # """
+        # if forRuns:
+            # WWorkspace.WDocumentViewer.instance().onRefreshRepositoryRuns(repoType, data, projectid)
+        # else:
+            # if repoType == UCI.REPO_ARCHIVES:
+                # WServerExplorer.instance().onRefreshArchives(data=data)
+            # else:
+                # WWorkspace.WRepositories.instance().onRefreshRemote(repoType, data, saveAsOnly, projectid)
 
     def onRefreshTestsRepo(self, data, projectId, forSaveAs, forRuns):
         """

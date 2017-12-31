@@ -697,7 +697,7 @@ class AdaptersListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        _, _, listing, _ = RepoAdapters.instance().getTree(b64=True)
+        _, _, listing, _ = RepoAdapters.instance().getTree(b64=False)
 
         return { "cmd": self.request.path, "adapters-listing": listing }
         
@@ -2373,7 +2373,7 @@ class LibrariesListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        _, _, listing, _ = RepoLibraries.instance().getTree(b64=True)
+        _, _, listing, _ = RepoLibraries.instance().getTree(b64=False)
 
         return { "cmd": self.request.path, "libraries-listing": listing }
         

@@ -28,23 +28,15 @@ except ImportError: # python3 support
 import time
 import base64
 import zlib
-try:
-    import hashlib
-    sha1_constructor = hashlib.sha1
-except ImportError as e: # support python 2.4
-    import sha
-    sha1_constructor = sha.new
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import hashlib
+import json
 
-# import Context
 try:
     import DbManager
+    import Common
 except ImportError: # python3 support
     from . import DbManager
+    from . import  Common
     
 from Libs import Settings, Logger
 
@@ -67,26 +59,26 @@ class UsersManager(Logger.ClassLogger):
         self.table_name = '%s-users' % Settings.get( 'MySql', 'table-prefix')
         self.table_name_stats = '%s-users-stats' % Settings.get( 'MySql', 'table-prefix')
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def getNbUserOfType(self, userType):
         """
@@ -177,7 +169,8 @@ class UsersManager(Logger.ClassLogger):
         Returns users with colomn name
         """
         self.trace( 'get users from db' )
-        ret, rows = DbManager.instance().querySQL( query = """SELECT * FROM `%s`""" % self.table_name, columnName=True)
+        sql = """SELECT * FROM `%s`""" % self.table_name
+        ret, rows = DbManager.instance().querySQL( query = sql, columnName=True)
         if not ret:
             self.error( 'unable to select users from db: %s' % str(ret) )
             return None
@@ -191,7 +184,7 @@ class UsersManager(Logger.ClassLogger):
         @return: all users from the database
         @rtype: dict
         """
-        self.trace( 'get users dict' )
+        self.trace( 'get users as dict' )
         users = {}
 
         usersdb = self.getUsers()
@@ -243,7 +236,7 @@ class UsersManager(Logger.ClassLogger):
         defaultPrj = 1
         projects = [1]
         #  password, create a sha1 hash with salt: sha1( salt + sha1(password) )
-        sha1 = sha1_constructor()
+        sha1 = hashlib.sha1()
         sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), password )  )
 
         sql = """INSERT INTO `%s-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`)""" % prefix
@@ -354,7 +347,7 @@ class UsersManager(Logger.ClassLogger):
         
         # duplicate user
         newLogin = "%s-COPY#%s" % (user['login'], uniqid())
-        sha1 = sha1_constructor()
+        sha1 = hashlib.sha1()
         sha1.update( '' )
         emptypwd = sha1.hexdigest()
         
@@ -405,9 +398,9 @@ class UsersManager(Logger.ClassLogger):
         disconnected = self.context.unregisterUserFromXmlrpc(login=dbRows[0]['login'])
         
         # update password
-        emptypwd = sha1_constructor()
+        emptypwd = hashlib.sha1()
         emptypwd.update( '' )
-        sha1 = sha1_constructor()
+        sha1 = hashlib.sha1()
         sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), emptypwd.hexdigest() )  )
         
         sql = """UPDATE `%s-users` SET password='%s' WHERE id='%s'""" % (prefix, sha1.hexdigest(), userId)
@@ -438,7 +431,7 @@ class UsersManager(Logger.ClassLogger):
         disconnected = self.context.unregisterUserFromXmlrpc(login=dbRows[0]['login'])
         
         # update password
-        sha1 = sha1_constructor()
+        sha1 = hashlib.sha1()
         sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), newPwd )  )
         
         sql = """UPDATE `%s-users` SET password='%s' WHERE id='%s'""" % (prefix, sha1.hexdigest(), userId)

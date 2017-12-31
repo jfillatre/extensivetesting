@@ -29,12 +29,10 @@ try:
     import RepoManager
     import EventServerInterface as ESI
     import RepoArchives
-    # import Context
 except ImportError: # python3 support
     from . import RepoManager
     from . import EventServerInterface as ESI
     from . import RepoArchives
-    # from . import Context
     
 from Libs import Settings, Logger
 

@@ -77,19 +77,18 @@ class Daemon(object):
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
-        # si = open(self.stdin, 'r')
-        # so = open(self.stdout, 'a+')
-        # se = open(self.stderr, 'a+', 0)
-        # os.dup2(si.fileno(), sys.stdin.fileno())
-        # os.dup2(so.fileno(), sys.stdout.fileno())
-        # os.dup2(se.fileno(), sys.stderr.fileno())
+        
         if sys.version_info < (3,):
-            sys.stdout = open( self.stdout,"a", 0)
-            sys.stderr = open( self.stderr ,"a", 0)
+            si = file(self.stdin, 'r')
+            so = file(self.stdout, 'a+')
+            se = file(self.stderr, 'a+', 0)
+            os.dup2(si.fileno(), sys.stdin.fileno())
+            os.dup2(so.fileno(), sys.stdout.fileno())
+            os.dup2(se.fileno(), sys.stderr.fileno())
         else:
             # 1 to select line buffering (only usable in text mode)
-            sys.stdout = open( self.stdout ,"a", 1) 
-            sys.stderr = open( self.stderr ,"a", 1)
+            sys.stdout = open( self.stdout ,"a+", 1) 
+            sys.stderr = open( self.stderr ,"a+", 1)
             
         # write pidfile
         atexit.register(self.delpid)

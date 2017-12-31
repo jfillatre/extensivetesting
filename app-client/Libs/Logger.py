@@ -22,7 +22,7 @@
 # -------------------------------------------------------------------
 
 """
-Python logger compatible with python 2.4
+Python logger
 Based on logging python module, with log file rotation
 """
 
@@ -86,10 +86,13 @@ class ClassLogger(object):
         @param txt: message
         @type txt: string
         """
-        try:
-            instance().info(  unicode(txt).encode('utf-8')  )
-        except:
-            instance().info( txt  )
+        if sys.version_info > (3,):
+            instance().info( txt )
+        else:
+            try:
+                instance().info(  unicode(txt).encode('utf-8')  )
+            except:
+                instance().info( txt  )
             
     def trace (self, txt):
         """
@@ -98,10 +101,13 @@ class ClassLogger(object):
         @param txt: message
         @type txt: string
         """
-        try:
-            instance().debug(  unicode(txt).encode('utf-8')  )
-        except:
-            instance().debug(  txt )
+        if sys.version_info > (3,):
+            instance().debug( txt )
+        else:
+            try:
+                instance().debug(  unicode(txt).encode('utf-8')  )
+            except:
+                instance().debug(  txt )
             
     def error (self, err):
         """
@@ -110,10 +116,13 @@ class ClassLogger(object):
         @param err:
         @type err:
         """
-        try:
-            instance().error( "%s > %s: %s" % ( self.__class__.__name__, caller(), unicode(err).encode('utf-8') ) )
-        except:
+        if sys.version_info > (3,):
             instance().error( "%s > %s: %s" % ( self.__class__.__name__, caller(), err ) )
+        else:
+            try:
+                instance().error( "%s > %s: %s" % ( self.__class__.__name__, caller(), unicode(err).encode('utf-8') ) )
+            except:
+                instance().error( "%s > %s: %s" % ( self.__class__.__name__, caller(), err ) )
 
 LG = None # Singleton
 def instance ():
@@ -212,7 +221,6 @@ def initialize (logPathFile=None, level="INFO", size="5", nbFiles="10", noSettin
                                                 )
     
     #format='%(asctime)-6s: %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s',
-    # %(funcName)s ==> not supported with python 2.4
     formatter = logging.Formatter( "%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
 

@@ -29,18 +29,14 @@ import os
 import base64
 import zlib
 import shutil
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 try:
     import DbManager
-    # import Context
+    import Common
 except ImportError: # python3 support
     from . import DbManager
-    # from . import Context
+    from . import Common
 
 from Libs import Settings, Logger
 
@@ -66,26 +62,26 @@ class ProjectsManager(Logger.ClassLogger):
         self.addReservedFolders()
         # end of new
         
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def addReservedFolders(self):
         """
@@ -136,10 +132,11 @@ class ProjectsManager(Logger.ClassLogger):
         else:
             self.trace( "List of projects for user %s: %s" % (user,rows) )
             prjs = rows
-        if b64:
-            return self.encodeData(data=prjs)
-        else:
-            return prjs
+        # if b64:
+            # return self.encodeData(data=prjs)
+            # return Common.encodeData(data=prjs, logger=self)
+        # else:
+        return prjs
             
     def checkProjectsAuthorization(self, user, projectId):
         """

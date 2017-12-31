@@ -25,13 +25,9 @@ import threading
 
 try:
     import EventServerInterface as ESI
-    # import TestServerInterface as TSI
-    # import Context
 except ImportError: # python3 support
     from . import EventServerInterface as ESI
-    # from . import TestServerInterface as TSI
-    # from . import Context
-    
+
 import Libs.NetLayerLib.ServerAgent as NetLayerLib
 import Libs.NetLayerLib.Messages as Messages
 import Libs.NetLayerLib.ClientAgent as ClientAgent

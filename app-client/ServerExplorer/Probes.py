@@ -172,7 +172,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probes = {}
 
         self.nbPrbs = 0
-        self.prbsInstalled = None
+        # self.prbsInstalled = None
 
         self.createWidgets()
         self.createConnections()
@@ -194,31 +194,21 @@ class WProbes(QWidget, Logger.ClassLogger):
         """
         layout = QHBoxLayout()
         
-        self.statsBox = QGroupBox("Summary")
-        self.nbInstalledLabel = QLabel("0")
-        self.nbConfiguredLabel = QLabel("0")
-        self.nbRegisteredLabel = QLabel("0")
-        layout2 = QFormLayout()
-        layout2.addRow(QLabel("Installed"), self.nbInstalledLabel )
-        layout2.addRow(QLabel("Configured"), self.nbConfiguredLabel )
-        layout2.addRow(QLabel("Registered"), self.nbRegisteredLabel )
-        self.statsBox.setLayout(layout2)
+        # self.statsBox = QGroupBox("Summary")
+        # self.nbInstalledLabel = QLabel("0")
+        # self.nbConfiguredLabel = QLabel("0")
+        # self.nbRegisteredLabel = QLabel("0")
+        # layout2 = QFormLayout()
+        # layout2.addRow(QLabel("Installed"), self.nbInstalledLabel )
+        # layout2.addRow(QLabel("Configured"), self.nbConfiguredLabel )
+        # layout2.addRow(QLabel("Registered"), self.nbRegisteredLabel )
+        # self.statsBox.setLayout(layout2)
 
-        # group licence
-        # self.licenceBox = QGroupBox("Licences")
-        # self.nbRegistrationLabel = QLabel("0")
-        # self.nbDefaultLabel = QLabel("0")
-        # layoutNbLicence = QFormLayout()
-        # layoutNbLicence.addRow(QLabel("Max Registrations"), self.nbRegistrationLabel )
-        # layoutNbLicence.addRow(QLabel("Max Defaults"), self.nbDefaultLabel )
-        # self.licenceBox.setLayout(layoutNbLicence)
-
-
-        self.nbRunningBox = QGroupBox("Running")
-        self.nbPrbLabel = QLabel()
-        layoutRunning = QVBoxLayout()
-        layoutRunning.addWidget(self.nbPrbLabel)
-        self.nbRunningBox.setLayout(layoutRunning)
+        # self.nbRunningBox = QGroupBox("Running")
+        # self.nbPrbLabel = QLabel()
+        # layoutRunning = QVBoxLayout()
+        # layoutRunning.addWidget(self.nbPrbLabel)
+        # self.nbRunningBox.setLayout(layoutRunning)
 
 
         self.deployBox = QGroupBox("Default probes")
@@ -300,13 +290,12 @@ class WProbes(QWidget, Logger.ClassLogger):
         layoutDeploy.addWidget(self.probesDefault)
         self.deployBox.setLayout(layoutDeploy)
         
-        layoutRightTop = QHBoxLayout()
-        layoutRightTop.addWidget(self.statsBox)
-        layoutRightTop.addWidget(self.nbRunningBox)
-        # layoutRightTop.addWidget(self.licenceBox)
+        # layoutRightTop = QHBoxLayout()
+        # layoutRightTop.addWidget(self.statsBox)
+        # layoutRightTop.addWidget(self.nbRunningBox)
 
         layoutRight = QVBoxLayout()
-        layoutRight.addLayout(layoutRightTop)
+        # layoutRight.addLayout(layoutRightTop)
         layoutRight.addWidget(self.deployBox)   
 
         layout.addLayout(layoutLeft)
@@ -344,9 +333,11 @@ class WProbes(QWidget, Logger.ClassLogger):
                                         icon = QIcon(":/probe-del.png"))
         self.cancelAction = QtHelper.createAction(self, "&Clear", self.resetProbe, tip = 'Clear fields', 
                                         icon = QIcon(":/clear.png") )
-        self.refreshRunningAction = QtHelper.createAction(self, "&Refresh", self.refreshRunningProbe, tip = 'Refresh running probes', 
+        self.refreshRunningAction = QtHelper.createAction(self, "&Refresh", 
+                                        self.refreshRunningProbe, tip = 'Refresh running probes', 
                                         icon = QIcon(":/act-refresh.png") )
-        self.refreshDefaultAction = QtHelper.createAction(self, "&Refresh", self.refreshDefaultProbe, tip = 'Refresh default probes', 
+        self.refreshDefaultAction = QtHelper.createAction(self, "&Refresh", 
+                                        self.refreshDefaultProbe, tip = 'Refresh default probes', 
                                         icon = QIcon(":/act-refresh.png") )
 
     def createToolbar(self):
@@ -522,6 +513,7 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probeDescEdit.setText( '' )
         self.probeNameEdit.setText( '' )
         self.probeTypeEdit.setText( '' )
+        
         # clear selection
         itms = self.probesAvailable.selectedItems()
         for i in itms:
@@ -537,9 +529,8 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probesAvailable.setEnabled(True)
         self.deployBox.setEnabled(True)
         self.runningBox.setEnabled(True)
-        self.statsBox.setEnabled(True)
-        self.nbRunningBox.setEnabled(True)
-        # self.licenceBox.setEnabled(True)
+        # self.statsBox.setEnabled(True)
+        # self.nbRunningBox.setEnabled(True)
 
         self.refreshRunningAction.setEnabled(True)
 
@@ -547,8 +538,6 @@ class WProbes(QWidget, Logger.ClassLogger):
         """
         Clears QTreeWidget and disables it
         """
-        # self.nbRegistrationLabel.setText( "0" )
-        # self.nbDefaultLabel.setText( "0" )
         self.checkAutoStartOption.setCheckState(Qt.Unchecked) 
         self.checkStartNowOption.setCheckState(Qt.Unchecked) 
 
@@ -563,7 +552,6 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probesAvailable.setEnabled(False)
         self.deployBox.setEnabled(False)
         self.runningBox.setEnabled(False)
-        # self.licenceBox.setEnabled(False)
 
         # actions
         self.stopAction.setEnabled(False)
@@ -571,19 +559,19 @@ class WProbes(QWidget, Logger.ClassLogger):
         
         self.itemCurrentRunning = None
         self.itemCurrentInstalled = None
-        self.prbsInstalled = None
+        # self.prbsInstalled = None
 
         self.probeDescEdit.setText( '' )
         self.probeTypeEdit.setText( '' )
         self.probeNameEdit.setText( '' )
         
-        self.statsBox.setEnabled(False)
-        self.nbInstalledLabel.setText( "0" )
-        self.nbConfiguredLabel.setText( "0" )
+        # self.statsBox.setEnabled(False)
+        # self.nbInstalledLabel.setText( "0" )
+        # self.nbConfiguredLabel.setText( "0" )
         
-        self.nbRunningBox.setEnabled(False)
+        # self.nbRunningBox.setEnabled(False)
         self.resetNbProbes()
-        self.nbPrbLabel.setText('' )
+        # self.nbPrbLabel.setText('' )
 
         self.refreshRunningAction.setEnabled(False)
 
@@ -608,16 +596,14 @@ class WProbes(QWidget, Logger.ClassLogger):
         else:
             return ''
 
-    def loadStats(self, data):
-        """
-        Loads statistics
+    # def loadStats(self, data):
+        # """
+        # Loads statistics
 
-        @param data: 
-        @type data: dict
-        """
-        pass
-        # self.nbRegistrationLabel.setText( str(data['max-reg']) )
-        # self.nbDefaultLabel.setText( str(data['max-def']) )
+        # @param data: 
+        # @type data: dict
+        # """
+        # pass
 
     def loadDefault (self, data):
         """
@@ -630,8 +616,8 @@ class WProbes(QWidget, Logger.ClassLogger):
 
         for defProbe in data:
             defProbeItem = ProbeDefaultItem( probe = defProbe, parent= self.probesDefault)
-        totConfigured = len(data)
-        self.nbConfiguredLabel.setText( str(totConfigured) ) 
+        # totConfigured = len(data)
+        # self.nbConfiguredLabel.setText( str(totConfigured) ) 
 
     def loadData (self, data, dataInstalled=None):
         """
@@ -652,50 +638,51 @@ class WProbes(QWidget, Logger.ClassLogger):
             probeItem = ProbeItem( probe = probe, parent= self.probesRegistered)
             self.probes[probe['id']] = probeItem
 
-        totRunning = len(data)
-        self.nbRegisteredLabel.setText( str(totRunning) ) 
+        # totRunning = len(data)
+        # self.nbRegisteredLabel.setText( str(totRunning) ) 
 
         # load tests stats
         if dataInstalled is not None:
             if len(dataInstalled) == 0:
                 self.deployBox.setEnabled(False)
                 self.probesAvailable.setEnabled(False)
-            else:
-                self.prbsInstalled = dataInstalled
-                running = {}
-                for p in dataInstalled:
-                    running[ str(p['type']).lower() ] = 0
-                    probeItem = ProbeInstalledItem( probe = p, parent= self.probesAvailable)
-                self.nbInstalledLabel.setText( str(len(dataInstalled)) ) 
+            # else:
+                # self.prbsInstalled = dataInstalled
+                # running = {}
+                # for p in dataInstalled:
+                    # running[ str(p['type']).lower() ] = 0
+                    # probeItem = ProbeInstalledItem( probe = p, parent= self.probesAvailable)
+                # self.nbInstalledLabel.setText( str(len(dataInstalled)) ) 
                
-                for probe in data:
-                    if probe['type'].lower() in running:
-                        running[probe['type'].lower() ] += 1
-                runningList = []
-                for k,v in running.items():
-                    runningList.append( '%s: %s' % (k.title(), v) )
-                self.nbPrbLabel.setText( '\n'.join(runningList) )
+                # for probe in data:
+                    # if probe['type'].lower() in running:
+                        # running[probe['type'].lower() ] += 1
+                # runningList = []
+                # for k,v in running.items():
+                    # runningList.append( '%s: %s' % (k.title(), v) )
+                # self.nbPrbLabel.setText( '\n'.join(runningList) )
 
 
     def resetNbProbes(self, data=None):
         """
         Reset the number of probes
         """
-        if data is None:
-            self.nbPrbLabel.setText( '' )
-        else:
-            if self.prbsInstalled is not None:
-                running = {}
-                for p in self.prbsInstalled:
-                    running[ str(p['type']).lower() ] = 0
+        pass
+        # if data is None:
+            # self.nbPrbLabel.setText( '' )
+        # else:
+            # if self.prbsInstalled is not None:
+                # running = {}
+                # for p in self.prbsInstalled:
+                    # running[ str(p['type']).lower() ] = 0
 
-                for probe in data:
-                    if probe['type'].lower() in running:
-                        running[probe['type'].lower() ] += 1
-                runningList = []
-                for k,v in running.items():
-                    runningList.append( '%s: %s' % (k.title(), v) )
-                self.nbPrbLabel.setText( '\n'.join(runningList) )
+                # for probe in data:
+                    # if probe['type'].lower() in running:
+                        # running[probe['type'].lower() ] += 1
+                # runningList = []
+                # for k,v in running.items():
+                    # runningList.append( '%s: %s' % (k.title(), v) )
+                # self.nbPrbLabel.setText( '\n'.join(runningList) )
 
     def refreshData (self, data, action):
         """

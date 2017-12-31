@@ -499,7 +499,7 @@ if [ "$DL_MISSING_PKGS" = "Yes" ]; then
     fi
     
 	echo -ne "* Adding python                \r"
-	$YUM_BIN -y install python-lxml MySQL-python policycoreutils-python python-simplejson python-setuptools python-ldap 1>> "$LOG_FILE" 2>&1
+	$YUM_BIN -y install python-lxml MySQL-python policycoreutils-python python-setuptools python-ldap 1>> "$LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
         echo_failure; echo
         echo "Unable to download packages python and more with yum" >> "$LOG_FILE"

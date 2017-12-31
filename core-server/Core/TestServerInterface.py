@@ -32,14 +32,10 @@ try:
     import EventServerInterface as ESI
     import ProbeServerInterface as PSI
     import AgentServerInterface as ASI
-    # import StatsManager
-    # import Context
 except ImportError: # python3 support
     from . import EventServerInterface as ESI
     from . import ProbeServerInterface as PSI
     from . import AgentServerInterface as ASI
-    # from . import StatsManager
-    # from . import Context
     
 from Libs import Logger, Settings
 
@@ -367,7 +363,6 @@ class Interact(object):
 
         instance().ok( self.client, self.tid, body = _data_ )
 
-#############
 TSI = None
 def instance ():
     """

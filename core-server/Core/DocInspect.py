@@ -56,7 +56,6 @@ def describeFunc(obj, method=False):
         return
 
     args = arginfo[0]
-    #argsvar = arginfo[1]
 
     desc = { }
     desc['name'] = obj.__name__

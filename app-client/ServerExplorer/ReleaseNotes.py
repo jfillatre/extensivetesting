@@ -206,7 +206,7 @@ class WServerReleaseNote(QWidget, Logger.ClassLogger):
         @type dataProbes:
         """
         # load server rn
-        self.constructItem(parent=self.rn, data= zlib.decompress(data) )
+        self.constructItem(parent=self.rn, data= data )
 
         # load adapters rn
         if not len(dataAdp): # dataAdp is false then adapters are not installed on the server
@@ -215,7 +215,7 @@ class WServerReleaseNote(QWidget, Logger.ClassLogger):
                                         parent = self.rnAdp, type = 1)
         else:
             try:
-                self.constructItem(parent=self.rnAdp, data=zlib.decompress(dataAdp) )
+                self.constructItem(parent=self.rnAdp, data=dataAdp )
             except Exception as e:
                 self.error( e )
 
@@ -226,7 +226,7 @@ class WServerReleaseNote(QWidget, Logger.ClassLogger):
                                         parent = self.rnLibAdp, type = 1)
         else:
             try:
-                self.constructItem(parent=self.rnLibAdp, data=zlib.decompress(dataLibAdp) )
+                self.constructItem(parent=self.rnLibAdp, data=dataLibAdp )
             except Exception as e:
                 self.error( e )
                 
@@ -237,7 +237,7 @@ class WServerReleaseNote(QWidget, Logger.ClassLogger):
                                         parent = self.rnToolbox, type = 1)
         else:
             try:
-                self.constructItem(parent=self.rnToolbox, data=zlib.decompress(dataToolbox) )
+                self.constructItem(parent=self.rnToolbox, data=dataToolbox )
             except Exception as e:
                 self.error( e )
 
@@ -254,6 +254,8 @@ class WServerReleaseNote(QWidget, Logger.ClassLogger):
         rootItem = None
         subItem = None
         for line in data.splitlines():
+            if sys.version_info > (3,):
+                line = bytes(line, 'utf8')
             if not line.startswith(b'\t'): # wrap to bytes for python 3 support
                 rootItem = KeyItem( key = line, parent = parent, type = 0)
                 rootItem.setExpanded(True)

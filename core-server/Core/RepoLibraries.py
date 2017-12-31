@@ -28,13 +28,8 @@ import shutil
 import base64
 import zlib
 import parser
-# import compiler
 import re
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 import tarfile
 try:
     import ConfigParser
@@ -42,16 +37,12 @@ except ImportError: # python3 support
     import configparser as ConfigParser
 
 try:
-    # import Context
     import RepoManager
-    # import TaskManager
     import Common
     import EventServerInterface as ESI
 except ImportError: # python3 support
-    # from . import Context
-    from . import RepoManager
-    # from . import TaskManager
     from . import Common
+    from . import RepoManager
     from . import EventServerInterface as ESI
     
 from Libs import Scheduler, Settings, Logger
@@ -422,21 +413,26 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: 
         """
-        nb, nbf, backups, stats = self.getListingFilesV2(path=self.destBackup, 
+        _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
                                                          extensionsSupported=[RepoManager.ZIP_EXT])
-        if b64:
-            backups_ret = self.encodeData(data=backups)
-        else:
-            backups_ret = backups
-        return backups_ret
+        # if b64:
+            # backups_ret = self.encodeData(data=backups)
+            # backups_ret = Common.encodeData(data=backups, logger=self)
+        # else:
+            # backups_ret = backups
+        return backups
 
     def getTree(self, b64=False):
         """
         Return a tree of files 
         """
-        libs_ret = []
-        nb_libs, nb_libs_f, libs, stats  = self.getListingFilesV2(path=self.testsPath)
-        libs_ret = self.encodeData(data=libs)
+        # libs_ret = []
+        nb_libs, nb_libs_f, libs_ret, stats  = self.getListingFilesV2(path=self.testsPath)
+        # libs_ret = self.encodeData(data=libs)
+        # if b64:
+            # libs_ret = Common.encodeData(data=libs, logger=self)
+        # else:
+            # libs_ret = libs
         return nb_libs, nb_libs_f, libs_ret, stats
 
     def getLastBackupIndex(self, pathBackups ):
@@ -529,7 +525,7 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: string
         """
-        rn_ret = ''
+        # rn_ret = ''
         rns = []
         libs = self.getInstalled(asList=True)
         libs.reverse()
@@ -553,16 +549,19 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
                 rns.append( "\n%s\n%s" % (version_name, Common.indent(rn,1) ) )
                 
         # zip and encode in b64
-        try: 
-            rn_zipped = zlib.compress( '\n'.join(rns) )
-        except Exception as e:
-            self.error( "Unable to compress all release notes: %s" % str(e) )
-        else:
-            try: 
-                rn_ret = base64.b64encode(rn_zipped)
-            except Exception as e:
-                self.error( "Unable to encode in base 64 all release notes: %s" % str(e) )
-        return rn_ret
+        # if b64:
+            # try: 
+                # rn_zipped = zlib.compress( '\n'.join(rns) )
+            # except Exception as e:
+                # self.error( "Unable to compress all release notes: %s" % str(e) )
+            # else:
+                # try: 
+                    # rn_ret = base64.b64encode(rn_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64 all release notes: %s" % str(e) )
+        # else:
+            # rn_ret = '\n'.join(rns)
+        return '\n'.join(rns)
 
     def checkSyntax(self, content):
         """
@@ -577,7 +576,6 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         try:
             content_decoded = base64.b64decode(content)
             parser.suite(content_decoded).compile()
-            # compiler.parse(content_decoded)
         except SyntaxError as e:
             syntax_msg = str(e)
             return False, str(e)
@@ -750,7 +748,10 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
                 initcontent = fd_init.read()
                 fd_init.close()
             except Exception as e:
-                self.error( "unable to read init file (%s/%s/%s/__init__.py): %s" % (self.testsPath, newMainPath, newPath, e) )
+                self.error( "unable to read init file (%s/%s/%s/__init__.py): %s" % (self.testsPath, 
+                                                                                     newMainPath, 
+                                                                                     newPath, 
+                                                                                     e) )
             else:
                 if "__DEFAULT__" in initcontent:
                     self.trace("updating init file to set as default")

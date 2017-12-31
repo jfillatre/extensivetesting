@@ -146,10 +146,13 @@ class _NoLoggingWSGIRequestHandler(WSGIRequestHandler, Logger.ClassLogger):
         """
         self.trace( "RSI - %s %s %s" % args )
 
-_my_logger = logging.Logger(__name__)
-_my_logger.setLevel(logging.DEBUG)
-_hnd = logging.StreamHandler(sys.stdout)
-_my_logger.addHandler(_hnd)
+if sys.version_info > (3,):
+    _my_logger = None
+else:
+    _my_logger = logging.Logger(__name__)
+    _my_logger.setLevel(logging.DEBUG)
+    _hnd = logging.StreamHandler(sys.stdout)
+    _my_logger.addHandler(_hnd)
 
 """
 Webservices routing
@@ -404,8 +407,10 @@ class _RestServerInterface(Logger.ClassLogger, threading.Thread):
         threading.Thread.__init__(self)
         self._stopEvent = threading.Event()
 
-        self.httpd = make_server( host=listeningAddress[0], port=listeningAddress[1], 
-                                    app=_WebServices, handler_class=_NoLoggingWSGIRequestHandler )
+        self.httpd = make_server( host=listeningAddress[0], 
+                                  port=listeningAddress[1], 
+                                  app=_WebServices, 
+                                  handler_class=_NoLoggingWSGIRequestHandler )
 
     def run(self):
         """

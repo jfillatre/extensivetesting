@@ -345,7 +345,7 @@ class AdaptersStatistics(Handler):
         
         if not user_profile['administrator']: raise HTTP_401("Access refused")
 
-        _, _, _, statistics = RepoAdapters.instance().getTree(b64=True)
+        _, _, _, statistics = RepoAdapters.instance().getTree(b64=False)
         
         return { "cmd": self.request.path, "statistics": statistics }
    
@@ -536,11 +536,14 @@ class AdaptersBackupDownload(Handler):
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        success, _, _, _, backupb64, _ = RepoAdapters.instance().getBackup(pathFile=backupName, project='')
+        success, _, _, _, backupb64, _ = RepoAdapters.instance().getBackup(pathFile=backupName, 
+                                                                           project='')
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to download backup adapter")
             
-        return { "cmd": self.request.path, "backup": backupb64, "dest-name": destName }
+        return { "cmd": self.request.path, 
+                 "backup": backupb64, 
+                 "dest-name": destName }
 
 class AdaptersBackupListing(Handler):
     """
@@ -1035,7 +1038,9 @@ class LibrariesBackupDownload(Handler):
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to download backup library")
             
-        return { "cmd": self.request.path, "backup": backupb64, "dest-name": destName }
+        return { "cmd": self.request.path, 
+                 "backup": backupb64, 
+                 "dest-name": destName }
 
 class LibrariesBackupListing(Handler):
     """
@@ -1231,7 +1236,7 @@ class LibrariesStatistics(Handler):
         
         if not user_profile['administrator']: raise HTTP_401("Access refused")
 
-        _, _, _, statistics = RepoLibraries.instance().getTree(b64=True)
+        _, _, _, statistics = RepoLibraries.instance().getTree(b64=False)
         
         return { "cmd": self.request.path, "statistics": statistics }
         
@@ -3021,9 +3026,12 @@ class TestsStatistics(Handler):
 
         if projectId == 0: projectId=''
         
-        _, _, _, statistics = RepoTests.instance().getTree(b64=True,  project=projectId )
+        _, _, _, statistics = RepoTests.instance().getTree( b64=False,
+                                                            project=projectId )
         
-        return { "cmd": self.request.path, "statistics": statistics, "project-id": projectId }
+        return { "cmd": self.request.path, 
+                 "statistics": statistics, 
+                 "project-id": projectId }
 
 class TestsDirectoryRemoveAll(Handler):
     """
@@ -3247,11 +3255,14 @@ class TestsBackupDownload(Handler):
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
             
-        success, _, _, _, backupb64, _ = RepoTests.instance().getBackup(pathFile=backupName, project='')
+        success, _, _, _, backupb64, _ = RepoTests.instance().getBackup(pathFile=backupName, 
+                                                                        project='')
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to download backup test")
             
-        return { "cmd": self.request.path, "backup": backupb64, "dest-name": destName }
+        return { "cmd": self.request.path, 
+                 "backup": backupb64, 
+                 "dest-name": destName }
 
 class TestsBackupListing(Handler):
     """
@@ -3861,11 +3872,14 @@ class ResultsBackupDownload(Handler):
         except Exception as e:
             raise HTTP_400("Bad request provided (%s ?)" % e)
 
-        success, _, _, _, backupb64, _ = RepoArchives.instance().getBackup(pathFile=backupName, project='')
+        success, _, _, _, backupb64, _ = RepoArchives.instance().getBackup(pathFile=backupName, 
+                                                                           project='')
         if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to download backup result")
             
-        return { "cmd": self.request.path, "backup": backupb64, "dest-name": destName }
+        return { "cmd": self.request.path, 
+                 "backup": backupb64, 
+                 "dest-name": destName }
         
 class ResultsBackupRemoveAll(Handler):
     """
@@ -3986,7 +4000,7 @@ class ResultsStatistics(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        _, _, _, statistics = RepoArchives.instance().getTree(b64=True)
+        _, _, _, statistics = RepoArchives.instance().getTree(b64=False)
         
         return { "cmd": self.request.path, "statistics": statistics }  
         

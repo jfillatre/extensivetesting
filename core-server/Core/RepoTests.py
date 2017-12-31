@@ -34,31 +34,22 @@ import base64
 import tarfile
 import scandir
 import copy
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 from Libs import Scheduler, Settings, Logger
 
 try:
     import RepoManager
-    # import Context
     import EventServerInterface as ESI
-    # import TaskManager
     import ProjectsManager
     import Common
-    # import TestModel
     import DbManager
     import ProjectsManager
 except ImportError:
     from . import RepoManager
     from . import EventServerInterface as ESI
-    # from . import TaskManager
     from . import ProjectsManager
     from . import Common
-    # from . import TestModel
     from . import DbManager
     from . import ProjectsManager
     
@@ -235,14 +226,15 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         """
         Returns tree
         """
-        tests_ret = []
+        # tests_ret = []
         nb_tests, nb_tests_f, tests, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, str(project)), 
                                                                     project=project, supportSnapshot=True  )
-        if b64:
-            tests_ret = self.encodeData(data=tests)
-        else:
-            tests_ret = tests
-        return nb_tests, nb_tests_f, tests_ret, stats
+        # if b64:
+            # tests_ret = self.encodeData(data=tests)
+            # tests_ret = Common.encodeData(data=tests, logger=self)
+        # else:
+            # tests_ret = tests
+        return nb_tests, nb_tests_f, tests, stats
 
     def __getBasicListing(self, testPath, initialPath):
         """
@@ -276,13 +268,14 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         @return:
         @rtype: list
         """
-        nb, nbf, tests, stats = self.getListingFilesV2( path=self.destBackup, 
+        _, _, tests, _ = self.getListingFilesV2( path=self.destBackup, 
                                                         extensionsSupported=[RepoManager.ZIP_EXT] )
-        if b64:
-            backups_ret = self.encodeData(data=tests)
-        else:
-            backups_ret = tests
-        return backups_ret
+        # if b64:
+            # backups_ret = self.encodeData(data=tests)
+            # backups_ret = Common.encodeData(data=tests, logger=self)
+        # else:
+            # backups_ret = tests
+        return tests
 
     def getLastBackupIndex(self, pathBackups ):
         """

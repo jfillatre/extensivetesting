@@ -115,23 +115,23 @@
             
 			if ( $code == 200 ) {
 				// rn server
-				$lines = $RESTAPI->decodeData($details['core'],  $json=False) ;
-				$tb = parseRn( explode("\n", $lines) );
+				//$lines = $RESTAPI->decodeData($details['core'],  $json=False) ;
+				$tb = parseRn( explode("\n", $details['core']) );
 				$tabsbody[] = $tb;
 
 				// rn adapters
-				$lines = $RESTAPI->decodeData($details['adapters'],  $json=False) ;
-				$tb = parseRn( explode("\n", $lines) );
+				//$lines = $RESTAPI->decodeData($details['adapters'],  $json=False) ;
+				$tb = parseRn( explode("\n", $details['adapters']) );
 				$tabsbody[] = $tb;
 
 				// rn libraries
-				$lines = $RESTAPI->decodeData($details['libraries'],  $json=False) ;
-				$tb = parseRn( explode("\n", $lines) );
+				//$lines = $RESTAPI->decodeData($details['libraries'],  $json=False) ;
+				$tb = parseRn( explode("\n", $details['libraries']) );
 				$tabsbody[] = $tb;
 
 				// rn toolbox
-				$lines = $RESTAPI->decodeData($details['toolbox'],  $json=False) ;
-				$tb = parseRn( explode("\n", $lines) );
+				//$lines = $RESTAPI->decodeData($details['toolbox'],  $json=False) ;
+				$tb = parseRn( explode("\n", $details['toolbox']) );
 				$tabsbody[] = $tb;
 
 			} else {

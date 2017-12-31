@@ -42,7 +42,10 @@ def isUp():
         if Settings.getInt('Web','https'):
             scheme = 'https'
             portHttp = Settings.get('Web','https-port')
-        uri = '%s://%s:%s/%s/index.php' % ( scheme, Settings.get('Web','fqdn'), portHttp, Settings.get('Web', 'path') )
+        uri = '%s://%s:%s/%s/index.php' % ( scheme, 
+                                            Settings.get('Web','fqdn'), 
+                                            portHttp, 
+                                            Settings.get('Web', 'path') )
         
         timeout = False
         go = False

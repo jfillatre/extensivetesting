@@ -23,21 +23,16 @@
 
 import base64
 import zlib
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
+import sys
 
 try:
     import ProbeServerInterface as PSI
     import EventServerInterface as ESI
-    # import Context
     import Common
 except ImportError: # python3 support
     from . import ProbeServerInterface as PSI
     from . import EventServerInterface as ESI
-    # from . import Context
     from . import Common
     
 from Libs import Settings, Logger
@@ -68,39 +63,40 @@ class ProbesManager(Logger.ClassLogger):
         self.configsFile = None
         self.__pids__ = {}
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
-    def getStats(self, b64=False):
-        """
-        Constructs some statistics on probes
-            - Licence definition
+    # def getStats(self, b64=False):
+        # """
+        # Constructs some statistics on probes
+            # - Licence definition
 
-        @return: probes statistics
-        @rtype: dict
-        """
-        ret= {}
-        if b64:
-            ret = self.encodeData(data=ret)
-        return ret
+        # @return: probes statistics
+        # @rtype: dict
+        # """
+        # ret= {}
+        # if b64:
+            # ret = self.encodeData(data=ret)
+            # ret = Common.encodeData(data=ret, logger=self)
+        # return ret
 
     def getDefaultProbes(self, b64=False):
         """
@@ -121,8 +117,9 @@ class ProbesManager(Logger.ClassLogger):
                     tpl[optKey] = optValue
                 # {'enable': '1', 'type': 'textual', 'name': 'textual01', 'description': 'default probe'},
                 probes.append( tpl )  
-        if b64:
-            probes = self.encodeData(data=probes)
+        # if b64:
+            # probes = self.encodeData(data=probes)
+            # probes = Common.encodeData(data=probes, logger=self)
         return probes
 
     def addDefaultProbe(self, pName, pType, pDescr):
@@ -220,8 +217,9 @@ class ProbesManager(Logger.ClassLogger):
         """
         self.trace("get running probes" )
         ret = PSI.instance().getProbes()
-        if b64:
-            ret = self.encodeData(data=ret)
+        # if b64:
+            # ret = self.encodeData(data=ret)
+            # ret = Common.encodeData(data=ret, logger=self)
         return ret
 
     def getInstalled (self, b64=False):
@@ -253,8 +251,9 @@ class ProbesManager(Logger.ClassLogger):
                         p['description'] = probeDescr
                     if  len(p) > 0:
                         pluginsInstalled.append( p )
-        if b64:
-            pluginsInstalled = self.encodeData(data=pluginsInstalled)
+        # if b64:
+            # pluginsInstalled = self.encodeData(data=pluginsInstalled)
+            # pluginsInstalled = Common.encodeData(data=pluginsInstalled, logger=self)
         return pluginsInstalled
 
     def disconnectProbe(self, name):

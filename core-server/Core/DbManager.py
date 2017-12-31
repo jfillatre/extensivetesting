@@ -25,6 +25,7 @@ try:
     import MySQLdb
 except ImportError: # python3 support
     import pymysql as MySQLdb
+    
 import time
 import inspect
 
@@ -88,8 +89,10 @@ class DbManager(Logger.ClassLogger):
                 rows = cursor.lastrowid
             else:
                 if columnName:
-                    fields = map(lambda x:x[0], cursor.description)
-                    rows = [dict(zip(fields,row))   for row in cursor.fetchall()]
+                    rows = []
+                    for row in cursor.fetchall():
+                        fields = map(lambda x:x[0], cursor.description)
+                        rows.append( dict(zip(fields,row))  )
                 else:
                     rows = cursor.fetchall()
             cursor.close ()
@@ -180,9 +183,6 @@ def initialize ():
     """
     global DBM
     DBM = DbManager()
-    #DBM.connectTo()
-    #DBM.detectVersion()
-
 
 def finalize ():
     """
@@ -190,5 +190,4 @@ def finalize ():
     """
     global DBM
     if DBM:
-        #DBM.disconnectFrom()
         DBM = None

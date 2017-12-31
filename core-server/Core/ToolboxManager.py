@@ -23,21 +23,17 @@
 
 import base64
 import zlib
-# import ConfigParser
 import os
-# import signal
-# import shlex
 import subprocess
 import sys
 import time
 import shutil
-# import tarfile
 
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
+import json
 
 try:
     import ProbeServerInterface as PSI
@@ -72,7 +68,6 @@ class ToolboxManager(Logger.ClassLogger):
         if Settings.getInt( 'WebServices', 'local-tools-enabled' ):
             if pkg is not None:
                 self.info( 'Deploying local tools %s...' % pkg)
-                # self.installPkg(pkgName=pkg)
                 self.installPkgV2(pkgName=pkg)
 
         self.TOOLS_INSTALLED = False
@@ -86,26 +81,26 @@ class ToolboxManager(Logger.ClassLogger):
         self.configsFile = None
         self.__pids__ = {}
 
-    def encodeData(self, data):
-        """
-        Encode data
-        """
-        ret = ''
-        try:
-            tasks_json = json.dumps(data)
-        except Exception as e:
-            self.error( "Unable to encode in json: %s" % str(e) )
-        else:
-            try: 
-                tasks_zipped = zlib.compress(tasks_json)
-            except Exception as e:
-                self.error( "Unable to compress: %s" % str(e) )
-            else:
-                try: 
-                    ret = base64.b64encode(tasks_zipped)
-                except Exception as e:
-                    self.error( "Unable to encode in base 64: %s" % str(e) )
-        return ret
+    # def encodeData(self, data):
+        # """
+        # Encode data
+        # """
+        # ret = ''
+        # try:
+            # tasks_json = json.dumps(data)
+        # except Exception as e:
+            # self.error( "Unable to encode in json: %s" % str(e) )
+        # else:
+            # try: 
+                # tasks_zipped = zlib.compress(tasks_json)
+            # except Exception as e:
+                # self.error( "Unable to compress: %s" % str(e) )
+            # else:
+                # try: 
+                    # ret = base64.b64encode(tasks_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64: %s" % str(e) )
+        # return ret
 
     def preInstall(self):
         """
@@ -155,7 +150,10 @@ class ToolboxManager(Logger.ClassLogger):
         t = time.time()
         try:
             DEVNULL = open(os.devnull, 'w')
-            __cmd__ = "%s xf %s/%s -C %s" % (Settings.get( 'Bin', 'tar' ), self.pkgsToolsPath, pkgName, Settings.getDirExec())
+            __cmd__ = "%s xf %s/%s -C %s" % (Settings.get( 'Bin', 'tar' ), 
+                                             self.pkgsToolsPath, 
+                                             pkgName, 
+                                             Settings.getDirExec())
             ret = subprocess.call(__cmd__, shell=True, stdout=DEVNULL, stderr=DEVNULL)  
             if ret: raise Exception("unable to untar toolbox pkg")
         except Exception as e:
@@ -244,8 +242,7 @@ class ToolboxManager(Logger.ClassLogger):
             return ''
         else:
             return Context.instance().getRn( pathRn="%s/%s/" % ( Settings.getDirExec(),
-                                                                Settings.get( 'Paths', 'tools' )  ),
-                                             b64=b64 )
+                                                                Settings.get( 'Paths', 'tools' ) ) )
 
     def trace(self, txt):
         """

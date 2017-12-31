@@ -79,7 +79,7 @@ class EventServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         @type client:
         """
         self.trace("New connection Client=%s" % str(client.client_address) )
-        
+
         NetLayerLib.ServerAgent.onConnection( self, client )
         if not self.wsSupport:
             self.trace('sending notify to channel id: %s' % str(client.client_address) )

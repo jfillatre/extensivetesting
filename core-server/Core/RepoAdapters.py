@@ -29,7 +29,6 @@ import shutil
 import base64
 import zlib
 import parser
-# import compiler
 import re
 import tempfile
 import tarfile
@@ -37,23 +36,17 @@ try:
     import ConfigParser
 except ImportError: # python3 support
     import configparser as ConfigParser
-try:
-    # python 2.4 support
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 try:
-    # import Context
+    import Common
     import RepoManager
-    # import TaskManager
     import RepoLibraries
     import Common
     import EventServerInterface as ESI
 except ImportError: # python3 support
-    # from . import Context
+    from . import Common
     from . import RepoManager
-    # from . import TaskManager
     from . import RepoLibraries
     from . import Common
     from . import EventServerInterface as ESI
@@ -448,22 +441,27 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: 
         """
-        nb, nbf, backups, stats = self.getListingFilesV2(path=self.destBackup, 
+        _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
                                                          extensionsSupported=[RepoManager.ZIP_EXT])
-        if b64:
-            backups_ret = self.encodeData(data=backups)
-        else:
-            backups_ret = backups
-        return backups_ret
+        # if b64:
+            # backups_ret = self.encodeData(data=backups)
+            # backups_ret =Common.encodeData(data=backups, logger=self)
+        # else:
+            # backups_ret = backups
+        return backups
 
     def getTree(self, b64=False):
         """
         Get tree folders
         """
-        adps_ret = []
+        # adps_ret = []
         nb_adps, nb_adps_f, adps, stats =self.getListingFilesV2(path=self.testsPath)
-        adps_ret = self.encodeData(data=adps)
-        return nb_adps, nb_adps_f, adps_ret, stats
+        # adps_ret = self.encodeData(data=adps)
+        # if b64:
+            # adps_ret = Common.encodeData(data=adps, logger=self)
+        # else:
+            # adps_ret = adps
+        return nb_adps, nb_adps_f, adps, stats
 
     def getLastBackupIndex(self, pathBackups ):
         """
@@ -565,7 +563,7 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: string
         """
-        rn_ret = ''
+        # rn_ret = ''
         rns = []
         adps = self.getInstalled(asList=True)
         adps.reverse()
@@ -589,16 +587,19 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
                 rns.append( "\n%s\n%s" % (version_name, Common.indent(rn,1) ) )
                 
         # zip and encode in b64
-        try: 
-            rn_zipped = zlib.compress( '\n'.join(rns) )
-        except Exception as e:
-            self.error( "Unable to compress all release notes: %s" % str(e) )
-        else:
-            try: 
-                rn_ret = base64.b64encode(rn_zipped)
-            except Exception as e:
-                self.error( "Unable to encode in base 64 all release notes: %s" % str(e) )
-        return rn_ret
+        # if b64:
+            # try: 
+                # rn_zipped = zlib.compress( '\n'.join(rns) )
+            # except Exception as e:
+                # self.error( "Unable to compress all release notes: %s" % str(e) )
+            # else:
+                # try: 
+                    # rn_ret = base64.b64encode(rn_zipped)
+                # except Exception as e:
+                    # self.error( "Unable to encode in base 64 all release notes: %s" % str(e) )
+        # else:
+            # rn_ret = '\n'.join(rns)
+        return '\n'.join(rns)
 
     def checkSyntax(self, content):
         """
@@ -613,7 +614,6 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
         try:
             content_decoded = base64.b64decode(content)
             parser.suite(content_decoded).compile()
-            # compiler.parse(content_decoded)
         except SyntaxError as e:
             syntax_msg = str(e)
             return False, str(e)
@@ -873,12 +873,9 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
 
         except Exception as e:
             self.error( "unable to generate adapter from wsdl: %s" % e )
-            
-        # remove the temp file
-        #if len(wsdlFile):
-        #    if f is not None: f.close()
+
         return ret
-###############################
+
 RA = None
 def instance ():
     """

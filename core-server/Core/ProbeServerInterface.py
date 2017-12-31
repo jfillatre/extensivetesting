@@ -28,11 +28,9 @@ import os
 try:
     import EventServerInterface as ESI
     import RepoArchives
-    # import Context
 except ImportError: # python3 support
     from . import EventServerInterface as ESI
     from . import RepoArchives
-    # from . import Context
     
 import Libs.NetLayerLib.ServerAgent as NetLayerLib
 import Libs.NetLayerLib.Messages as Messages
@@ -195,7 +193,6 @@ class ProbeServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         try:
             if request['cmd'] == Messages.RSQ_CMD:
-            ############################################################
                 body = request['body']
                 if 'cmd' in body:
                     if body['cmd'] == Messages.CMD_HELLO:
@@ -207,11 +204,11 @@ class ProbeServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
                         NetLayerLib.ServerAgent.failed(self, client, tid, body = rsp )
                 else:
                     self.error( 'cmd is missing')
-            ############################################################
+ 
             elif request['cmd'] == Messages.RSQ_NOTIFY:
                 self.trace( '<-- NOTIFY: %s' % tid )
                 self.moveNewFile( data=request['body'] )
-            ############################################################
+                
             else:
                 self.error( 'request unknown %s' % request['cmd'])
         except Exception as e:
@@ -357,7 +354,6 @@ class ProbeServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         Logger.ClassLogger.trace(self, txt="PSI - %s" % txt)
 
-#############
 PSI = None
 def instance ():
     """

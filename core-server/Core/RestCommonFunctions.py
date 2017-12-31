@@ -173,6 +173,7 @@ class SessionLogin(Handler):
             description: Bad request provided
         """
         try:
+            
             login = self.request.data.get("login")
             password = self.request.data.get("password")
             if login is None: raise EmptyValue("Please specify login")
@@ -210,7 +211,8 @@ class SessionLogin(Handler):
         lease = Settings.get('Users_Session', 'max-expiry-age') #in seconds
         userProfile = Context.instance().getSessions()[userSession]
         
-        self.response.set_cookie(key="session_id", value=userSession, expires=expires, path='/', domain="") 
+        self.response.set_cookie(key="session_id", value=userSession, 
+                                 expires='', path='/', domain="") 
 
         # get levels
         levels = Context.instance().getLevels(userProfile=userProfile)
@@ -242,7 +244,7 @@ class SessionLogin(Handler):
             _rsp["client-available"] = clientAvailable
             _rsp["version"] = newVersion 
             _rsp["name"] = newPkg
-            
+        
         return _rsp
 
 class SessionLogout(Handler):
@@ -385,7 +387,7 @@ class SessionContext(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        context = Context.instance().getInformations(user=user_profile['login'], b64=True)
+        context = Context.instance().getInformations(user=user_profile['login'], b64=False)
         
         return { "cmd": self.request.path, "context": context }
 
@@ -476,27 +478,26 @@ class SessionContextAll(Handler):
         
         rsp = { "cmd": self.request.path }
         
-        rsp['probes'] = ProbesManager.instance().getRunning(b64=True)
-        rsp['probes-installed'] = ProbesManager.instance().getInstalled(b64=True)
-        rsp['probes-stats'] = ProbesManager.instance().getStats(b64=True)
-        rsp['probes-default'] = ProbesManager.instance().getDefaultProbes(b64=True)
+        rsp['probes-running'] = ProbesManager.instance().getRunning(b64=False)
+        rsp['probes-installed'] = ProbesManager.instance().getInstalled(b64=False)
+        rsp['probes-default'] = ProbesManager.instance().getDefaultProbes(b64=False)
 
-        rsp['agents'] = AgentsManager.instance().getRunning(b64=True)
-        rsp['agents-installed'] = AgentsManager.instance().getInstalled(b64=True)
-        rsp['agents-stats'] = AgentsManager.instance().getStats(b64=True)
-        rsp['agents-default'] = AgentsManager.instance().getDefaultAgents(b64=True)
+        rsp['agents-running'] = AgentsManager.instance().getRunning(b64=False)
+        rsp['agents-installed'] = AgentsManager.instance().getInstalled(b64=False)
+        rsp['agents-default'] = AgentsManager.instance().getDefaultAgents(b64=False)
         
-        rsp['projects'] = USER_CTX.getProjects(b64=True)
+        rsp['projects'] = USER_CTX.getProjects(b64=False)
         rsp['default-project'] = USER_CTX.getDefault()
         
-        _, _, archs, stats_archs = RepoArchives.instance().getTree(b64=True,  project=USER_CTX.getDefault())
+        _, _, archs, stats_archs = RepoArchives.instance().getTree(b64=False,  
+                                                                   project=USER_CTX.getDefault())
         rsp['archives'] =  archs
         rsp['stats-repo-archives'] = stats_archs
 
-        rsp['tasks-running'] = TaskManager.instance().getRunning(b64=True, user=USER_CTX)
-        rsp['tasks-waiting'] = TaskManager.instance().getWaiting(b64=True, user=USER_CTX)
-        rsp['tasks-history'] = TaskManager.instance().getHistory(b64=True, user=USER_CTX)
-        rsp['tasks-enqueued'] = TaskManager.instance().getEnqueued(b64=True)
+        rsp['tasks-running'] = TaskManager.instance().getRunning(b64=False, user=USER_CTX)
+        rsp['tasks-waiting'] = TaskManager.instance().getWaiting(b64=False, user=USER_CTX)
+        rsp['tasks-history'] = TaskManager.instance().getHistory(b64=False, user=USER_CTX)
+        rsp['tasks-enqueued'] = TaskManager.instance().getEnqueued(b64=False)
 
         _, _, tests, stats_tests = RepoTests.instance().getTree(b64=False,
                                                                 project=USER_CTX.getDefault() )
@@ -506,25 +507,25 @@ class SessionContextAll(Handler):
         rsp['help'] = HelperManager.instance().getHelps()
         rsp['stats'] = StatsManager.instance().getStats()
         
-        rsp['stats-server'] = Context.instance().getStats(b64=True)
-        rsp['backups-repo-tests'] = RepoTests.instance().getBackups(b64=True)
-        rsp['backups-repo-adapters'] = RepoAdapters.instance().getBackups(b64=True)
-        rsp['backups-repo-libraries'] = RepoLibraries.instance().getBackups(b64=True)
-        rsp['backups-repo-archives'] = RepoArchives.instance().getBackups(b64=True)
+        rsp['stats-server'] = Context.instance().getStats(b64=False)
+        rsp['backups-repo-tests'] = RepoTests.instance().getBackups(b64=False)
+        rsp['backups-repo-adapters'] = RepoAdapters.instance().getBackups(b64=False)
+        rsp['backups-repo-libraries'] = RepoLibraries.instance().getBackups(b64=False)
+        rsp['backups-repo-archives'] = RepoArchives.instance().getBackups(b64=False)
             
-        _, _, adps, stats_adps = RepoAdapters.instance().getTree(b64=True)
+        _, _, adps, stats_adps = RepoAdapters.instance().getTree(b64=False)
         rsp['repo-adp'] = adps
         rsp['stats-repo-adapters'] = stats_adps
         
-        _, _, libs, stats_libs = RepoLibraries.instance().getTree(b64=True)
+        _, _, libs, stats_libs = RepoLibraries.instance().getTree(b64=False)
         rsp['repo-lib-adp'] = libs
         rsp['stats-repo-libraries'] = stats_libs
         
-        rsp['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
-        rsp['adapters'] = RepoAdapters.instance().getRn(b64=True)
-        rsp['libraries'] = RepoLibraries.instance().getRn(b64=True)
-        rsp['toolbox'] = ToolboxManager.instance().getRn(b64=True)
-        rsp['informations'] = Context.instance().getInformations(user=USER_CTX, b64=True)
+        rsp['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=False) 
+        rsp['adapters'] = RepoAdapters.instance().getRn(b64=False)
+        rsp['libraries'] = RepoLibraries.instance().getRn(b64=False)
+        rsp['toolbox'] = ToolboxManager.instance().getRn(b64=False)
+        rsp['informations'] = Context.instance().getInformations(user=USER_CTX, b64=False)
         
         del USER_CTX
         
@@ -743,10 +744,10 @@ class SystemAbout(Handler):
         about = {}
         
         rn = {}
-        rn['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=True) 
-        rn['adapters'] = RepoAdapters.instance().getRn(b64=True)
-        rn['libraries'] = RepoLibraries.instance().getRn(b64=True)
-        rn['toolbox'] = ToolboxManager.instance().getRn(b64=True)
+        rn['core'] = Context.instance().getRn(pathRn=Settings.getDirExec(), b64=False) 
+        rn['adapters'] = RepoAdapters.instance().getRn(b64=False)
+        rn['libraries'] = RepoLibraries.instance().getRn(b64=False)
+        rn['toolbox'] = ToolboxManager.instance().getRn(b64=False)
             
         versions = {}
         versions["core"] = Settings.getVersion()
