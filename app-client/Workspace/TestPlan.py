@@ -425,11 +425,11 @@ class QTreeWidgetEnhancement(QTreeWidget):
 
             data = pickle.loads( event.mimeData().data("application/x-%s-repo-openfile" % Settings.instance().readValue( key = 'Common/acronym' ).lower() ) )
             if self.document.testGlobal:
-                if data["ext"] not in [ UCI.EXT_TESTUNIT, UCI.EXT_TESTSUITE, UCI.EXT_TESTABSTRACT, UCI.EXT_TESTPLAN ]:
+                if data["ext"] not in [ RCI.EXT_TESTUNIT, RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT, RCI.EXT_TESTPLAN ]:
                     QTreeWidget.dropEvent(self, event)
                     return
             else:
-                if data["ext"] not in [ UCI.EXT_TESTUNIT, UCI.EXT_TESTSUITE, UCI.EXT_TESTABSTRACT ]:
+                if data["ext"] not in [ RCI.EXT_TESTUNIT, RCI.EXT_TESTSUITE, RCI.EXT_TESTABSTRACT ]:
                     QTreeWidget.dropEvent(self, event)
                     return
 
@@ -1068,7 +1068,7 @@ class WTestPlan(Document.WDocument):
                                          readOnly=False, 
                                          customParam=parentId, 
                                          actionId=insertAction, 
-                                         destinationId=UCI.FOR_DEST_TG)                            
+                                         destinationId=RCI.FOR_DEST_TG)                            
                                         
         else:
             RCI.instance().openFileTests(projectId=int(test['projectid']), 
@@ -1077,7 +1077,7 @@ class WTestPlan(Document.WDocument):
                                          readOnly=False, 
                                          customParam=parentId, 
                                          actionId=insertAction, 
-                                         destinationId=UCI.FOR_DEST_TP) 
+                                         destinationId=RCI.FOR_DEST_TP) 
     def updateAllDefaultAliases(self):
         """
         """
@@ -1280,11 +1280,11 @@ class WTestPlan(Document.WDocument):
             if self.testGlobal:
                 RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
                                              customParam=int(currentItem.text(COL_ID)), 
-                                             actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TG)
+                                             actionId=RCI.ACTION_UPDATE_PATH, destinationId=RCI.FOR_DEST_TG)
             else:
                 RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, ignoreLock=False, readOnly=False, 
                                              customParam=int(currentItem.text(COL_ID)), 
-                                             actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TP)
+                                             actionId=RCI.ACTION_UPDATE_PATH, destinationId=RCI.FOR_DEST_TP)
     def updateMainLocations(self):
         """
         Update projects of all remote tests
@@ -1406,7 +1406,7 @@ class WTestPlan(Document.WDocument):
         Insert item above
         """
         if self.itemCurrent is not None:
-            self.addTestFile( insertTest=UCI.ACTION_INSERT_AFTER)
+            self.addTestFile( insertTest=RCI.ACTION_INSERT_AFTER)
             
         # refresh stats
         self.updateStatsTestPlan()
@@ -1416,7 +1416,7 @@ class WTestPlan(Document.WDocument):
         Insert item below
         """
         if self.itemCurrent is not None:
-            self.addTestFile( insertTest=UCI.ACTION_INSERT_BELOW)
+            self.addTestFile( insertTest=RCI.ACTION_INSERT_BELOW)
             
         # refresh stats
         self.updateStatsTestPlan()
@@ -1806,19 +1806,19 @@ class WTestPlan(Document.WDocument):
                             prjId = self.iRepo.remote().getProjectId(project=prjName)
                         except Exception as e:
                             prjId=0
-                        actionId = UCI.ACTION_RELOAD_PARAMS
+                        actionId = RCI.ACTION_RELOAD_PARAMS
                         if mergeProperties:
-                            actionId = UCI.ACTION_MERGE_PARAMS
+                            actionId = RCI.ACTION_MERGE_PARAMS
                         if self.testGlobal:
                             RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, 
                                                          ignoreLock=False, readOnly=False, 
                                                          customParam=int(self.itemCurrent.text(COL_ID)), 
-                                                         actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TG)
+                                                         actionId=RCI.ACTION_UPDATE_PATH, destinationId=RCI.FOR_DEST_TG)
                         else:
                             RCI.instance().openFileTests(projectId=int(projectId), filePath=absPath, 
                                                          ignoreLock=False, readOnly=False, 
                                                          customParam=int(self.itemCurrent.text(COL_ID)), 
-                                                         actionId=UCI.ACTION_UPDATE_PATH, destinationId=UCI.FOR_DEST_TP)
+                                                         actionId=RCI.ACTION_UPDATE_PATH, destinationId=RCI.FOR_DEST_TP)
                     else:
                         QMessageBox.information(self, self.tr("Information") , self.tr("Connect to the server first.") )
                 else:
@@ -1866,11 +1866,11 @@ class WTestPlan(Document.WDocument):
                     if not os.path.exists( absPath ):
                         QMessageBox.warning(self, self.tr("Information") , self.tr("This file does not exist!") )
                     else:
-                        repoDest = UCI.REPO_UNDEFINED
+                        repoDest = RCI.REPO_UNDEFINED
                         if str(testSelected.text(COL_REPO)) == FROM_LOCAL_REPO or str(testSelected.text(COL_REPO)) == FROM_LOCAL_REPO_OLD:
-                            repoDest = UCI.REPO_TESTS_LOCAL
+                            repoDest = RCI.REPO_TESTS_LOCAL
                         if str(testSelected.text(COL_REPO)) == FROM_OTHER or str(testSelected.text(COL_REPO)) == FROM_HDD:
-                            repoDest = UCI.REPO_UNDEFINED
+                            repoDest = RCI.REPO_UNDEFINED
                         # the parent of the test plan is a the document viewer
                         self.parent.newTab( path = path, filename = filename, extension = extension, repoDest=repoDest )
             elif str(testSelected.text(COL_REPO)) == FROM_REMOTE_REPO:
@@ -1890,7 +1890,8 @@ class WTestPlan(Document.WDocument):
                 prjId = self.iRepo.remote().getProjectId(project=prjName)
             except Exception as e:
                 prjId=0
-            # UCI.instance().openFileRepo( pathFile=absPath, project=prjId)
+            
+            # web call
             RCI.instance().openFileTests(projectId=int(prjId), filePath=absPath)
         else:
             QMessageBox.information(self, self.tr("Information") , self.tr("Connect to the server first.") )
@@ -2839,7 +2840,7 @@ class WTestPlan(Document.WDocument):
         Add severals items
         """
         # reverse the list of files only for insert mode as below 
-        if insertTest == UCI.ACTION_INSERT_BELOW:
+        if insertTest == RCI.ACTION_INSERT_BELOW:
             files.reverse()
             
         # memorize the insert options
@@ -2920,10 +2921,10 @@ class WTestPlan(Document.WDocument):
             # go the to function insertRemoteSubItem to see the response to the following action
             if self.testGlobal:
                 RCI.instance().openFileTests(projectId=int(project), filePath=absPath, ignoreLock=False, readOnly=False, 
-                                             customParam=parentId, actionId=insertTest, destinationId=UCI.FOR_DEST_TG)
+                                             customParam=parentId, actionId=insertTest, destinationId=RCI.FOR_DEST_TG)
             else:
                 RCI.instance().openFileTests(projectId=int(project), filePath=absPath, ignoreLock=False, readOnly=False, 
-                                             customParam=parentId, actionId=insertTest, destinationId=UCI.FOR_DEST_TP)
+                                             customParam=parentId, actionId=insertTest, destinationId=RCI.FOR_DEST_TP)
         else:
         
             # this part is only to import a local file in the testplan

@@ -105,12 +105,9 @@ class TimeException(Exception): pass
 
 class AbortException(Exception): pass
 class AbortStopException(Exception): pass 
-# class ContinueTestException(Exception): pass
-# class TerminateTestException(Exception): pass
 
 class ForceStopException(Exception): pass
 class ForceTerminateTestException(Exception): pass
-# class ForceContinueTestException(Exception): pass
 
 class PrivateException(Exception): pass
 class PublicException(Exception): pass
@@ -360,10 +357,12 @@ class TestSuitesManager(object):
             for d in self.__mainDescriptions:
                 if d["key"].lower() == "comments": continue
                 
-                try:
-                    val = d["value"].encode("utf-8").decode("latin1")
-                except Exception as e:
-                    val = d["value"]
+                
+                val = d["value"]
+                # try:
+                    # val = d["value"].encode("utf-8").decode("latin1")
+                # except Exception as e:
+                    # val = d["value"]
                 k = d["key"].replace(" ", "_")
                 mainDescrs.append( "%s=\"%s\"" % (k, xmlescape(val) ) ) 
             # end of new
@@ -535,16 +534,19 @@ class TestSuitesManager(object):
                 elif i['type'] in [ "list-shared" ]: 
                     val_tmp  = TestPropertiesLib.instance().readListShared(shared=i['value'])
                 else:
-                    #val_tmp = i['value'].decode("latin1")
                     try:
                         val_tmp = str(i['value'])
                     except Exception:
                         val_tmp = i['value'].encode('utf8')
-                    
+                    # val_tmp = str(i['value'])
                     # will be fix in the future, utf8 be must provided from client, not string in latin1
-                    val_tmp = val_tmp.decode("latin1")
+                    # val_tmp = val_tmp.decode("latin1")
+                    val_tmp = val_tmp.decode("utf8")
                     
-                inputs_str.append( u'%s (%s) = %s' % ( str(i['name']), str(i['type']), val_tmp ))
+                inputs_str.append( u'%s (%s) = %s' % ( str(i['name']), 
+                                                       str(i['type']), 
+                                                       val_tmp )
+                                    )
         return inputs_str
         
     def prepareStatistics(self, statistics, statisticsTu, statisticsTa, statisticsTs, statisticsTp, statisticsTg):
@@ -1457,7 +1459,8 @@ class TestSuitesManager(object):
         """
         self.tcs[self.id__]['is-executed'] = True
 
-    def newTp(self, name, dataInputs=[], sutInputs=[], summary='', startedAt='', dataOutputs=[], sutOutputs=[]):
+    def newTp(self, name, dataInputs=[], sutInputs=[], summary='', 
+                    startedAt='', dataOutputs=[], sutOutputs=[]):
         """
         Add a new testplan
         """
@@ -1465,7 +1468,8 @@ class TestSuitesManager(object):
         self.__tp_datainputs = dataInputs
         self.__tp_sutinputs = sutInputs
         # will be fix in the future, utf8 be must provided from client, not string in latin1
-        self.__tp_datasummary = summary.decode("latin1")
+        # self.__tp_datasummary = summary.decode("latin1")
+        self.__tp_datasummary = summary.decode("utf8")
         self.__tp_startedat = startedAt
         # new 12.1
         self.__tp_dataoutputs = dataOutputs
@@ -1501,13 +1505,15 @@ class TestSuitesManager(object):
         # end of new
         
         self.id__ += 1
+        # _summary = summary.decode("latin1")
+        _summary = summary.decode("utf8")
         self.tcs[self.id__] = { 'result': UNDEFINED, 'tc': [], 'name': name, 'is-unit': isUnit,
                                 'is-abstract': isAbstract, 'data-outputs': dataOutputs, 'sut-outputs': sutOutputs,
                                 'is-enabled': isEnabled, 'is-executed': isExecuted, 'alias': nameAlias,
                                 'is-testplan': isTestPlan, 'is-tp-started': startTestPlan, 'duration': 0 ,
                                 'data-inputs': dataInputs, 'sut-inputs': sutInputs, 
                                 # will be fix in the future,utf8 be must provided from client, not string in latin1
-                                'data-summary': summary.decode("latin1"), 'path': testPath, 'project': testProject,
+                                'data-summary': _summary, 'path': testPath, 'project': testProject,
                                 'started-at': startedAt, 'is-tp-from-tg': isTpFromTg, 'data-descriptions': dataDescriptions,
                                 "errors": [] }
         return self.id__                        
@@ -2538,7 +2544,9 @@ class Step(object):
         """
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        self.summary_ = summary.decode("latin1")
+        # self.summary_ = summary.decode("latin1")
+        self.summary_ = summary.decode("utf8")
+        
     @doc_public    
     def setDescription(self, description):
         """
@@ -2549,7 +2557,9 @@ class Step(object):
         """
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        self.action_ = description.decode("latin1")
+        # self.action_ = description.decode("latin1")
+        self.action_ = description.decode("utf8")
+        
     @doc_public
     def setExpected(self, expected):
         """
@@ -2560,7 +2570,9 @@ class Step(object):
         """
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        self.expected_ = expected.decode("latin1")
+        # self.expected_ = expected.decode("latin1")
+        self.expected_ = expected.decode("utf8")
+        
     @doc_public
     def getId(self):
         """
@@ -2608,7 +2620,8 @@ class Step(object):
         """
         # will be fix on the future
         # utf8 be must provided from client, not string in latin1
-        return self.summary_.decode("latin1")
+        # return self.summary_.decode("latin1")
+        return self.summary_.decode("utf8")
 
     def getExpected(self):
         """
@@ -2616,8 +2629,9 @@ class Step(object):
         """
         # will be fix on the future
         # utf8 be must provided from client, not string in latin1
-        return self.expected_.decode("latin1")
-    
+        # return self.expected_.decode("latin1")
+        return self.expected_.decode("utf8")
+        
     def getActual(self):
         """
         Return actual string 
@@ -2643,7 +2657,8 @@ class Step(object):
         """
         # will be fix on the future
         # utf8 be must provided from client, not string in latin1
-        ret = self.action_.decode("latin1")
+        # ret = self.action_.decode("latin1")
+        ret = self.action_.decode("utf8")
         try:
             if self.action_thumbnail is not None:
                 imgB64 = base64.b64encode(self.action_thumbnail)
@@ -2756,7 +2771,8 @@ class Step(object):
 
         # will be fix on the future
         # utf8 be must provided from client, not string in latin1
-        self.actual_.append( actual.decode("latin1") )
+        # self.actual_.append( actual.decode("latin1") )
+        self.actual_.append( actual.decode("utf8") )
         self.actual_raw += actual.decode('utf8') + '\n'
 
         self.verdict = FAIL
@@ -2832,7 +2848,8 @@ class Step(object):
 
         # will be fix on the future
         # utf8 be must provided from client, not string in latin1
-        self.actual_.append( str(actual).decode("latin1") )
+        # self.actual_.append( str(actual).decode("latin1") )
+        self.actual_.append( str(actual).decode("utf8") )
         self.actual_raw += str(actual).decode('utf8') + '\n'
             
         if self.verdict == FAIL :
@@ -3423,7 +3440,9 @@ class TestCase(object):
         """
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        return self.__purpose.decode("latin1")
+        # return self.__purpose.decode("latin1")
+        return self.__purpose.decode("utf8")
+        
     @doc_public    
     def setRequirement(self, requirement):
         """
@@ -3440,7 +3459,8 @@ class TestCase(object):
         """
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        return self.__requirement.decode("latin1")
+        # return self.__requirement.decode("latin1")
+        return self.__requirement.decode("utf8")
         
     def getSuffix(self):
         """
@@ -3475,7 +3495,8 @@ class TestCase(object):
 
         # will be fix in the future
         # utf8 be must provided from client, not string in latin1
-        return tname.decode("latin1")
+        # return tname.decode("latin1")
+        return tname.decode("utf8")
 
     def getSteps(self):
         """
@@ -3685,7 +3706,8 @@ class TestCase(object):
         if not internal: self.warning("setFailed: deprecated function")
         self.__TESTCASE_VERDICT = FAIL
         if len( "%s" % str(internalErr) ): 
-            self.__errors.append( str(internalErr).decode("latin1") )
+            # self.__errors.append( str(internalErr).decode("latin1") )
+            self.__errors.append( str(internalErr).decode("utf8") )
 
     def getErrors(self):
         """
@@ -4237,7 +4259,8 @@ class TestCase(object):
         
         typeMsg = ''
         if txt:
-            self.__logs.append( str(txt).decode("latin1") )
+            # self.__logs.append( str(txt).decode("latin1") )
+            self.__logs.append( str(txt).decode("utf8") )
             
             if raw: typeMsg = 'raw'
             try:
@@ -4314,7 +4337,8 @@ class TestCase(object):
         
         typeMsg = ''
         if txt:
-            self.__logs.append( str(txt).decode("latin1") )
+            # self.__logs.append( str(txt).decode("latin1") )
+            self.__logs.append( str(txt).decode("utf8") )
             if raw: typeMsg = 'raw'
             try:
                 TLX.instance().log_testcase_warning(message=txt,component=TC, tcid = self.__id,

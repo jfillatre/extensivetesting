@@ -36,6 +36,10 @@ import scandir
 import copy
 import json
 
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
 from Libs import Scheduler, Settings, Logger
 
 try:
@@ -226,14 +230,8 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         """
         Returns tree
         """
-        # tests_ret = []
         nb_tests, nb_tests_f, tests, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, str(project)), 
                                                                     project=project, supportSnapshot=True  )
-        # if b64:
-            # tests_ret = self.encodeData(data=tests)
-            # tests_ret = Common.encodeData(data=tests, logger=self)
-        # else:
-            # tests_ret = tests
         return nb_tests, nb_tests_f, tests, stats
 
     def __getBasicListing(self, testPath, initialPath):
@@ -270,11 +268,6 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         """
         _, _, tests, _ = self.getListingFilesV2( path=self.destBackup, 
                                                         extensionsSupported=[RepoManager.ZIP_EXT] )
-        # if b64:
-            # backups_ret = self.encodeData(data=tests)
-            # backups_ret = Common.encodeData(data=tests, logger=self)
-        # else:
-            # backups_ret = tests
         return tests
 
     def getLastBackupIndex(self, pathBackups ):
@@ -780,7 +773,6 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         for i in xrange(len(currentParam)):
             for np in newParam:
                 if np['name'] == currentParam[i]['name'] and currentParam[i]['type'] != "alias":
-                #if np['name'] == currentParam[i]['name']:
                     currentParam[i] = np
         # adding new param
         newparams = self.__getnewparams(currentParam, newParam)
@@ -938,48 +930,6 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         # execute the rename function as before
         ret = RepoManager.RepoManager.moveDir(self, mainPath=mainPath, folderName=folderName, newPath=newPath, 
                                             project=project, newProject=newProject)
-        # ( code, mainPath, folderName, newPath, project) = ret
-        
-        # if code == self.context.CODE_OK:
-            # get the project Name 
-            # prjName = None
-            # prjNewName = None
-            # for prj in projectsList:
-                # if "%s" % prj["project_id"] == "%s" % project:
-                    # prjName = prj["name"] 
-                # if "%s" % prj["project_id"] == "%s" % newProject:
-                    # prjNewName = prj["name"] 
-
-            # if prjName is not None and prjNewName is not None:
-                # new_files = []
-                # for path, subdirs, files in os.walk("%s/%s/%s/%s/" % (self.testsPath, newProject, newPath, folderName) ):
-                    # for name in files:
-                        # new_path = os.path.join(path, name)
-                        # new_path = os.path.normpath(new_path)
-                        # new_files.append( new_path )
-                        
-                # old_files = []
-                # for f in new_files:
-                    # new_path = "%s/%s/%s/%s/" % (self.testsPath, newProject, newPath, folderName)
-                    # new_path = os.path.normpath(new_path)
-                    # old_path = "%s/%s/%s/%s/" % (self.testsPath, project, mainPath, folderName)
-                    # old_path = os.path.normpath(old_path)
-                    # old_files.append(   f.replace( new_path,  old_path )  )
-
-                # for i in xrange(len(old_files)):
-                    # old_path = old_files[i].split( "%s%s" % (self.testsPath, project) )[1]
-                    # if old_path.startswith("/"): old_path = old_path[1:]
-                    # old_path = "%s:%s" % (prjName, old_path )
-                    
-                    # new_path = new_files[i].split( "%s%s" % (self.testsPath, newProject) )[1]
-                    # if new_path.startswith("/"): new_path = new_path[1:]
-                    # new_path = "%s:%s" % (prjNewName, new_path )
-                    
-                    # self.saveToHistory(oldPrjId=project, oldPath=old_path, 
-                                        # newPrjId=newProject, newPath=new_path) 
-                
-                # finished = self.updateAllTestsPlan(renamedBy=renamedBy)
-
         return ret
         
     def moveFile(self, mainPath, fileName, extFilename, newPath, project='', newProject='', 
@@ -991,31 +941,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         ret = RepoManager.RepoManager.moveFile( self, mainPath=mainPath, fileName=fileName, extFilename=extFilename, 
                                                 newPath=newPath, project=project, newProject=newProject, 
                                                 supportSnapshot=supportSnapshot)
-        # ( code, mainPath, fileName, newPath, extFilename, project) = ret
-        
-        # if code == self.context.CODE_OK:
-            # get the project Name 
-            # prjName = None
-            # prjNewName = None
-            # for prj in projectsList:
-                # if "%s" % prj["project_id"] == "%s" % project:
-                    # prjName = prj["name"] 
-                # if "%s" % prj["project_id"] == "%s" % newProject:
-                    # prjNewName = prj["name"] 
 
-            # if prjName is not None and prjNewName is not None:
-                # oldPath = "%s/%s.%s" % (mainPath, fileName, extFilename)
-                # oldPath = os.path.normpath(oldPath)
-                # if oldPath.startswith("/"): oldPath = oldPath[1:]
-                # oldPath = "%s:%s" % (prjName, oldPath)
-                
-                # newPath = "%s/%s.%s" %  (newPath, fileName, extFilename)
-                # newPath = os.path.normpath(newPath)
-                # if newPath.startswith("/"): newPath = newPath[1:]
-                # newPath = "%s:%s" % (prjNewName, newPath)
-                
-                # self.saveToHistory(oldPrjId=project, oldPath=oldPath, newPrjId=newProject, newPath=newPath) 
-   
         return ret
         
     def duplicateDir(self, mainPath, oldPath, newPath, project='', newProject='', newMainPath=''):
@@ -1048,44 +974,6 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         # execute the rename function as before
         ret = RepoManager.RepoManager.renameDir(self, mainPath=mainPath, oldPath=oldPath, newPath=newPath, 
                                                      project=project)
-        # code, mainPath, oldPath, newPath, project  = ret  
-        
-        # if ok then update the history
-        # if code == self.context.CODE_OK:
-            # get the project Name 
-            # prjName = None
-            # for prj in projectsList:
-                # if "%s" % prj["project_id"] == "%s" % project:
-                    # prjName = prj["name"] 
-            # if prjName is not None:
-                # new_files = []
-                # for path, subdirs, files in os.walk("%s/%s/%s/%s/" % (self.testsPath, project, mainPath, newPath) ):
-                    # for name in files:
-                        # new_path = os.path.join(path, name)
-                        # new_path = os.path.normpath(new_path)
-                        # new_files.append( new_path )
-
-                # old_files = []
-                # for f in new_files:
-                    # new_path = "%s/%s/%s/%s/" % (self.testsPath, project, mainPath, newPath)
-                    # new_path = os.path.normpath(new_path)
-                    # old_path = "%s/%s/%s/%s/" % (self.testsPath, project, mainPath, oldPath)
-                    # old_path = os.path.normpath(old_path)
-                    # old_files.append(   f.replace( new_path,  old_path )  )
-
-                # for i in xrange(len(old_files)):
-                    # old_path = old_files[i].split( "%s%s" % (self.testsPath, project) )[1]
-                    # if old_path.startswith("/"): old_path = old_path[1:]
-                    # old_path = "%s:%s" % (prjName, old_path )
-                    
-                    # new_path = new_files[i].split( "%s%s" % (self.testsPath, project) )[1]
-                    # if new_path.startswith("/"): new_path = new_path[1:]
-                    # new_path = "%s:%s" % (prjName, new_path )
-                    
-                    # self.saveToHistory( oldPrjId=project, oldPath=old_path, 
-                                        # newPrjId=project, newPath=new_path) 
-                
-                # finished = self.updateAllTestsPlan(renamedBy=renamedBy)
 
         return ret
         
@@ -1101,29 +989,6 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
                                                     newFilename=newFilename,
                                                     extFilename=extFilename, project=project, 
                                                     supportSnapshot=supportSnapshot )
-        code, mainPath, oldFilename, newFilename, extFilename, project = ret
-
-        # if ok then update the history
-        # if code == self.context.CODE_OK:
-            # get the project Name 
-            # prjName = None
-            # for prj in projectsList:
-                # if "%s" % prj["project_id"] == "%s" % project:
-                    # prjName = prj["name"] 
-            # if prjName is not None:
-                # oldPath = "%s/%s.%s" % (mainPath, oldFilename, extFilename)
-                # oldPath = os.path.normpath(oldPath)
-                # if oldPath.startswith("/"): oldPath = oldPath[1:]
-                # oldPath = "%s:%s" % (prjName, oldPath)
-                
-                # newPath = "%s/%s.%s" %  (mainPath, newFilename, extFilename)
-                # newPath = os.path.normpath(newPath)
-                # if newPath.startswith("/"): newPath = newPath[1:]
-                # newPath = "%s:%s" % (prjName, newPath)
-                
-                # self.saveToHistory(oldPrjId=project, oldPath=oldPath, 
-                                    # newPrjId=project, newPath=newPath) 
-                # finished = self.updateAllTestsPlan(renamedBy=renamedBy)
 
         return ret
         

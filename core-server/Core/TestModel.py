@@ -584,7 +584,6 @@ def createTestDesignForTg(dataTest, userName, testName, trPath, logFilename, wit
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
     
-    # testglobal = dataTest['testglobal']
     testglobal = dataTest['test-execution']
     
     # prepare datasets
@@ -1228,17 +1227,9 @@ def createTestDesignForTs(dataTest, userName, testName, trPath, logFilename, wit
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # if 'src-test' in dataTest:
-        # srcTest = dataTest['src-test']
-    # if 'src-exec' in dataTest:
-        # srcExec = dataTest['src-exec']
+
     srcTest = dataTest['test-definition']
     srcExec = dataTest['test-execution']
-    
-    # if 'testunit' in dataTest:
-        # srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
-        # srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
 
     # prepare datasets
     missingDataset = loadDataset(parameters=parameters, user=userName)
@@ -1727,9 +1718,7 @@ def createTestDesignForTa(dataTest, userName, testName, trPath, logFilename, wit
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # if 'src-test' in dataTest:
-        # srcTest = dataTest['src-test']
+
     srcTest = dataTest['test-definition']
     
     # prepare datasets
@@ -2083,8 +2072,7 @@ def createTestGlobal ( dataTest, userName, testName, trPath, logFilename, withou
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # testglobal = dataTest['testglobal']
+
     testglobal = dataTest['test-execution']
     
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
@@ -2768,8 +2756,7 @@ def createTestPlan ( dataTest, userName, testName, trPath, logFilename, withoutP
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # testplan = dataTest['testplan']
+
     testplan = dataTest['test-execution']
     
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
@@ -3404,18 +3391,9 @@ def createTestSuite (	dataTest, userName, testName, trPath, logFilename, without
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # if 'src-test' in dataTest:
-        # srcTest = dataTest['src-test']
-    # if 'src-exec' in dataTest:
-        # srcExec = dataTest['src-exec']
 
     srcTest = dataTest['test-definition']
     srcExec = dataTest['test-execution']
-    
-    # if 'testunit' in dataTest:
-        # srcTest = "class TESTCASE_01(TestCase):\t%s"% indent(srcTest)
-        # srcExec = "TESTCASE_01(suffix=None, testName='%s' % description('name')).execute()"
 
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
     
@@ -3801,9 +3779,7 @@ def createTestUnit (	dataTest, userName, testName, trPath, logFilename, withoutP
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # if 'src-test' in dataTest:
-        # srcTest = dataTest['src-test']    
+  
     srcTest = dataTest['test-definition']
     
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)
@@ -4181,9 +4157,7 @@ def createTestAbstract (	dataTest, userName, testName, trPath, logFilename, with
         
     SutLibrariesGeneric = RepoLibraries.instance().getGeneric()
     SutAdaptersGeneric = RepoAdapters.instance().getGeneric()
-    
-    # if 'src-test' in dataTest:
-        # srcTest = dataTest['src-test']
+
     srcTest = dataTest['test-definition']
     
     projectName = ProjectsManager.instance().getProjectName(prjId=projectId)

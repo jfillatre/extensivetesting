@@ -87,7 +87,7 @@ class UserContext(Logger.ClassLogger):
         self.trace('Preparing user context Login=%s' % login)
         self.login = login
         self.default_prj = ProjectsManager.instance().getDefaultProjectForUser(user=login)
-        self.projects = ProjectsManager.instance().getProjects(user=login, b64=False)
+        self.projects = ProjectsManager.instance().getProjects(user=login)
         self.trace('User context constructed Login=%s' % login)
         
     def __str__(self):
@@ -110,32 +110,7 @@ class UserContext(Logger.ClassLogger):
         """
         Return all projects 
         """
-        # if b64:
-            # return self.encodeData(data=self.projects)
-            # return Common.encodeData(data=self.projects, logger=self)
-        # else:
         return self.projects
-            
-    # def encodeData(self, data):
-        # """
-        # Encode data
-        # """
-        # ret = ''
-        # try:
-            # tasks_json = json.dumps(data)
-        # except Exception as e:
-            # self.error( "Unable to encode in json: %s" % str(e) )
-        # else:
-            # try: 
-                # tasks_zipped = zlib.compress(tasks_json)
-            # except Exception as e:
-                # self.error( "Unable to compress: %s" % str(e) )
-            # else:
-                # try: 
-                    # ret = base64.b64encode(tasks_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64: %s" % str(e) )
-        # return ret
 
 class SessionExpireHandler(threading.Thread, Logger.ClassLogger):
     """
@@ -254,6 +229,10 @@ class Context(Logger.ClassLogger):
         try:
             phpVersion = subprocess.check_output( 'php -v', stderr=subprocess.STDOUT, shell=True )
             phpVersion = phpVersion.strip()
+            
+            if sys.version_info > (3,):
+                phpVersion = phpVersion.decode('utf8')
+                
             self.trace("php version: %s" % phpVersion)
             
             lines = phpVersion.splitlines()
@@ -269,6 +248,9 @@ class Context(Logger.ClassLogger):
         try:
             versionHttpd = subprocess.check_output( 'httpd -v', stderr=subprocess.STDOUT, shell=True )
             versionHttpd = versionHttpd.strip()
+            if sys.version_info > (3,):
+                versionHttpd = versionHttpd.decode('utf8')
+                
             self.trace("httpd version: %s" % versionHttpd)
             
             lines = versionHttpd.splitlines()
@@ -300,10 +282,6 @@ class Context(Logger.ClassLogger):
                                                                       Settings.get( 'Paths', 'tests')) )
         except Exception as e:
             self.error( "unable to get server usage: %s"  % e )
-        # else:
-            # if b64:
-                # ret = self.encodeData(data=ret)
-                # ret = Common.encodeData(data=ret, logger=self)
         return ret
 
     def diskUsage(self, p):
@@ -470,27 +448,6 @@ class Context(Logger.ClassLogger):
         """
         return len(self.usersConnected)
 
-    # def encodeData(self, data):
-        # """
-        # Encode data
-        # """
-        # ret = ''
-        # try:
-            # tasks_json = json.dumps(data)
-        # except Exception as e:
-            # self.error( "Unable to encode in json: %s" % str(e) )
-        # else:
-            # try: 
-                # tasks_zipped = zlib.compress(tasks_json)
-            # except Exception as e:
-                # self.error( "Unable to compress: %s" % str(e) )
-            # else:
-                # try: 
-                    # ret = base64.b64encode(tasks_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64: %s" % str(e) )
-        # return ret
-
     def getStats(self, b64=False):
         """
         Constructs some statistics on tas server
@@ -549,10 +506,7 @@ class Context(Logger.ClassLogger):
                                     + int(nbTests[0]['nbtg']) + int(nbTests[0]['nbta'])
         except Exception as e:
             self.error( "unable get statistics server: %s"  % e )
-        # else:
-            # if b64:
-                # ret = self.encodeData(data=ret)
-                # ret = Common.encodeData(data=ret, logger=self)
+
         return ret
 
     def getSize(self, folder):
@@ -838,10 +792,10 @@ class Context(Logger.ClassLogger):
                 ret.append( {'test-environment': self.getTestEnvironment(user=user) } )
                 
                 if isinstance(user, UserContext):
-                    ret.append( {'projects': user.getProjects(b64=False)  } )
+                    ret.append( {'projects': user.getProjects()  } )
                     ret.append( {'default-project': user.getDefault()  } )
                 else:
-                    ret.append( {'projects': ProjectsManager.instance().getProjects(user=user, b64=False)  } )
+                    ret.append( {'projects': ProjectsManager.instance().getProjects(user=user)  } )
                     ret.append( {'default-project': ProjectsManager.instance().getDefaultProjectForUser(user=user)  } )
 
             for section in Settings.instance().sections():
@@ -850,10 +804,7 @@ class Context(Logger.ClassLogger):
 
         except Exception as e:
             self.error( 'unable to construct servers settings: %s' % str(e) )
-        # else:
-            # if b64:
-                # ret = self.encodeData(data=ret)
-                # ret = Common.encodeData(data=ret, logger=self)
+
         return  ret
 
     def getUptime(self):
@@ -874,6 +825,8 @@ class Context(Logger.ClassLogger):
         dt = subprocess.check_output( "%s --rfc-3339=seconds" % Settings.get('Bin', 'date'), 
                                         stderr=subprocess.STDOUT, shell=True )
         dt = dt.strip()
+        if sys.version_info > (3,):
+            dt = dt.decode('utf8')
         self.trace( 'Date Server: %s' % dt )
         return dt
 
@@ -895,19 +848,7 @@ class Context(Logger.ClassLogger):
             f.close()
         except Exception as e:
             self.error( "Unable to read release notes: %s" % str(e) )
-        # else:
-            # if not b64:
-                # rn_ret = rn
-            # else:
-                # try: 
-                    # rn_zipped = zlib.compress(rn)
-                # except Exception as e:
-                    # self.error( "Unable to compress release notes: %s" % str(e) )
-                # else:
-                    # try: 
-                        # rn_ret = base64.b64encode(rn_zipped)
-                    # except Exception as e:
-                        # self.error( "Unable to encode in base 64: %s" % str(e) )
+
         return rn_ret
 
     def listRoutes(self):
@@ -922,6 +863,8 @@ class Context(Logger.ClassLogger):
         iproute = subprocess.check_output(  Settings.get('Bin', 'iproute'), 
                                             stderr=subprocess.STDOUT, shell=True )
         iproute = iproute.strip()
+        if sys.version_info > (3,):
+            iproute = iproute.decode('utf8')
         self.trace( 'iproute: %s' % iproute )
         
         # save all eths
@@ -948,6 +891,8 @@ class Context(Logger.ClassLogger):
         ipaddr = subprocess.check_output( Settings.get('Bin', 'ipaddr'), 
                                           stderr=subprocess.STDOUT, shell=True )
         ipaddr = ipaddr.strip()
+        if sys.version_info > (3,):
+            ipaddr = ipaddr.decode('utf8')
         self.trace( 'ipaddr: %s' % ipaddr )
         
         try:
@@ -987,6 +932,8 @@ class Context(Logger.ClassLogger):
 
         ifconfig = subprocess.check_output( Settings.get('Bin', 'ifconfig'),
                                             stderr=subprocess.STDOUT, shell=True )
+        if sys.version_info > (3,):
+            ifconfig = ifconfig.decode('utf8')
         self.trace( 'ifconfig: %s' % ifconfig )
         
         for eth in ifconfig.split('\n\n'):
@@ -1011,6 +958,8 @@ class Context(Logger.ClassLogger):
         """
         lang = subprocess.check_output( Settings.get('Bin', 'locale'), 
                                         stderr=subprocess.STDOUT, shell=True )
+        if sys.version_info > (3,):
+            lang = lang.decode('utf8')
         self.trace( 'lang: %s' % lang )
         
         lines = lang.splitlines()
@@ -1181,9 +1130,9 @@ class Context(Logger.ClassLogger):
         self.trace("Return the test environment for the user: %s" % user)
         
         if isinstance(user, UserContext):
-            projects = user.getProjects(b64=False)
+            projects = user.getProjects()
         else:
-            projects = ProjectsManager.instance().getProjects(user=user, b64=False)
+            projects = ProjectsManager.instance().getProjects(user=user)
         testEnvironment = []
         for prj in projects:
             if int( Settings.get( 'MySql', 'test-environment-encrypted' ) ):
@@ -1204,17 +1153,20 @@ class Context(Logger.ClassLogger):
                     try:
                         env_json = json.loads(env['value'])
                         
-                        # convert unicode to str encoded in utf8
-                        if sys.version_info > (2,6,):
-                            if isinstance(env_json, unicode):
-                                env_json = env_json.encode("utf8")
-                            elif isinstance(env_json, dict):
-                                env_json = self.__parseDict(d=env_json)
-                            elif isinstance(env_json, list):
-                                env_json = self.__parseList(d=env_json)
-                            else:
-                                env_json = env_json
-                            
+                        if sys.version_info > (3,):
+                            pass
+                        else:
+                            # convert unicode to str encoded in utf8
+                            if sys.version_info > (2,6,):
+                                if isinstance(env_json, unicode):
+                                    env_json = env_json.encode("utf8")
+                                elif isinstance(env_json, dict):
+                                    env_json = self.__parseDict(d=env_json)
+                                elif isinstance(env_json, list):
+                                    env_json = self.__parseList(d=env_json)
+                                else:
+                                    env_json = env_json
+                                
                     except Exception as e:
                         self.error( "Unable to encode in json: %s" % str(e) )
                     else:
@@ -1223,10 +1175,6 @@ class Context(Logger.ClassLogger):
         
         self.trace( "Test environment retrieved for Login=%s" % (user) )
 
-        # if b64:
-            # return self.encodeData(data=testEnvironment)
-            # return Common.encodeData(data=testEnvironment, logger=self)
-        # else:
         return testEnvironment
 
     def refreshTestEnvironment(self):
@@ -1235,8 +1183,9 @@ class Context(Logger.ClassLogger):
         And notify all connected user
         """
         for user_login, user_profile in self.usersConnected.items():
-            if user_profile['profile']['administrator'] or user_profile['profile']['tester'] or user_profile[cur_user]['profile']['developer'] :
-                data = ( 'context-server', ( "update", self.getInformations(user=user_login, b64=False) ) )
+            if user_profile['profile']['administrator'] or user_profile['profile']['tester'] or \
+                user_profile[cur_user]['profile']['developer'] :
+                data = ( 'context-server', ( "update", self.getInformations(user=user_login) ) )
                 ESI.instance().notify(body=data, toUser=user_login)
         return True
     
@@ -1256,7 +1205,9 @@ class Context(Logger.ClassLogger):
         @param portable:
         @type portable: boolean
         """
-        self.trace('Check update client requested client Version=%s OS=%s Portable=%s' % (currentVersion, systemOs, portable) )
+        self.trace('Check update client requested client Version=%s OS=%s Portable=%s' % (currentVersion, 
+                                                                                          systemOs, 
+                                                                                          portable) )
         available = self.CODE_NOT_FOUND
         
         # avoid exception during version check, provide default values

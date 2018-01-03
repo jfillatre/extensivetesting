@@ -29,7 +29,12 @@ import zipfile
 import time
 import scandir
 import json
+import sys
 
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
 from Libs import Logger
 
 try:
@@ -86,27 +91,6 @@ class RepoManager(Logger.ClassLogger):
         Trace message
         """
         Logger.ClassLogger.trace(self, txt="RMG - %s" % txt)
-
-    # def encodeData(self, data):
-        # """
-        # Encode data
-        # """
-        # ret = ''
-        # try:
-            # tasks_json = json.dumps(data)
-        # except Exception as e:
-            # self.error( "Unable to encode in json: %s" % str(e) )
-        # else:
-            # try: 
-                # tasks_zipped = zlib.compress(tasks_json)
-            # except Exception as e:
-                # self.error( "Unable to compress: %s" % str(e) )
-            # else:
-                # try: 
-                    # ret = base64.b64encode(tasks_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64: %s" % str(e) )
-        # return ret
 
     def getTimestamp(self):
         """
@@ -405,7 +389,10 @@ class RepoManager(Logger.ClassLogger):
                 if entry.is_dir(follow_symlinks=False) and not entry.name.startswith(".") :
                     nbFolders += 1
                     
-                    folderName = entry.name.decode("utf-8")
+                    if sys.version_info > (3,):
+                        folderName = entry.name
+                    else:
+                        folderName = entry.name.decode("utf-8")
                     
                     # get the testresult name
                     if archiveMode:
@@ -468,7 +455,12 @@ class RepoManager(Logger.ClassLogger):
                     if entry.name.lower().endswith( tuple(extSupported) ) and not entry.name.startswith(".") :
                         nbFiles += 1
                         sizeFile = entry.stat(follow_symlinks=False).st_size
-                        dictFile = { "type": "file", "name": entry.name.decode("utf-8"), 
+                        
+                        if sys.version_info > (3,):
+                            fileName = entry.name
+                        else:
+                            fileName = entry.name.decode("utf-8")
+                        dictFile = { "type": "file", "name": fileName, 
                                      'size': "%s" % sizeFile,
                                      'modification': entry.stat(follow_symlinks=False).st_mtime, 
                                      'project': "%s" % project }
@@ -683,69 +675,6 @@ class RepoManager(Logger.ClassLogger):
             self.error( e )
             return (self.context.CODE_ERROR,) + ret + (is_locked, lockedBy,)
 
-        
-    # def importFile(self, pathFile, nameFile, extFile, contentFile, binaryMode=True, project='', makeDirs=False):
-        # """
-        # Save data in the file passed in argument
-
-        # @param pathFile: 
-        # @type pathFile:
-
-        # @param nameFile: 
-        # @type nameFile:
-
-        # @param extFile: 
-        # @type extFile:
-
-        # @param contentFile: file content in base64
-        # @type contentFile:
-
-        # @param updateFile: 
-        # @type updateFile:
-
-        # @param binaryMode: 
-        # @type binaryMode:
-
-        # @return: 
-        # @rtype: list
-        # """
-        # try:
-            # if extFile.lower() not in [ PY_EXT, PNG_EXT, TXT_EXT, TEST_UNIT_EXT, TEST_SUITE_EXT, 
-                                    # TEST_PLAN_EXT, TEST_GLOBAL_EXT, TEST_CONFIG_EXT, TEST_DATA_EXT]:
-                # raise Exception('Extension: %s not supported!' % extFile)
-
-            # if len(pathFile) > 0:
-                # complete_path = "%s/%s/%s/%s.%s" % (self.testsPath, project, pathFile, nameFile, extFile)
-            # else:
-                # complete_path = "%s/%s/%s.%s" % (self.testsPath, project, nameFile, extFile)
-            # self.trace( "importing file %s" % complete_path  ) 
-            # res = os.path.exists( complete_path )
-            # if res:
-                # return ( self.context.CODE_ALLREADY_EXISTS, pathFile, nameFile, extFile, project )
-            
-            # create missing directory
-            # if makeDirs:
-                # folderPath = "%s/%s/%s/" % (self.testsPath, project, pathFile)
-                # if not os.path.exists( folderPath ):
-                    # os.makedirs(folderPath)
-                
-            # decode the content
-            # content_decoded = base64.b64decode(contentFile)
-            
-            # write the file
-            # if binaryMode:
-                # f = open( complete_path, 'wb')
-            # else:
-                # f = open( complete_path, 'w')
-            # f.write( content_decoded )
-            # f.close()
-            
-            # ret = (  self.context.CODE_OK, pathFile, nameFile, extFile, project )
-        # except Exception as e:
-            # self.error( e )
-            # ret = (  self.context.CODE_ERROR, False, False, False, project)
-        # return ret
-        
     def unlockFile(self, pathFile, nameFile, extFile, project='', login=''):
         """
         Save data in the file passed in argument
@@ -792,85 +721,6 @@ class RepoManager(Logger.ClassLogger):
             self.error( "unable to unlock file: %s" % e )
             ret = self.context.CODE_ERROR
         return ret
-
-    # def putFile(self, pathFile, nameFile, extFile, contentFile, updateFile, binaryMode=True,
-                        # project='', closeAfter=False, login=''):
-        # """
-        # Save data in the file passed in argument
-
-        # @param pathFile: 
-        # @type pathFile:
-
-        # @param nameFile: 
-        # @type nameFile:
-
-        # @param extFile: 
-        # @type extFile:
-
-        # @param contentFile: 
-        # @type contentFile:
-
-        # @param updateFile: 
-        # @type updateFile:
-
-        # @param binaryMode: 
-        # @type binaryMode:
-
-        # @return: 
-        # @rtype: list
-        # """
-        # try:
-            # lockedBy = ''
-        
-            # if extFile.lower() not in [ PY_EXT, PNG_EXT, TXT_EXT, TEST_ABSTRACT_EXT, TEST_UNIT_EXT,
-                                        # TEST_SUITE_EXT, TEST_PLAN_EXT, TEST_GLOBAL_EXT, TEST_CONFIG_EXT, 
-                                        # TEST_DATA_EXT ]:
-                # raise Exception('Extension: %s not supported!' % extFile)
-
-            # prepare path files
-            # if len(pathFile) > 0:
-                # lockPath = "%s/%s/%s/.%s.%s.lock" % (self.testsPath, project, pathFile, nameFile, extFile)
-                # complete_path = "%s/%s/%s/%s.%s" % (self.testsPath, project, pathFile, nameFile, extFile)
-            # else:
-                # complete_path = "%s/%s/%s.%s" % (self.testsPath, project, nameFile, extFile)
-                # lockPath = "%s/%s/.%s.%s.lock" % (self.testsPath, project,  nameFile, extFile)
-            
-            
-            # self.trace( "putting file %s" % complete_path  ) 
-            # if not updateFile:
-                # res = os.path.exists( complete_path )
-                # if res:
-                    # return ( self.context.CODE_ALLREADY_EXISTS, pathFile, nameFile, extFile, 
-                                # updateFile, project, closeAfter, lockedBy )
-
-            # refuse to save if a lock already exist with a diffent login name
-            # is_locked = False
-            # if os.path.exists( lockPath ): 
-                # is_locked=True
-                # fd_lock = open(lockPath, 'r')
-                # lockedBy = fd_lock.read()
-                # fd_lock.close()
-                
-                # cancel lock when login
-                # if base64.b64encode(login) !=  lockedBy:
-                    # return ( self.context.CODE_LOCKED, pathFile, nameFile, extFile, 
-                                # updateFile, project, closeAfter, lockedBy )
-                    
-            # decode the content and save it in the file
-            # content_decoded = base64.b64decode(contentFile)
-            # if binaryMode:
-                # f = open( complete_path, 'wb')
-            # else:
-                # f = open( complete_path, 'w')
-            # f.write( content_decoded )
-            # f.close()
-            
-            # ret = ( self.context.CODE_OK, pathFile, nameFile, extFile, 
-                    # updateFile, project, closeAfter, lockedBy )
-        # except Exception as e:
-            # self.error( e )
-            # ret = (  self.context.CODE_ERROR, False, False, False, False, project, closeAfter, lockedBy)
-        # return ret
 
     def addDir(self, pathFolder, folderName, project=''):
         """

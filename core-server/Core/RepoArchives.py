@@ -33,11 +33,9 @@ import hashlib
 import re
 try:
     import cStringIO
-except ImportError: # support python 3
-    import io as cStringIO
-try:
     import cPickle
 except ImportError: # support python 3
+    import io as cStringIO
     import pickle as cPickle
 
 try:
@@ -158,11 +156,6 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         """
         _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
                                                          extensionsSupported=[RepoManager.ZIP_EXT])
-        # if b64:
-            # backups_ret = self.encodeData(data=backups)
-            # backups_ret = Common.encodeData(data=backups, logger=self)
-        # else:
-            # backups_ret = backups
         return backups
 
     def getTree(self, b64=False, fullTree=False, project=1):
@@ -184,11 +177,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         else:
             nb_archs, nb_archs_f, archs, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, project),
                                                                         nbDirs=nb, project=project, archiveMode=True)
-        # if b64:
-            # archs_ret = self.encodeData(data=archs)
-            # archs_ret = Common.encodeData(data=archs, logger=self)
-        # else:
-            # archs_ret = archs
+
         return nb_archs, nb_archs_f, archs, stats
 
     def getLastEventIndex(self, pathEvents ):
@@ -335,7 +324,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
 
             # update all connected users
             if ret == self.context.CODE_OK:
-                nb, nbf, backups, stats =self.getListingFilesV2(path="%s/%s/" % (self.testsPath, projectId), 
+                _, _, backups, _ =self.getListingFilesV2(path="%s/%s/" % (self.testsPath, projectId), 
                                                                 project=projectId )
                 data = ( 'archive', ( 'reset', backups ) )  
                 ESI.instance().notifyAll(body = data)
@@ -385,7 +374,6 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         @rtype: int
         """
         ret = self.context.CODE_ERROR
-        # pathTozip = '%s/%s' % (mainPathTozip,subPathTozip)
         mainPathTozip, subPathTozip = trPath.split("/", 1)
         try:
             timeArch, milliArch, testName, testUser = subPathTozip.split(".")
@@ -494,49 +482,6 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             self.error( "[addComment] %s" % str(e) )
             return ( self.context.CODE_ERROR, archivePath, newArchivePath, comments )
         return ( self.context.CODE_OK, archivePath, newArchivePath , comments )
-
-    # def getComments(self, archivePath):
-        # """
-        # Returns all comments of the archive gived in argument
-
-        # @type  archivePath:
-        # @param archivePath:
-
-        # @return: 
-        # @rtype: 
-        # """
-        # comments = []
-        # try:
-            # prepare path
-            # completePath = "%s/%s" % (self.testsPath, archivePath) 
-
-            # to avoid error, the server try to find the good file by himself
-            # just take the name of the name and the replay id to find the test automaticly
-            # trxPath, rightover = archivePath.rsplit('/',1)
-            # trxfile = rightover.rsplit('_', 1)[0]
-            
-            # for f in os.listdir( "%s/%s" % (self.testsPath,trxPath) ):
-                # if f.startswith( trxfile ) and f.endswith( RepoManager.TEST_RESULT_EXT ):
-                    # completePath = "%s/%s/%s" % (self.testsPath, trxPath, f) 
-
-            # read test result
-            # dataModel = TestResult.DataModel()
-            # trLoaded = dataModel.load(absPath=completePath)
-            # if not trLoaded:
-                # raise Exception( "failed to load test result" )
-            # comments = dataModel.properties['properties']['comments']
-            # if isinstance(comments, dict):
-                # if isinstance( comments['comment'], list):
-                    # comments = comments['comment']
-                # else:
-                    # comments = [ comments['comment'] ]                  
-            # else:
-                # comments = []
-    
-        # except Exception as e:
-            # self.error( "[addComment] %s" % str(e) )
-            # return ( self.context.CODE_ERROR, archivePath, comments )
-        # return ( self.context.CODE_OK, archivePath , comments )
 
     def delComments(self, archivePath):
         """
@@ -957,8 +902,8 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
                     if not entry.is_dir(follow_symlinks=False):
                         if entry.name.endswith( "_%s.%s" % (replayId,trExt) ) :
                             f = open( "%s/%s" %  (fullPath, entry.name) , 'r'  )
-                            report_raw = f.read()
-                            report = self.zipb64(data=report_raw)
+                            report = f.read()
+                            # report = self.zipb64(data=report_raw)
                             f.close()
                             break
             except Exception as e:

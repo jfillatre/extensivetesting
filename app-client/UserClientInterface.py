@@ -71,11 +71,11 @@ EXT_TESTPLAN = "tpx"
 EXT_TESTGLOBAL = "tgx"
 EXT_TESTABSTRACT = "tax"
 
-TESTPLAN_REPO_FROM_OTHER                = 'other'
-TESTPLAN_REPO_FROM_LOCAL                = 'local'
-TESTPLAN_REPO_FROM_REMOTE               = 'remote'
-TESTPLAN_REPO_FROM_HDD                  = 'hdd'
-TESTPLAN_REPO_FROM_LOCAL_REPO_OLD       = 'local repository'
+# TESTPLAN_REPO_FROM_OTHER                = 'other'
+# TESTPLAN_REPO_FROM_LOCAL                = 'local'
+# TESTPLAN_REPO_FROM_REMOTE               = 'remote'
+# TESTPLAN_REPO_FROM_HDD                  = 'hdd'
+# TESTPLAN_REPO_FROM_LOCAL_REPO_OLD       = 'local repository'
 
 ############## NETWORK ERROR ##############
 # errors on channel tcp
@@ -85,7 +85,7 @@ TESTPLAN_REPO_FROM_LOCAL_REPO_OLD       = 'local repository'
 # - Network problem server to slow to respond
 # - Connection timeout
 
-TIMEOUT_CONNECT_XMLRPC      = 10.0
+# TIMEOUT_CONNECT_XMLRPC      = 10.0
 
 ############## RESPONSE CODE ##############
 

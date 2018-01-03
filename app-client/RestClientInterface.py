@@ -81,6 +81,28 @@ REPO_UNDEFINED                      =   3
 REPO_ARCHIVES                       =   4
 REPO_LIBRARIES                      =   5
 
+REPO_TYPES_DICT =   {
+                        REPO_TESTS          :   'remote-tests',
+                        REPO_ADAPTERS       :   'remote-adapters',
+                        REPO_TESTS_LOCAL    :   'local-tests',
+                        REPO_UNDEFINED      :   'undefined',
+                        REPO_ARCHIVES       :   'archives',
+                        REPO_LIBRARIES      :   'remote-libraries'
+                    }
+                    
+RIGHTS_ADMIN                =   "Administrator"
+RIGHTS_DEVELOPER            =   "Developer"
+RIGHTS_LEADER               =   "Leader"
+RIGHTS_TESTER               =   "Tester"
+
+RIGHTS_USER_LIST            =  [ 
+                                    RIGHTS_ADMIN, 
+                                    RIGHTS_LEADER,
+                                    RIGHTS_TESTER,
+                                    RIGHTS_DEVELOPER
+                                ]
+
+
 ACTION_MERGE_PARAMS     = 7
 ACTION_UPDATE_PATH      = 6
 ACTION_IMPORT_OUTPUTS   = 5
@@ -96,9 +118,11 @@ FOR_DEST_TS             = 3
 FOR_DEST_TU             = 4
 FOR_DEST_ALL            = 10
 
+# type of http request
 HTTP_POST   =   "POST"
 HTTP_GET    =   "GET"
 
+# all rest uri called
 CMD_LOGIN                       =   "/session/login"
 CMD_LOGOUT                      =   "/session/logout"
 CMD_REFRESH                     =   "/session/refresh"
@@ -2317,8 +2341,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         """
         self.trace("on tasks replayed")
-        print(details)
-        
+
     def onTasksDesign(self, details):
         """
         """

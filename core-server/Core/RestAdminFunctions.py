@@ -345,7 +345,7 @@ class AdaptersStatistics(Handler):
         
         if not user_profile['administrator']: raise HTTP_401("Access refused")
 
-        _, _, _, statistics = RepoAdapters.instance().getTree(b64=False)
+        _, _, _, statistics = RepoAdapters.instance().getTree()
         
         return { "cmd": self.request.path, "statistics": statistics }
    
@@ -1236,7 +1236,7 @@ class LibrariesStatistics(Handler):
         
         if not user_profile['administrator']: raise HTTP_401("Access refused")
 
-        _, _, _, statistics = RepoLibraries.instance().getTree(b64=False)
+        _, _, _, statistics = RepoLibraries.instance().getTree()
         
         return { "cmd": self.request.path, "statistics": statistics }
         
@@ -3026,8 +3026,7 @@ class TestsStatistics(Handler):
 
         if projectId == 0: projectId=''
         
-        _, _, _, statistics = RepoTests.instance().getTree( b64=False,
-                                                            project=projectId )
+        _, _, _, statistics = RepoTests.instance().getTree(project=projectId)
         
         return { "cmd": self.request.path, 
                  "statistics": statistics, 
@@ -4000,7 +3999,7 @@ class ResultsStatistics(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        _, _, _, statistics = RepoArchives.instance().getTree(b64=False)
+        _, _, _, statistics = RepoArchives.instance().getTree()
         
         return { "cmd": self.request.path, "statistics": statistics }  
         

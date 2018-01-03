@@ -518,8 +518,10 @@ class DServerConnection(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         # proxy http
         self.defaultProxyHttpAddr = Settings.instance().readValue( key = 'Server/addr-proxy-http' )
         self.defaultProxyHttpPort = Settings.instance().readValue( key = 'Server/port-proxy-http' )
+        
         # decryptor
         self.oEncryptor = PyBlowFish.BlowfishEncryptor()
+        
         self.createDialog()
         self.createConnections()
 
@@ -528,7 +530,7 @@ class DServerConnection(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         Create qt dialog
         """
         self.setWindowTitle(self.tr("Login on the test center"))
-        self.resize(400, 100)
+        # self.resize(400, 100)
         
         layout = QVBoxLayout()
         

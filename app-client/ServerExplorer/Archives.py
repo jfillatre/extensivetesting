@@ -1092,7 +1092,7 @@ class PreviewVerdict(QWidget, Logger.ClassLogger):
         if self.toXml:
             self.txtEdit = QtHelper.RawXmlEditor(parent=self)
             self.txtEdit.setText( self.__data )
-            self.txtEdit.setUtf8(True)
+            # self.txtEdit.setUtf8(True)
             self.txtEdit.setFont( QFont( "%s" % fontName, int(fontSize)) )
         else:
             self.txtEdit = QtHelper.RawEditor(parent=self) 
@@ -2537,7 +2537,7 @@ class WArchives(QWidget, Logger.ClassLogger):
         
         # load reports
         if 'review' in content:
-            self.tabReports.loadReports( self.decodeData(content['review']) )
+            self.tabReports.loadReports( content['review'] )
         else:
             self.tabReports.loadReports( "No test report available" )
             self.previewTab.setTabEnabled(TAB_COMMENTS, False)
@@ -2548,44 +2548,24 @@ class WArchives(QWidget, Logger.ClassLogger):
 
         if 'verdict' in content:
             self.previewTab.setTabEnabled(TAB_VERDICTS, True)
-            self.tabVerdicts.loadVerdicts( self.decodeData(content['verdict']) )
+            self.tabVerdicts.loadVerdicts( content['verdict'] )
         else:
             self.tabVerdicts.loadVerdicts( "No csv verdict available" )
             self.previewTab.setTabEnabled(TAB_VERDICTS, False)
 
         if 'xml-verdict' in content:
             self.previewTab.setTabEnabled(TAB_XML_VERDICTS, True)
-            self.tabXmlVerdicts.loadVerdicts( self.decodeData(content['xml-verdict']) )
+            self.tabXmlVerdicts.loadVerdicts( content['xml-verdict'] )
         else:
             self.tabXmlVerdicts.loadVerdicts( "No xml verdict available" )
             self.previewTab.setTabEnabled(TAB_XML_VERDICTS, False)
             
         if 'basic-review' in content:
-            self.tabBasicReports.loadReports( self.decodeData(content['basic-review']) )
+            self.tabBasicReports.loadReports( content['basic-review'] )
         else:
             self.tabBasicReports.loadReports( "No basic test report available" )
             self.previewTab.setTabEnabled(TAB_BASIC_REPORTS, False)
-        
-    def decodeData(self, b64data):
-        """
-        Decode data
-        """
-        data = ''
-        try:
-            data_decoded = base64.b64decode(b64data)
-        except Exception as e:
-            self.error( 'unable to decode from base64 structure: %s' % str(e) )
-        else:
-            try:
-                data = zlib.decompress(data_decoded)
-                try:
-                    data = data.decode('utf8')
-                except UnicodeDecodeError as e:
-                    data = data
-            except Exception as e:
-                self.error( 'unable to decompress: %s' % str(e) )
-        return data
-        
+
 AR = None # Singleton
 def instance ():
     """

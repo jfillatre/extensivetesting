@@ -443,24 +443,13 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
         """
         _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
                                                          extensionsSupported=[RepoManager.ZIP_EXT])
-        # if b64:
-            # backups_ret = self.encodeData(data=backups)
-            # backups_ret =Common.encodeData(data=backups, logger=self)
-        # else:
-            # backups_ret = backups
         return backups
 
     def getTree(self, b64=False):
         """
         Get tree folders
         """
-        # adps_ret = []
         nb_adps, nb_adps_f, adps, stats =self.getListingFilesV2(path=self.testsPath)
-        # adps_ret = self.encodeData(data=adps)
-        # if b64:
-            # adps_ret = Common.encodeData(data=adps, logger=self)
-        # else:
-            # adps_ret = adps
         return nb_adps, nb_adps_f, adps, stats
 
     def getLastBackupIndex(self, pathBackups ):
@@ -585,20 +574,7 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
                 if match:
                     version_name = f[1:]
                 rns.append( "\n%s\n%s" % (version_name, Common.indent(rn,1) ) )
-                
-        # zip and encode in b64
-        # if b64:
-            # try: 
-                # rn_zipped = zlib.compress( '\n'.join(rns) )
-            # except Exception as e:
-                # self.error( "Unable to compress all release notes: %s" % str(e) )
-            # else:
-                # try: 
-                    # rn_ret = base64.b64encode(rn_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64 all release notes: %s" % str(e) )
-        # else:
-            # rn_ret = '\n'.join(rns)
+
         return '\n'.join(rns)
 
     def checkSyntax(self, content):

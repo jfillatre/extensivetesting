@@ -2048,7 +2048,6 @@ class Repository(QWidget, Logger.ClassLogger):
                 project = self.getCurrentProject()
                 projectId = self.getProjectId(project=str(project))
 
-            testFilePath = "%s/%s" % (pathFile, self.itemCurrent.fileName)
             testId = TestResults.instance().getTestId()
             
             _json = DocumentViewer.instance().prepareTest( wdocument=None, tabId=testId, background = False, 
@@ -2056,7 +2055,7 @@ class Repository(QWidget, Logger.ClassLogger):
                                                            withoutProbes=False, debugActivated=False, 
                                                            withoutNotif=False, noKeepTr=False, 
                                                            prjId=projectId, testFileExtension=self.itemCurrent.fileExtension, 
-                                                           testFilePath=testFilePath, testFileName=self.itemCurrent.fileName, 
+                                                           testFilePath=pathFile, testFileName=self.itemCurrent.fileName, 
                                                            fromTime=(0,0,0,0,0,0), 
                                                            toTime=(0,0,0,0,0,0), prjName='', 
                                                            stepByStep=False, breakpoint=False,

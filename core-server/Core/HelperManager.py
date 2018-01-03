@@ -28,6 +28,7 @@ import shlex
 import base64
 import zlib
 import os
+import sys
 
 SUTADAPTERS_INSTALLED = True
 SUTLIBADAPTERS_INSTALLED = True
@@ -94,15 +95,16 @@ class HelperManager(Logger.ClassLogger):
         try:
             complete_path = '%s/%s/documentations.dat' % ( Settings.getDirExec(), Settings.get( 'Paths', 'tmp' ))
             if os.path.exists( complete_path ):
-                fd = open( complete_path , "r")
+                fd = open( complete_path , "rb")
                 data = fd.read()
                 fd.close()
+                
                 ret = base64.b64encode( zlib.compress(data) )
             else:
                 self.error( 'documentation cache does not exist' ) 
         except Exception as e:
             self.error( "unable to get helps: %s" % e )
-        return ret
+        return ret.decode('utf8')
 
 HM = None # singleton
 def instance ():

@@ -34,8 +34,10 @@ if sys.version_info > (3,):
     unicode = str
     
 try:
-    from PyQt4.QtGui import (QWidget, QToolBar, QVBoxLayout, QFont, QIcon, QPrinter, QGroupBox, QHBoxLayout,
-                            QPrintDialog, QDialog, QTextDocument, QFileDialog, QDialogButtonBox, QTabWidget,
+    from PyQt4.QtGui import (QWidget, QToolBar, QVBoxLayout, QFont, QIcon, 
+                            QPrinter, QGroupBox, QHBoxLayout,
+                            QPrintDialog, QDialog, QTextDocument, 
+                            QFileDialog, QDialogButtonBox, QTabWidget,
                             QTextEdit)
     from PyQt4.QtCore import (Qt, QSize, QByteArray)
     from PyQt4.QtWebKit import (QWebView)
@@ -124,7 +126,7 @@ class RawView(QWidget, Logger.ClassLogger):
         if self.toXml:
             self.txtEdit = QtHelper.RawXmlEditor(parent=self)
             self.txtEdit.setText( self.__data )
-            self.txtEdit.setUtf8(True)
+            # self.txtEdit.setUtf8(False)
             self.txtEdit.setFont( QFont("Courier", 9) )
         else:
             self.txtEdit = QWebView(parent=self)
@@ -213,7 +215,8 @@ class RawView(QWidget, Logger.ClassLogger):
         """
         Save to txt file
         """
-        fileName = QFileDialog.getSaveFileName(self, "Save TXT file", "", "TXT file (*.txt);;All Files (*.*)")
+        fileName = QFileDialog.getSaveFileName(self, "Save TXT file", "", 
+                                               "TXT file (*.txt);;All Files (*.*)")
         
         # new in v17.1
         if QtHelper.IS_QT5:
@@ -254,7 +257,8 @@ class RawView(QWidget, Logger.ClassLogger):
         """
         Save xml file
         """
-        fileName = QFileDialog.getSaveFileName(self, "Save XML file", "", "XML file (*.xml);;All Files (*.*)")
+        fileName = QFileDialog.getSaveFileName(self, "Save XML file", "", 
+                                               "XML file (*.xml);;All Files (*.*)")
         
         # new in v17.1
         if QtHelper.IS_QT5:
@@ -274,7 +278,8 @@ class RawView(QWidget, Logger.ClassLogger):
         """
         Save to html file
         """
-        fileName = QFileDialog.getSaveFileName(self, "Save HTML file", "", "HTML file (*.html);;All Files (*.*)")
+        fileName = QFileDialog.getSaveFileName(self, "Save HTML file", "", 
+                                               "HTML file (*.html);;All Files (*.*)")
         
         # new in v17.1
         if QtHelper.IS_QT5:
@@ -315,7 +320,8 @@ class RawView(QWidget, Logger.ClassLogger):
         """
         Save to pdf file
         """
-        fileName = QFileDialog.getSaveFileName(self, 'Save to PDF', "", "PDF file (*.pdf);;All Files (*.*)")
+        fileName = QFileDialog.getSaveFileName(self, 'Save to PDF', "", 
+                                               "PDF file (*.pdf);;All Files (*.*)")
         
         # new in v17.1
         if QtHelper.IS_QT5:
@@ -374,50 +380,11 @@ class WExportReport(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """     
         super(WExportReport, self).__init__(parent)
 
-        self.__data = ''
-        self.__dataXml = ''
-        self.decodeData(data)
-        self.decodeDataXml(dataXml)
+        self.__data = data
+        self.__dataXml = dataXml
 
         self.createWidgets()
         self.createConnections()
-
-
-    def decodeData(self, b64data):
-        """
-        Decode data
-        """
-        try:
-            data_decoded = base64.b64decode(b64data)
-        except Exception as e:
-            self.error( 'unable to decode from base64 structure: %s' % str(e) )
-        else:
-            try:
-                self.__data = zlib.decompress(data_decoded)
-                try:
-                    self.__data = self.__data.decode('utf8')
-                except UnicodeDecodeError as e:
-                    self.__data = self.__data
-            except Exception as e:
-                self.error( 'unable to decompress: %s' % str(e) )
-
-    def decodeDataXml(self, b64data):
-        """
-        Decode data xml
-        """
-        try:
-            data_decoded = base64.b64decode(b64data)
-        except Exception as e:
-            self.error( 'unable to decode from base64 structure: %s' % str(e) )
-        else:
-            try:
-                self.__dataXml = zlib.decompress(data_decoded)
-                try:
-                    self.__dataXml = self.__dataXml.decode('utf8')
-                except UnicodeDecodeError as e:
-                    self.__dataXml = self.__dataXml
-            except Exception as e:
-                self.error( 'unable to decompress: %s' % str(e) )
 
     def pluginDataAccessor(self):
         """

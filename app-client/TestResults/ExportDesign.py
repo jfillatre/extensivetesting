@@ -34,8 +34,10 @@ if sys.version_info > (3,):
     unicode = str
     
 try:
-    from PyQt4.QtGui import (QWidget, QToolBar, QVBoxLayout, QFont, QIcon, QPrinter, QPrintDialog, QHBoxLayout, 
-                            QDialog, QTextDocument, QFileDialog, QDialogButtonBox, QTabWidget, QGroupBox,
+    from PyQt4.QtGui import (QWidget, QToolBar, QVBoxLayout, QFont, QIcon, 
+                            QPrinter, QPrintDialog, QHBoxLayout, 
+                            QDialog, QTextDocument, QFileDialog, 
+                            QDialogButtonBox, QTabWidget, QGroupBox,
                             QTextEdit)
     from PyQt4.QtCore import (Qt, QSize, QByteArray)
     from PyQt4.QtWebKit import (QWebView)
@@ -125,7 +127,7 @@ class RawView(QWidget, Logger.ClassLogger):
         if self.toXml:
             self.txtEdit = QtHelper.RawXmlEditor(parent=self)
             self.txtEdit.setText( self.__data )
-            self.txtEdit.setUtf8(True)
+            # self.txtEdit.setUtf8(True)
             self.txtEdit.setFont( QFont("Courier", 9) )
         else:
             self.txtEdit = QWebView(parent=self)
@@ -384,49 +386,11 @@ class WExportDesign(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """     
         super(WExportDesign, self).__init__(parent)
 
-        self.__data = ''
-        self.__dataXml = ''
-        self.decodeData(data)
-        self.decodeDataXml(dataXml)
+        self.__data = data
+        self.__dataXml = dataXml
 
         self.createWidgets()
         self.createConnections()
-
-    def decodeData(self, b64data):
-        """
-        Decode data
-        """
-        try:
-            data_decoded = base64.b64decode(b64data)
-        except Exception as e:
-            self.error( 'unable to decode from base64 structure design: %s' % str(e) )
-        else:
-            try:
-                self.__data = zlib.decompress(data_decoded)
-                try:
-                    self.__data = self.__data.decode('utf8')
-                except UnicodeDecodeError as e:
-                    self.__data = self.__data
-            except Exception as e:
-                self.error( 'unable to decompress design: %s' % str(e) )
-
-    def decodeDataXml(self, b64data):
-        """
-        Decode data xml
-        """
-        try:
-            data_decoded = base64.b64decode(b64data)
-        except Exception as e:
-            self.error( 'unable to decode from base64 structure design: %s' % str(e) )
-        else:
-            try:
-                self.__dataXml = zlib.decompress(data_decoded)
-                try:
-                    self.__dataXml = self.__dataXml.decode('utf8')
-                except UnicodeDecodeError as e:
-                    self.__dataXml = self.__dataXml
-            except Exception as e:
-                self.error( 'unable to decompress design: %s' % str(e) )
 
     def pluginDataAccessor(self):
         """

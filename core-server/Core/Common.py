@@ -37,30 +37,6 @@ import json
 import zlib
 import base64
 
-# def encodeData(data, logger):
-    # """
-    # Encode data
-    # """
-    # ret = ''
-    # try:
-        # tasks_json = json.dumps(data)
-    # except Exception as e:
-        # logger.error( "Unable to encode in json: %s" % str(e) )
-    # else:
-        # try:
-            # if sys.version_info > (3,):
-                # tasks_zipped = zlib.compress( bytes(tasks_json, 'utf8') )
-            # else:
-                # tasks_zipped = zlib.compress(tasks_json)
-        # except Exception as e:
-            # logger.error( "Unable to compress: %s" % str(e) )
-        # else:
-            # try: 
-                # ret = base64.b64encode(tasks_zipped)
-            # except Exception as e:
-                # logger.error( "Unable to encode in base 64: %s" % str(e) )
-    # return ret
-        
 def indent(code, nbTab = 1):
     """
     Add tabulation for each lines

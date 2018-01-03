@@ -61,27 +61,6 @@ class StatsManager(Logger.ClassLogger):
         self.dbt_writing = '%s-writing-stats' % Settings.get( 'MySql', 'table-prefix')
         self.notifyUsers =  Settings.getInt( 'Notifications', 'statistics')
 
-    # def encodeData(self, data):
-        # """
-        # Encode data
-        # """
-        # ret = ''
-        # try:
-            # tasks_json = json.dumps(data)
-        # except Exception as e:
-            # self.error( "Unable to encode in json: %s" % str(e) )
-        # else:
-            # try: 
-                # tasks_zipped = zlib.compress(tasks_json)
-            # except Exception as e:
-                # self.error( "Unable to compress: %s" % str(e) )
-            # else:
-                # try: 
-                    # ret = base64.b64encode(tasks_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64: %s" % str(e) )
-        # return ret
-
     def getStats (self):
         """
         Returns statistics

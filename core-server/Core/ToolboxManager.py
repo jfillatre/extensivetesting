@@ -81,27 +81,6 @@ class ToolboxManager(Logger.ClassLogger):
         self.configsFile = None
         self.__pids__ = {}
 
-    # def encodeData(self, data):
-        # """
-        # Encode data
-        # """
-        # ret = ''
-        # try:
-            # tasks_json = json.dumps(data)
-        # except Exception as e:
-            # self.error( "Unable to encode in json: %s" % str(e) )
-        # else:
-            # try: 
-                # tasks_zipped = zlib.compress(tasks_json)
-            # except Exception as e:
-                # self.error( "Unable to compress: %s" % str(e) )
-            # else:
-                # try: 
-                    # ret = base64.b64encode(tasks_zipped)
-                # except Exception as e:
-                    # self.error( "Unable to encode in base 64: %s" % str(e) )
-        # return ret
-
     def preInstall(self):
         """
         Prepare the installation of the package

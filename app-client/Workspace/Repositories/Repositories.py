@@ -440,31 +440,6 @@ class WRepositories(QWidget, Logger.ClassLogger):
         else:
             self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
             self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
-            
-    # def onRefreshRemote(self, repoType, data, saveAsOnly, projectid):
-        # """
-        # Dispatch received datas to the tests repo or adapters repo
-        # """
-        # if repoType == UCI.REPO_TESTS:
-            # self.remoteRepository.defaultActions()
-            # if saveAsOnly:
-                # self.remoteRepository.initializeSaveAs(listing=self.decodeData(data), reloadItems=True )
-            # else:
-                # update default project
-                # projectName = self.remoteRepository.getProjectName(projectid)
-                # self.remoteRepository.setDefaultProject(projectName=projectName)
-                # reconstruct
-                # self.remoteRepository.initialize(listing=self.decodeData(data) )
-                
-        # elif repoType == UCI.REPO_ADAPTERS:
-            # self.adaptersRemoteRepository.defaultActions()
-            # self.adaptersRemoteRepository.initialize(listing=self.decodeData(data) )
-            
-        # elif repoType == UCI.REPO_LIBRARIES:
-            # self.librariesRemoteRepository.defaultActions()
-            # self.librariesRemoteRepository.initialize(listing=self.decodeData(data) )
-        # else:
-            # self.error( 'repo type unknown: %s' % repoType )
 
     def onRefreshRemoteTests(self, data, projectId, forSaveAs=False):
         """

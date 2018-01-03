@@ -697,7 +697,7 @@ class AdaptersListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        _, _, listing, _ = RepoAdapters.instance().getTree(b64=False)
+        _, _, listing, _ = RepoAdapters.instance().getTree()
 
         return { "cmd": self.request.path, "adapters-listing": listing }
         
@@ -2373,7 +2373,7 @@ class LibrariesListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        _, _, listing, _ = RepoLibraries.instance().getTree(b64=False)
+        _, _, listing, _ = RepoLibraries.instance().getTree()
 
         return { "cmd": self.request.path, "libraries-listing": listing }
         
@@ -3696,7 +3696,7 @@ class AgentsDefault(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        default = AgentsManager.instance().getDefaultAgents(b64=False)
+        default = AgentsManager.instance().getDefaultAgents()
         return { "cmd": self.request.path, "agents": default }
        
 class AgentsDisconnect(Handler):
@@ -4091,7 +4091,7 @@ class ProbesDefault(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        default = ProbesManager.instance().getDefaultProbes(b64=False)
+        default = ProbesManager.instance().getDefaultProbes()
         return { "cmd": self.request.path, "probes": default }
         
 class ProbesDisconnect(Handler):
@@ -6261,7 +6261,7 @@ class TestsListing(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        _, _, listing, _ = RepoTests.instance().getTree(b64=False, project=projectId)
+        _, _, listing, _ = RepoTests.instance().getTree(project=projectId)
 
         return { "cmd": self.request.path, "listing": listing, "project-id": projectId, 
                  "for-saveas": _forsaveas, "for-runs": _forruns }
@@ -9534,8 +9534,7 @@ class ResultsListingFiles(Handler):
         else:
             partialListing = _partial
         
-        nb_archs, nb_archs_f, archs, stats_archs = RepoArchives.instance().getTree(b64=False, 
-                                                                                   fullTree=not partialListing, 
+        nb_archs, nb_archs_f, archs, stats_archs = RepoArchives.instance().getTree(fullTree=not partialListing, 
                                                                                    project=projectId)       
         return { "cmd": self.request.path, 
                  "listing": archs, 
