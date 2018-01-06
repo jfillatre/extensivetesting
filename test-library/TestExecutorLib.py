@@ -1121,7 +1121,7 @@ class TestSuitesManager(object):
 
                 #decode summary only for testglobal or testplan
                 if self.__tp_name is not None:
-                    ts['data-summary'] = ts['data-summary']
+                    ts['data-summary'] = ts['data-summary'].decode("utf8")
                     # ts['data-summary'] = ts['data-summary'].decode("latin1")
                     
                 if ts['is-unit']:
@@ -1201,7 +1201,6 @@ class TestSuitesManager(object):
                         reports.append(  u"<tr><td class=\"header\">SUT Outputs</td><td>%s</td></tr>" % u"<br />".join(self.prepareParameters(ts['sut-outputs'])) )
                     reports.append(  u"</table>" )
                         
-                #reports.append( u'<ul>' )
                 # iterate each testcases
                 for tc in ts['tc']:
                     # i += 1

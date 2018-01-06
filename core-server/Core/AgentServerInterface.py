@@ -278,7 +278,6 @@ class AgentServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         Logger.ClassLogger.trace(self, txt="ASI - %s" % txt)
 
-#############
 ASI = None
 def instance ():
     """

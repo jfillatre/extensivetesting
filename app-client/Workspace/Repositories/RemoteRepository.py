@@ -245,7 +245,8 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
             item_text = self.projectCombobox.itemText(projectId)
             self.RefreshRepository.emit(item_text)
         
-    def iterateTree(self, item, hideTsx, hideTpx, hideTcx, hideTdx, hideTxt, hidePy, hideTux, hidePng, hideTgx, hideTax):
+    def iterateTree(self, item, hideTsx, hideTpx, hideTcx, hideTdx, 
+                    hideTxt, hidePy, hideTux, hidePng, hideTgx, hideTax):
         """
         Iterate tree
         """
@@ -254,8 +255,12 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
             subitem = item.child(i)
             subchild_count = subitem.childCount()
             if subchild_count > 0:
-                self.iterateTree(item=subitem, hideTsx=hideTsx, hideTpx=hideTpx, hideTcx=hideTcx, hideTdx=hideTdx, hideTxt=hideTxt,
-                                    hidePy=hidePy, hideTux=hideTux, hidePng=hidePng, hideTgx=hideTgx, hideTax=hideTax)
+                self.iterateTree(item=subitem, hideTsx=hideTsx, 
+                                 hideTpx=hideTpx, hideTcx=hideTcx, 
+                                 hideTdx=hideTdx, hideTxt=hideTxt,
+                                 hidePy=hidePy, hideTux=hideTux, 
+                                 hidePng=hidePng, hideTgx=hideTgx, 
+                                 hideTax=hideTax)
             else:
                 if hideTux and subitem.getExtension() == EXTENSION_TUX:
                     subitem.setHidden (True)
@@ -286,8 +291,11 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         Hide items
         """
         root = self.wrepository.invisibleRootItem()
-        self.iterateTree(item=root, hideTsx=hideTsx, hideTpx=hideTpx, hideTcx=hideTcx, hideTdx=hideTdx, hideTxt=hideTxt, hidePy=hidePy,
-                            hideTux=hideTux, hidePng=hidePng, hideTgx=hideTgx, hideTax=hideTax)
+        self.iterateTree(item=root, hideTsx=hideTsx, hideTpx=hideTpx, 
+                         hideTcx=hideTcx, hideTdx=hideTdx, 
+                         hideTxt=hideTxt, hidePy=hidePy,
+                         hideTux=hideTux, hidePng=hidePng, 
+                         hideTgx=hideTgx, hideTax=hideTax)
 
     def accept(self):
         """
@@ -431,8 +439,12 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
             if EXTENSION_TXT in self.typeToHide: hideTxt = False
             if EXTENSION_PY in self.typeToHide: hidePy = False
             if EXTENSION_PNG in self.typeToHide: hidePng = False
-            self.hideItems(hideTsx=hideTsx, hideTpx=hideTpx, hideTcx=hideTcx, hideTdx=hideTdx, hideTxt=hideTxt, hidePy=hidePy, 
-                                hideTux=hideTux, hidePng=hidePng, hideTgx=hideTgx, hideTax=hideTax)
+            
+            self.hideItems(hideTsx=hideTsx, hideTpx=hideTpx, 
+                           hideTcx=hideTcx, hideTdx=hideTdx, 
+                           hideTxt=hideTxt, hidePy=hidePy, 
+                           hideTux=hideTux, hidePng=hidePng, 
+                           hideTgx=hideTgx, hideTax=hideTax)
 
     def getProjectSelection(self):
         """
@@ -484,8 +496,9 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         @param filename:
         @type filename:
         """
-        self.hideItems(hideTsx=True, hideTpx=True, hideTcx=True, hideTdx=True, hideTux=True, 
-                        hideTgx=True, hidePng=True, hideTax=True)
+        self.hideItems(hideTsx=True, hideTpx=True, hideTcx=True, 
+                       hideTdx=True, hideTux=True, 
+                       hideTgx=True, hidePng=True, hideTax=True)
 
         self.setDefaultProject(project=project)
         
@@ -512,8 +525,11 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         @param filename:
         @type filename:
         """
-        self.hideItems( hideTsx=True, hideTpx=True, hideTcx=True, hideTdx=True, hideTxt=True, 
-                            hidePy=True, hideTux=True, hidePng=True, hideTgx=True, hideTax=True)
+        self.hideItems( hideTsx=True, hideTpx=True, 
+                        hideTcx=True, hideTdx=True, 
+                        hideTxt=True, hidePy=True, 
+                        hideTux=True, hidePng=True, 
+                        hideTgx=True, hideTax=True)
 
         self.setDefaultProject(project=project)
 
@@ -540,8 +556,11 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         @param filename:
         @type filename:
         """
-        self.hideItems(hideTsx=True, hideTpx=True, hideTcx=True, hideTdx=True, hideTxt=True, hidePy=True, 
-                        hideTux=True, hidePng=True, hideTgx=True, hideTax=True)
+        self.hideItems(hideTsx=True, hideTpx=True, 
+                       hideTcx=True, hideTdx=True, 
+                       hideTxt=True, hidePy=True, 
+                        hideTux=True, hidePng=True, 
+                        hideTgx=True, hideTax=True)
 
         self.setDefaultProject(project=project)
 
@@ -569,8 +588,11 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         @param filename:
         @type filename:
         """
-        self.hideItems(hideTsx=True, hideTpx=True, hideTcx=True, hideTdx=True, hideTxt=True, 
-                            hidePy=True, hideTux=True, hidePng=True, hideTgx=True, hideTax=True)
+        self.hideItems(hideTsx=True, hideTpx=True, 
+                       hideTcx=True, hideTdx=True, 
+                       hideTxt=True, hidePy=True, 
+                       hideTux=True, hidePng=True, 
+                       hideTgx=True, hideTax=True)
         self.setDefaultProject(project=project)
 
         self.multipleSelection = False
@@ -635,8 +657,11 @@ class SaveOpenToRepoDialog(QDialog, Logger.ClassLogger):
         if EXTENSION_PY in type: hidePy = False
         if EXTENSION_PNG in type: hidePng = False
 
-        self.hideItems(hideTsx=hideTsx, hideTpx=hideTpx, hideTcx=hideTcx, hideTdx=hideTdx, hideTxt=hideTxt, hidePy=hidePy, 
-                            hideTux=hideTux, hidePng=hidePng, hideTgx=hideTgx, hideTax=hideTax)
+        self.hideItems(hideTsx=hideTsx, hideTpx=hideTpx, 
+                       hideTcx=hideTcx, hideTdx=hideTdx, 
+                       hideTxt=hideTxt, hidePy=hidePy, 
+                       hideTux=hideTux, hidePng=hidePng, 
+                       hideTgx=hideTgx, hideTax=hideTax)
 
         self.modeRepoSave = False
         self.modeRepoMove = False
@@ -807,7 +832,8 @@ class DuplicateDialog(QtHelper.EnhancedQDialog, Logger.ClassLogger):
     """
     Duplicate dialog
     """
-    def __init__(self, currentName, folder, parent=None, projects=[], defaultProject=1, repoType=0, currentPath=''):
+    def __init__(self, currentName, folder, parent=None, projects=[], 
+                    defaultProject=1, repoType=0, currentPath=''):
         """
         Dialog to duplicate file or folder
 
@@ -1551,31 +1577,44 @@ class Repository(QWidget, Logger.ClassLogger):
         """
         # remote actions
         self.refreshRemoteAction = QtHelper.createAction(self, self.tr("&Refresh"), self.__refreshAll, 
-                                        icon = QIcon(":/refresh.png"), tip = self.tr('Refresh remote repository content') )
+                                        icon = QIcon(":/refresh.png"), 
+                                        tip = self.tr('Refresh remote repository content') )
         self.addDirAction = QtHelper.createAction(self, self.tr("&Add Folder"), self.__createItem, 
-                                        icon = QIcon(":/folder_add.png"), tip = self.tr('Create new folder') )
+                                        icon = QIcon(":/folder_add.png"), 
+                                        tip = self.tr('Create new folder') )
         self.delDirAction = QtHelper.createAction(self, self.tr("&Delete"), self.__deleteItem, shortcut = "Ctrl+Alt+D", 
-                                        icon = QIcon(":/folder_delete.png"), tip = self.tr('Add the selected directory') )
-        self.delAllDirAction = QtHelper.createAction(self, self.tr("&Delete All"), self.__deleteAllItem, shortcut = "Ctrl+Alt+A", 
-                                        icon = QIcon(":/folder_delete_all.png"), tip = self.tr('Delete all folder and contents') )
+                                        icon = QIcon(":/folder_delete.png"), 
+                                        tip = self.tr('Add the selected directory') )
+        self.delAllDirAction = QtHelper.createAction(self, self.tr("&Delete All"), self.__deleteAllItem, 
+                                        shortcut = "Ctrl+Alt+A", 
+                                        icon = QIcon(":/folder_delete_all.png"), 
+                                        tip = self.tr('Delete all folder and contents') )
         self.renameAction = QtHelper.createAction(self, self.tr("&Rename"), self.__renameItem, shortcut = "Ctrl+Alt+R",
-                                        icon = QIcon(":/rename.png"), tip = self.tr('Rename') )
+                                        icon = QIcon(":/rename.png"), 
+                                        tip = self.tr('Rename') )
         self.duplicateDirAction = QtHelper.createAction(self, self.tr("&Duplicate Folder"), self.__duplicateItem, 
-                                        icon = QIcon(":/duplicate_folder.png"), tip = self.tr('Duplicate folder') )
+                                        icon = QIcon(":/duplicate_folder.png"), 
+                                        tip = self.tr('Duplicate folder') )
         self.duplicateFileAction = QtHelper.createAction(self, self.tr("&Duplicate File"), self.__duplicateItem, 
-                                        icon = QIcon(":/filenew2.png"), tip = self.tr('Duplicate file') )
-        self.deleteFileAction = QtHelper.createAction(self, self.tr("&Delete File"), self.__deleteItem, shortcut = "Ctrl+Alt+D", 
-                                        icon = QIcon(":/delete_file.png"), tip = self.tr('Delete File') )
+                                        icon = QIcon(":/filenew2.png"), 
+                                        tip = self.tr('Duplicate file') )
+        self.deleteFileAction = QtHelper.createAction(self, self.tr("&Delete File"), self.__deleteItem, 
+                                        shortcut = "Ctrl+Alt+D", 
+                                        icon = QIcon(":/delete_file.png"), 
+                                        tip = self.tr('Delete File') )
         self.moveFileAction = QtHelper.createAction(self, self.tr("&Move File"), self.__moveItem, 
-                                        icon = QIcon(":/move_file.png"), tip = self.tr('Move the selected file') )
+                                        icon = QIcon(":/move_file.png"), 
+                                        tip = self.tr('Move the selected file') )
         self.moveFolderAction = QtHelper.createAction(self, self.tr("&Move Folder"), self.__moveItem, 
-                                        icon = QIcon(":/move_folder.png"), tip = self.tr('Move the selected folder') )
+                                        icon = QIcon(":/move_folder.png"), 
+                                        tip = self.tr('Move the selected folder') )
         self.openFileAction = QtHelper.createAction(self, self.tr("&Open File"), self.__openItem, 
                                         icon = None, tip = self.tr('Open the selected file') )
         self.openPropertiesAction = QtHelper.createAction(self, self.tr("&Properties"), self.__openProperties, 
                                         icon = None, tip = self.tr('Open properties') )
         self.snapshotAction = QtHelper.createAction(self, self.tr("&Snapshot"), self.__addSnapshot, 
-                                        icon = QIcon(":/snapshot.png"), tip = self.tr('Snapshot manager') )
+                                        icon = QIcon(":/snapshot.png"), 
+                                        tip = self.tr('Snapshot manager') )
         self.snapshotAddAction = QtHelper.createAction(self, self.tr("&Create..."), self.__addSnapshot, 
                                         icon = None, tip = self.tr('Add snapshot') )
         self.snapshotRestoreAction = QtHelper.createAction(self, self.tr("&Restore..."), self.__restoreSnapshot, 
@@ -1968,7 +2007,8 @@ class Repository(QWidget, Logger.ClassLogger):
         self.testcasesRoot2 = Item(repo = self, parent = self.saveAs.wrepository, txt = "Root",  
                                     type = QTreeWidgetItem.UserType+10, isRoot = True )
         self.testcasesRoot2.setSelected(True)
-        self.createRepository(listing=listing, parent=self.testcasesRoot2,fileincluded=True, firstCalled=True)
+        self.createRepository(listing=listing, parent=self.testcasesRoot2,
+                              fileincluded=True, firstCalled=True)
         self.saveAs.wrepository.sortItems(0, Qt.AscendingOrder)
 
         if reloadItems:
@@ -2489,10 +2529,12 @@ class Repository(QWidget, Logger.ClassLogger):
                         if self.projectSupport:
                             project = self.getCurrentProject()
                             projectid = self.getProjectId(project=str(project))
-                            self.renameFolder(mainPath=pathFolder, oldFolderName=self.itemCurrent.folderName, newFolderName= txt, 
+                            self.renameFolder(mainPath=pathFolder, oldFolderName=self.itemCurrent.folderName, 
+                                              newFolderName= txt, 
                                                 project=projectid)
                         else:
-                            self.renameFolder(mainPath=pathFolder, oldFolderName=self.itemCurrent.folderName, newFolderName= txt)
+                            self.renameFolder(mainPath=pathFolder, oldFolderName=self.itemCurrent.folderName, 
+                                              newFolderName= txt)
                     else:
                         self.error( "should not be happened" )
 
@@ -2593,9 +2635,12 @@ class Repository(QWidget, Logger.ClassLogger):
                                     newprojectid = self.getProjectId(project=str(newProjectName))
                                 else:
                                     newprojectid = projectid
-                                self.duplicateFile(mainPath=pathFolder, oldFileName=self.itemCurrent.fileName, newFileName= txt, 
-                                                    extFile=self.itemCurrent.fileExtension, project=projectid, newProject=newprojectid, 
-                                                        newPath=newPath)
+                                self.duplicateFile(mainPath=pathFolder, 
+                                                   oldFileName=self.itemCurrent.fileName, 
+                                                   newFileName= txt, 
+                                                   extFile=self.itemCurrent.fileExtension, 
+                                                   project=projectid, newProject=newprojectid, 
+                                                   newPath=newPath)
                             else:
                                 self.duplicateFile(mainPath=pathFolder, oldFileName=self.itemCurrent.fileName, newFileName= txt, 
                                         extFile=self.itemCurrent.fileExtension, newPath=newPath)

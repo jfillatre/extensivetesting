@@ -315,7 +315,6 @@ class WelcomePage(QWidget):
         rightLayout.setContentsMargins(0, 0, 0, 0)     
         rightFrame.setLayout(rightLayout)
         
-        #*****************************************#
         # prepare the product frame
         self.productFrame = QFrame(self)
         productLayout = QVBoxLayout()
@@ -339,7 +338,6 @@ class WelcomePage(QWidget):
         productLayout.setSpacing(0)
         productLayout.addStretch(1)
         
-        #*****************************************#
         # prepare the generators frame
         self.devFrame = QFrame(self)
         self.devFrame.setEnabled(False)
@@ -412,7 +410,6 @@ class WelcomePage(QWidget):
         capturetLayout.setSpacing(0)
         capturetLayout.addStretch(1)
         
-        #*****************************************#
         # prepare the get started frame
         self.connectFrame = QFrame(self)
         self.connectFrame.setStyleSheet( """
@@ -447,11 +444,7 @@ class WelcomePage(QWidget):
         connectLayout.setSpacing(0)
         connectLayout.addStretch(1)
         self.connectFrame.setLayout(connectLayout)
-        
-        # end of get started frame
-        
-         
-        #*****************************************#
+
         # prepare the files frame
         self.filesFrame = QFrame(self)
         self.filesFrame.setStyleSheet( """
@@ -508,8 +501,6 @@ class WelcomePage(QWidget):
         filesLayout.addStretch(1)
         self.filesFrame.setLayout(filesLayout)
         self.filesFrame.setEnabled(False)
-        # end of get started frame
-        
 
         leftLayout.addWidget(self.connectFrame)
         leftLayout.addWidget(self.productFrame)
@@ -612,7 +603,8 @@ class WelcomePage(QWidget):
         On online link clicked
         """
         if not len(UCI.instance().getHttpAddress()):
-            QMessageBox.warning(self, self.tr("Website"), self.tr("Please to configure a test server."))
+            QMessageBox.warning(self, self.tr("Website"), 
+                                self.tr("Please to configure a test server."))
         else:
             self.OpenWeb.emit()
 
@@ -893,15 +885,20 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         icon = QIcon(":/%s.png" % TestUnit.TYPE), 
                                         tip = 'Creates a new test unit')
         self.newTestConfigAction = QtHelper.createAction(self, "Test Config", self.newTestConfig,
-                                        icon = QIcon(":/%s.png" % TestConfig.TYPE), tip = 'Creates a new test config')
+                                        icon = QIcon(":/%s.png" % TestConfig.TYPE), 
+                                        tip = 'Creates a new test config')
         self.newTestSuiteAction = QtHelper.createAction(self, "Test Suite", self.newTestSuite,
-                                        icon = QIcon(":/%s.png" % TestSuite.TYPE), shortcut = "Ctrl+N", tip = 'Creates a new test suite')
+                                        icon = QIcon(":/%s.png" % TestSuite.TYPE), 
+                                        shortcut = "Ctrl+N", tip = 'Creates a new test suite')
         self.newTestPlanAction = QtHelper.createAction(self, "Test Plan", self.newTestPlan,
-                                        icon = QIcon(":/%s.png" % TestPlan.TYPE), tip = 'Creates a new test plan')
+                                        icon = QIcon(":/%s.png" % TestPlan.TYPE), 
+                                        tip = 'Creates a new test plan')
         self.newTestGlobalAction = QtHelper.createAction(self, "Test Global", self.newTestGlobal,
-                                        icon = QIcon(":/%s.png" % TestPlan.TYPE_GLOBAL), tip = 'Creates a new test global')
+                                        icon = QIcon(":/%s.png" % TestPlan.TYPE_GLOBAL), 
+                                        tip = 'Creates a new test global')
         self.newTestDataAction = QtHelper.createAction(self, "Test Data", self.newTestData,
-                                        icon = QIcon(":/%s.png" % TestData.TYPE), tip = 'Creates a new test data')
+                                        icon = QIcon(":/%s.png" % TestData.TYPE), 
+                                        tip = 'Creates a new test data')
         self.newAdapterAction = QtHelper.createAction(self, "Adapter", self.newTestAdapter,
                                         icon = QIcon(":/file-adp2.png"), tip = 'Creates a new adapter')
         self.newLibraryAction = QtHelper.createAction(self, "Library", self.newTestLibrary,
@@ -913,7 +910,8 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         icon = QIcon(":/open-test.png"), shortcut = "Ctrl+O", tip = 'Open')
         self.saveAction = QtHelper.createAction(self, self.tr("Save"), self.saveTab, 
                                         shortcut = Settings.instance().readValue( key = 'KeyboardShorcuts/save' ),
-                                        icon = QIcon(":/save-test.png"), tip = 'Saves the active document')
+                                        icon = QIcon(":/save-test.png"), 
+                                        tip = 'Saves the active document')
         self.saveAsAction = QtHelper.createAction(self, self.tr("Save As"), self.saveTabAs,
                                         icon = QIcon(":/filesave.png"), tip = 'Saves the active document as ...')
         self.exportAsAction = QtHelper.createAction(self, self.tr("Export"), self.exportTabAs,
@@ -940,7 +938,8 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         tip = 'Copies the selection and puts it on the clipboard' )
         self.copyAction.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         self.pasteAction = QtHelper.createAction(self, self.tr("Paste"), callback = self.globalCallback,
-                                        data='paste', shortcut = QKeySequence.Paste, tip = 'Inserts clipboard contents' )
+                                        data='paste', shortcut = QKeySequence.Paste, 
+                                        tip = 'Inserts clipboard contents' )
         self.pasteAction.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         self.deleteAction = QtHelper.createAction( self, "Delete Selection", callback = self.globalCallback,
                                         data='removeSelectedText', tip = 'Deletes the selection' )
@@ -951,14 +950,16 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         icon =  QIcon(":/uncomment.png"), data='uncomment', 
                                         tip = 'Remove comment sign at the begining of line' )
         self.selectAllAction = QtHelper.createAction(self, "Select All", self.globalCallback, 
-                                        QIcon(":/select_all.png"), data='selectAll', tip = 'Selects the entire document' )
+                                        QIcon(":/select_all.png"), data='selectAll', 
+                                        tip = 'Selects the entire document' )
         self.indentAction = QtHelper.createAction(self, "Indent", self.globalCallback, data='indent', 
                                         shortcut = "Tab", tip = 'Indent current line or selection' )
         self.unindentAction = QtHelper.createAction(self, "Unindent", self.globalCallback, data='unindent', 
                                         shortcut = "Shift+Tab", tip = 'Unindent current line or selection' )
         
         self.foldAllAction = QtHelper.createAction(self, "Fold/Unfold all", callback = self.globalCallback,
-                                        icon = QIcon(":/toggle-expand.png"), data='foldAllLines', tip = 'Fold all lines' )
+                                        icon = QIcon(":/toggle-expand.png"), 
+                                        data='foldAllLines', tip = 'Fold all lines' )
         self.codefoldingAction = QtHelper.createAction(self, "Code Folding", self.toggleCodeFolding, 
                                         icon =  QIcon(":/folding.png"), toggled = True)
         self.codefoldingAction.setChecked( self.codeFolding )
@@ -990,7 +991,8 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         tip = 'Executes the current test in background')
 
         self.runWithoutProbesAction = QtHelper.createAction(self, "Without probes", self.runDocumentWithoutProbes,
-                                        tip = 'Executes the current test without probes', icon=QIcon(":/test-play-without-probes.png") )
+                                        tip = 'Executes the current test without probes', 
+                                        icon=QIcon(":/test-play-without-probes.png") )
         self.runDebugAction = QtHelper.createAction(self, "&Debug", self.runDocumentDebug,
                                         tip = 'Executes the current test with debug traces on server' )
         self.runWithoutNotifAction = QtHelper.createAction(self, "&Without notifications", self.runDocumentWithoutNotif,
@@ -999,26 +1001,32 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                                         tip = 'Do not keep test result on archive' )
 
         self.runSchedAction = QtHelper.createAction(self, self.tr("Schedule"), self.schedRunDocument,
-                                        icon =  QIcon(":/schedule.png"), tip = self.tr('Scheduling a run of the current tab') )
+                                        icon =  QIcon(":/schedule.png"), 
+                                        tip = self.tr('Scheduling a run of the current tab') )
         
         self.runSeveralAction = QtHelper.createAction(self, self.tr("Grouped"), self.runSeveralTests,
                                         icon =  QIcon(":/test-play-several.png"), tip = self.tr('Run several tests')  )
         self.runSeveralAction.setEnabled(False)
 
         self.runStepByStepAction = QtHelper.createAction(self, "Steps", self.runDocumentStepByStep,
-                                        tip = 'Execute the current test step by step', icon=QIcon(":/run-state.png"),
+                                        tip = 'Execute the current test step by step', 
+                                        icon=QIcon(":/run-state.png"),
                                         shortcut = Settings.instance().readValue( key = 'KeyboardShorcuts/steps' ) )
         self.runBreakpointAction = QtHelper.createAction(self, "Break Point", self.runDocumentBreakpoint,
-                                        tip = 'Execute the current test with breakpoint', icon=QIcon(":/breakpoint.png"),
+                                        tip = 'Execute the current test with breakpoint', 
+                                        icon=QIcon(":/breakpoint.png"),
                                         shortcut = Settings.instance().readValue( key = 'KeyboardShorcuts/breakpoint' ) )
 
         self.checkSyntaxAction = QtHelper.createAction(self, self.tr("&Syntax"), self.checkSyntaxDocument,
-                                        icon =  QIcon(":/check-syntax.png"), tip = self.tr('Checking syntax of the current tab'),
+                                        icon =  QIcon(":/check-syntax.png"), 
+                                        tip = self.tr('Checking syntax of the current tab'),
                                         shortcut = Settings.instance().readValue( key = 'KeyboardShorcuts/syntax' ) )
         self.checkDesignAction = QtHelper.createAction(self, self.tr("&Design"), self.checkDesignDocument,
-                                        icon =  QIcon(":/tds.png"), tip = self.tr('Checking design of the current tab') )
+                                        icon =  QIcon(":/tds.png"), 
+                                        tip = self.tr('Checking design of the current tab') )
         self.updateTestAction = QtHelper.createAction(self, self.tr("&Assistant"), self.updateMacro,
-                                        icon =  QIcon(":/recorder.png") , tip = self.tr('Update the test with the automation assistant'),
+                                        icon =  QIcon(":/recorder.png") , 
+                                        tip = self.tr('Update the test with the automation assistant'),
                                         shortcut = Settings.instance().readValue( key = 'KeyboardShorcuts/assistant' ) )
                              
         menu1 = QMenu(self)

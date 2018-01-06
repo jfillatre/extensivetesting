@@ -933,7 +933,10 @@ class WTestResult(QWidget, Logger.ClassLogger):
             duration = None
             if 'duration' in data:
                 duration = "%.3f" % float(data['duration'])
-            self.logsItem.finishRootItem( rootItem = rootTreeItem, duration=duration, typeItem='testplan', event=data)          
+            self.logsItem.finishRootItem( rootItem = rootTreeItem, 
+                                          duration=duration, 
+                                          typeItem='testplan', 
+                                          event=data)          
         elif data['event'] == 'testplan':
             if not data['script_id'] in self.scriptEvents:
                 self.scriptEvents[ data['script_id'] ] = [ data ]
@@ -949,7 +952,9 @@ class WTestResult(QWidget, Logger.ClassLogger):
             if rootTreeItem.isSelected():
                 self.logsView.setExpectedEventId(data['script_id'])
                 row_pos = self.logsView.addEvent( event = data )
-                self.resumeView.addEvent( event = data, rowp = row_pos, ihmId=row_pos )
+                self.resumeView.addEvent( event = data, 
+                                          rowp = row_pos, 
+                                          ihmId=row_pos )
         
         ############# test abstract events
         elif data['event'] == 'testabstract-started':
@@ -973,7 +978,10 @@ class WTestResult(QWidget, Logger.ClassLogger):
             duration = None
             if 'duration' in data:
                 duration = "%.3f" % float(data['duration'])
-            self.logsItem.finishRootItem( rootItem = rootTreeItem, duration=duration, typeItem='testabstract' , event=data)     
+            self.logsItem.finishRootItem( rootItem = rootTreeItem, 
+                                          duration=duration, 
+                                          typeItem='testabstract' , 
+                                          event=data)     
         elif data['event'] == 'testabstract':
             if not data['script_id']  in self.scriptEvents:
                 self.scriptEvents[ data['script_id'] ] = [ data ]
@@ -1009,7 +1017,10 @@ class WTestResult(QWidget, Logger.ClassLogger):
             duration = None
             if 'duration' in data:
                 duration = "%.3f" % float(data['duration'])
-            self.logsItem.finishRootItem( rootItem = rootTreeItem, duration=duration, typeItem='testunit', event=data )     
+            self.logsItem.finishRootItem( rootItem = rootTreeItem, 
+                                          duration=duration, 
+                                          typeItem='testunit', 
+                                          event=data )     
         elif data['event'] == 'testunit':
             if not data['script_id']  in self.scriptEvents:
                 self.scriptEvents[ data['script_id'] ] = [ data ]
@@ -1049,7 +1060,9 @@ class WTestResult(QWidget, Logger.ClassLogger):
             duration = None
             if 'duration' in data:
                 duration = "%.3f" % float(data['duration'])
-            self.logsItem.finishRootItem( rootItem = rootTreeItem, duration=duration, event=data )      
+            self.logsItem.finishRootItem( rootItem = rootTreeItem, 
+                                          duration=duration, 
+                                          event=data )      
         elif data['event'] == 'testsuite':
             if not data['script_id']  in self.scriptEvents:
                 self.scriptEvents[ data['script_id'] ] = [ data ]
@@ -1081,7 +1094,9 @@ class WTestResult(QWidget, Logger.ClassLogger):
                 self.resumeView.reset()
                 self.logsView.reset()
 
-            testcaseTreeItem = self.logsItem.createTestcase( rootItem = rootTreeItem, event = data, fromLocal=fromLocal )
+            testcaseTreeItem = self.logsItem.createTestcase( rootItem = rootTreeItem, 
+                                                             event = data, 
+                                                             fromLocal=fromLocal )
             self.testcases[ data['tc_id'] ] = testcaseTreeItem
         elif data['event'] == 'testcase-stopped':
             if not data['tc_id'] in self.testcases:
@@ -1093,7 +1108,10 @@ class WTestResult(QWidget, Logger.ClassLogger):
             duration = None
             if 'duration' in data:
                 duration = "%.3f" % float(data['duration'])
-            self.logsItem.finishTestcase( testcaseItem = testcaseItem, result = data['result'], duration=duration, event=data )
+            self.logsItem.finishTestcase( testcaseItem = testcaseItem, 
+                                          result = data['result'], 
+                                          duration=duration, 
+                                          event=data )
         elif data['event'] == 'testcase':
             # Issue 41: incorrect event displayed in test result
             # ignore invalid events

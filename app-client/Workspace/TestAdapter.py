@@ -83,7 +83,8 @@ class WTestAdapter(Document.WDocument):
         @param nonameId: 
         @type nonameId: 
         """
-        Document.WDocument.__init__(self, parent, path, filename, extension, nonameId, remoteFile, repoDest, project, isLocked)
+        Document.WDocument.__init__(self, parent, path, filename, extension, nonameId, 
+                                    remoteFile, repoDest, project, isLocked)
         
         self.srcEditor = None
         self.createWidgets()
@@ -101,7 +102,8 @@ class WTestAdapter(Document.WDocument):
         |       PyEditor        |
         |_______________________|
         """
-        self.srcWidget = EditorWidget( editorId=self.TEST_ADAPTER_EDITOR, title="Adapter Definition:", parent=self )
+        self.srcWidget = EditorWidget( editorId=self.TEST_ADAPTER_EDITOR, 
+                                       title="Adapter Definition:", parent=self )
         self.srcEditor = self.srcWidget.editor
 
         layout = QVBoxLayout()
@@ -130,7 +132,6 @@ class WTestAdapter(Document.WDocument):
         """
         On total lines changed
         """
-        # self.parent.emit( SIGNAL("totalLinesChanged"), self.editor().lines() )
         self.viewer().TotalLinesChanged.emit( self.editor().lines() )
         
     def editor(self):
@@ -155,7 +156,6 @@ class WTestAdapter(Document.WDocument):
         @param col: column index
         @type col: Integer
         """
-        # self.parent.emit( SIGNAL("cursorPositionChanged"), ln, col )
         self.viewer().CursorPositionChanged.emit( ln, col )
 
     def setDefaultCursorPosition(self):
@@ -238,7 +238,6 @@ class WTestAdapter(Document.WDocument):
         if isinstance(weditor, PyEditor):
             if weditor.editorId == self.TEST_ADAPTER_EDITOR:
                 self.viewer().findWidget.setEditor( editor = self.srcEditor)
-            # self.parent.emit( SIGNAL("focusChanged"), self )
             self.viewer().FocusChanged.emit(self)
 
     def defaultLoad (self):

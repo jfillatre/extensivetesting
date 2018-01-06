@@ -177,7 +177,8 @@ class TestServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
             # handle notify and save some statistics on the database
             if request['cmd'] == Messages.RSQ_NOTIFY:
                 try:
-                    if _body_['event'] in [ 'agent-data', 'agent-notify', 'agent-init', 'agent-reset', 'agent-alive', 'agent-ready' ]:
+                    if _body_['event'] in [ 'agent-data', 'agent-notify', 'agent-init', 
+                                            'agent-reset', 'agent-alive', 'agent-ready' ]:
                         
                         if _body_['event'] == 'agent-ready':
                             self.testsConnected[client]['agents'].append( 
@@ -216,12 +217,14 @@ class TestServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
 
                 if _body_['event'] == 'testglobal-stopped':
                     self.statsmgr.addResultTestGlobal( tgResult =_body_['result'], fromUser=_body_['user-id'], 
-                                                        tgDuration=_body_['duration'], nbTs=_body_['nb-ts'], nbTu=_body_['nb-tu'],
+                                                        tgDuration=_body_['duration'], nbTs=_body_['nb-ts'], 
+                                                        nbTu=_body_['nb-tu'],
                                                         nbTc=_body_['nb-tc'], prjId=_body_['prj-id'] )
 
                 if _body_['event'] == 'testplan-stopped':
                     self.statsmgr.addResultTestPlan( tpResult =_body_['result'], fromUser=_body_['user-id'], 
-                                                        tpDuration=_body_['duration'], nbTs=_body_['nb-ts'], nbTu=_body_['nb-tu'],
+                                                        tpDuration=_body_['duration'], nbTs=_body_['nb-ts'], 
+                                                        nbTu=_body_['nb-tu'],
                                                         nbTc=_body_['nb-tc'], prjId=_body_['prj-id'] )
 
                 if  _body_['task-id'] in self.tests:

@@ -193,23 +193,6 @@ class WProbes(QWidget, Logger.ClassLogger):
         |_______________|
         """
         layout = QHBoxLayout()
-        
-        # self.statsBox = QGroupBox("Summary")
-        # self.nbInstalledLabel = QLabel("0")
-        # self.nbConfiguredLabel = QLabel("0")
-        # self.nbRegisteredLabel = QLabel("0")
-        # layout2 = QFormLayout()
-        # layout2.addRow(QLabel("Installed"), self.nbInstalledLabel )
-        # layout2.addRow(QLabel("Configured"), self.nbConfiguredLabel )
-        # layout2.addRow(QLabel("Registered"), self.nbRegisteredLabel )
-        # self.statsBox.setLayout(layout2)
-
-        # self.nbRunningBox = QGroupBox("Running")
-        # self.nbPrbLabel = QLabel()
-        # layoutRunning = QVBoxLayout()
-        # layoutRunning.addWidget(self.nbPrbLabel)
-        # self.nbRunningBox.setLayout(layoutRunning)
-
 
         self.deployBox = QGroupBox("Default probes")
         self.probesAvailable = QTreeWidget(self)
@@ -289,13 +272,8 @@ class WProbes(QWidget, Logger.ClassLogger):
         layoutDeploy.addLayout(paramLayout)
         layoutDeploy.addWidget(self.probesDefault)
         self.deployBox.setLayout(layoutDeploy)
-        
-        # layoutRightTop = QHBoxLayout()
-        # layoutRightTop.addWidget(self.statsBox)
-        # layoutRightTop.addWidget(self.nbRunningBox)
 
         layoutRight = QVBoxLayout()
-        # layoutRight.addLayout(layoutRightTop)
         layoutRight.addWidget(self.deployBox)   
 
         layout.addLayout(layoutLeft)
@@ -529,8 +507,6 @@ class WProbes(QWidget, Logger.ClassLogger):
         self.probesAvailable.setEnabled(True)
         self.deployBox.setEnabled(True)
         self.runningBox.setEnabled(True)
-        # self.statsBox.setEnabled(True)
-        # self.nbRunningBox.setEnabled(True)
 
         self.refreshRunningAction.setEnabled(True)
 
@@ -559,19 +535,12 @@ class WProbes(QWidget, Logger.ClassLogger):
         
         self.itemCurrentRunning = None
         self.itemCurrentInstalled = None
-        # self.prbsInstalled = None
 
         self.probeDescEdit.setText( '' )
         self.probeTypeEdit.setText( '' )
         self.probeNameEdit.setText( '' )
-        
-        # self.statsBox.setEnabled(False)
-        # self.nbInstalledLabel.setText( "0" )
-        # self.nbConfiguredLabel.setText( "0" )
-        
-        # self.nbRunningBox.setEnabled(False)
+
         self.resetNbProbes()
-        # self.nbPrbLabel.setText('' )
 
         self.refreshRunningAction.setEnabled(False)
 
@@ -596,15 +565,6 @@ class WProbes(QWidget, Logger.ClassLogger):
         else:
             return ''
 
-    # def loadStats(self, data):
-        # """
-        # Loads statistics
-
-        # @param data: 
-        # @type data: dict
-        # """
-        # pass
-
     def loadDefault (self, data):
         """
         Loads default probes
@@ -616,8 +576,6 @@ class WProbes(QWidget, Logger.ClassLogger):
 
         for defProbe in data:
             defProbeItem = ProbeDefaultItem( probe = defProbe, parent= self.probesDefault)
-        # totConfigured = len(data)
-        # self.nbConfiguredLabel.setText( str(totConfigured) ) 
 
     def loadData (self, data, dataInstalled=None):
         """
@@ -638,51 +596,17 @@ class WProbes(QWidget, Logger.ClassLogger):
             probeItem = ProbeItem( probe = probe, parent= self.probesRegistered)
             self.probes[probe['id']] = probeItem
 
-        # totRunning = len(data)
-        # self.nbRegisteredLabel.setText( str(totRunning) ) 
-
         # load tests stats
         if dataInstalled is not None:
             if len(dataInstalled) == 0:
                 self.deployBox.setEnabled(False)
                 self.probesAvailable.setEnabled(False)
-            # else:
-                # self.prbsInstalled = dataInstalled
-                # running = {}
-                # for p in dataInstalled:
-                    # running[ str(p['type']).lower() ] = 0
-                    # probeItem = ProbeInstalledItem( probe = p, parent= self.probesAvailable)
-                # self.nbInstalledLabel.setText( str(len(dataInstalled)) ) 
-               
-                # for probe in data:
-                    # if probe['type'].lower() in running:
-                        # running[probe['type'].lower() ] += 1
-                # runningList = []
-                # for k,v in running.items():
-                    # runningList.append( '%s: %s' % (k.title(), v) )
-                # self.nbPrbLabel.setText( '\n'.join(runningList) )
-
 
     def resetNbProbes(self, data=None):
         """
         Reset the number of probes
         """
         pass
-        # if data is None:
-            # self.nbPrbLabel.setText( '' )
-        # else:
-            # if self.prbsInstalled is not None:
-                # running = {}
-                # for p in self.prbsInstalled:
-                    # running[ str(p['type']).lower() ] = 0
-
-                # for probe in data:
-                    # if probe['type'].lower() in running:
-                        # running[probe['type'].lower() ] += 1
-                # runningList = []
-                # for k,v in running.items():
-                    # runningList.append( '%s: %s' % (k.title(), v) )
-                # self.nbPrbLabel.setText( '\n'.join(runningList) )
 
     def refreshData (self, data, action):
         """

@@ -194,7 +194,8 @@ class KeyItem(QTreeWidgetItem):
     """
     Key item
     """
-    def __init__(self, key, colorKey, value = None, valueRaw=None, parent = None, colorValue = None, noLimit=False ):
+    def __init__(self, key, colorKey, value = None, valueRaw=None, 
+                 parent = None, colorValue = None, noLimit=False ):
         """
         Constructs KeyItem widget item
 
@@ -891,7 +892,6 @@ class TreeMemory(object):
         for i in xrange( self.treeWidget.tree.topLevelItemCount() ):
             itm = self.treeWidget.tree.topLevelItem( i )
             if itm.isExpanded():
-            # if self.treeWidget.tree.isItemExpanded( itm ):
                 subRet = self.__snapshot(itm)
                 self.treeIndexes.append( (i,subRet) )
 
@@ -922,7 +922,6 @@ class DetailedView(QWidget):
         """
         QWidget.__init__(self, parent)
         self.parent = parent
-        # self.treeIndexes = []
         self.treeIndexesSelected = []
 
         self.createActions()
@@ -1020,7 +1019,6 @@ class DetailedView(QWidget):
         self.treeWidgetLeft2.tree.itemCollapsed.connect(self.EventTreeMemory.snapshot)
         self.treeWidgetLeft.tree.itemExpanded.connect(self.TemplateTreeMemory.snapshot)
         self.treeWidgetLeft.tree.itemCollapsed.connect(self.TemplateTreeMemory.snapshot)
-        # self.treeWidgetLeft2.tree.itemSelectionChanged.connect(self.itemEventSelected)
         
     def displayTreeValueLeft(self):
         """
@@ -1195,17 +1193,25 @@ class DetailedView(QWidget):
         self.treeWidgetLeft.tree.setContextMenuPolicy(Qt.CustomContextMenu)
 
         # tree for events
-        self.treeWidgetLeft2 = QTreeWidgetTemplate( self, signals=True, textHexa=self.hexEdit, textRaw=self.rawEdit , 
-                                                    imgRaw=self.imgEdit, xmlRaw=self.xmlEdit, htmlRaw=self.htmlEdit )
+        self.treeWidgetLeft2 = QTreeWidgetTemplate( self, signals=True, 
+                                                    textHexa=self.hexEdit, 
+                                                    textRaw=self.rawEdit , 
+                                                    imgRaw=self.imgEdit, 
+                                                    xmlRaw=self.xmlEdit, 
+                                                    htmlRaw=self.htmlEdit )
         self.treeWidgetLeft2.tree.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.treeWidgetLeft3 = QTreeWidgetTemplate( self, signals=True, textRaw=self.text3Edit, withLabel=False  )
+        self.treeWidgetLeft3 = QTreeWidgetTemplate( self, signals=True, 
+                                                    textRaw=self.text3Edit, 
+                                                    withLabel=False  )
         self.treeWidgetLeft3.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         
         # tree for template messages 
         signalsExpanded = QtHelper.str2bool(Settings.instance().readValue( key = 'TestRun/auto-expandcollapse-templates' ))
         signalsClicked = QtHelper.str2bool(Settings.instance().readValue( key = 'TestRun/auto-selection-templates' ))
-        self.treeWidgetRight = QTreeWidgetTemplate( self, signalsExpanded=signalsExpanded, signalsAutoSelect=signalsClicked, 
+        self.treeWidgetRight = QTreeWidgetTemplate( self, 
+                                                    signalsExpanded=signalsExpanded, 
+                                                    signalsAutoSelect=signalsClicked, 
                                                     signalsReadMore=True ) 
         self.treeWidgetRight.setStatusLabels()
         self.treeWidgetRight.tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -1710,7 +1716,9 @@ class DetailedView(QWidget):
                     if '%%raw-layer%%' in val:
                         valueRaw = copy.deepcopy( val['%%raw-layer%%'] )
 
-                keyItem = KeyItem( key = key, valueRaw=valueRaw, parent = parent, colorKey = clr, colorValue = clrValue, noLimit=False)
+                keyItem = KeyItem( key = key, valueRaw=valueRaw, parent = parent, 
+                                   colorKey = clr, colorValue = clrValue, 
+                                   noLimit=False)
                 self.loadTreeTemplate( val,keyItem,template )
        
         elif isinstance(keyval, dict):
@@ -1742,14 +1750,18 @@ class DetailedView(QWidget):
                         sk, sv = v
                         if template:
                             sk, clrValue = self.getColor(txt=sk)
-                        hdrItem = KeyItem( key = str(h), value = sk, parent = parent, colorKey = clr, colorValue = clrValue, noLimit=False )
+                        hdrItem = KeyItem( key = str(h), value = sk, parent = parent, 
+                                           colorKey = clr, colorValue = clrValue, 
+                                           noLimit=False )
                         self.loadTreeTemplate( sv,hdrItem,template )
                     else:
                         print('bad value: %s, tuple expected or list of 2 elements' % v)
                 else:
                     # display all items except the internal key
                     if str(h) != '%%raw-layer%%':
-                        hdrItem = KeyItem( key = str(h), value = v, parent = parent, colorKey = clr, colorValue = clrValue, noLimit=False )
+                        hdrItem = KeyItem( key = str(h), value = v, parent = parent, 
+                                           colorKey = clr, colorValue = clrValue, 
+                                           noLimit=False )
         else:
             pass
 

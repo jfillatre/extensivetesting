@@ -21,11 +21,6 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-try:
-    import MySQLdb
-except ImportError: # python3 support
-    import pymysql as MySQLdb
-
 import time
 import datetime
 import pickle

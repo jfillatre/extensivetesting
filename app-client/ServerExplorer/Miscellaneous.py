@@ -434,7 +434,7 @@ class WServerInformation(QWidget, Logger.ClassLogger):
         for param in data:
             probeItem = ParamItem( param = param, parent= self.informations)
         
-        # resize collums
+        # resize columns
         for i in xrange(len(self.labels) - 1):
             self.informations.resizeColumnToContents(i)
 

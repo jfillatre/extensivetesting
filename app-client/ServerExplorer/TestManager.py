@@ -516,9 +516,10 @@ class WTestManager(QWidget, Logger.ClassLogger):
         self.testWaiting = QTreeWidget(self)
         self.testWaiting.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.waitingToolbar = QToolBar(self)
-        self.labelsWaiting = [ self.tr("No.") , self.tr("Group"), self.tr("Schedulation Type"),self.tr("Project"), self.tr("Name") \
-                            , self.tr("Next run"), self.tr("Repeat"), self.tr("Probes"), self.tr("Notifications") \
-                            , self.tr("Tests result"), self.tr("Author")  ]
+        self.labelsWaiting = [ self.tr("No.") , self.tr("Group"), self.tr("Schedulation Type"),
+                              self.tr("Project"), self.tr("Name") , self.tr("Next run"), 
+                              self.tr("Repeat"), self.tr("Probes"), self.tr("Notifications") , 
+                              self.tr("Tests result"), self.tr("Author")  ]
         self.testWaiting.setHeaderLabels(self.labelsWaiting)
         self.testWaiting.setIndentation(10)
         self.testWaiting.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -814,9 +815,12 @@ class WTestManager(QWidget, Logger.ClassLogger):
         """
         # if self.itemCurrent is not None:
         for currentItem in self.testWaiting.selectedItems():
-            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=False, scheduleType=currentItem.taskEventType,
-                                            scheduleAt=currentItem.taskEventArgs, scheduleRepeat=currentItem.taskEventNb, 
-                                            probesEnabled=currentItem.taskWithoutProbes, notificationsEnabled=currentItem.taskWithoutNotif, 
+            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=False, 
+                                            scheduleType=currentItem.taskEventType,
+                                            scheduleAt=currentItem.taskEventArgs, 
+                                            scheduleRepeat=currentItem.taskEventNb, 
+                                            probesEnabled=currentItem.taskWithoutProbes, 
+                                            notificationsEnabled=currentItem.taskWithoutNotif, 
                                             debugEnabled=False, logsEnabled=currentItem.taskNoKeepTr, 
                                             fromTime=currentItem.taskEventFrom, toTime=currentItem.taskEventTo )
                                             
@@ -826,9 +830,12 @@ class WTestManager(QWidget, Logger.ClassLogger):
         """
         # if self.itemCurrent is not None:
         for currentItem in self.testWaiting.selectedItems():
-            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=True, scheduleType=currentItem.taskEventType,
-                                            scheduleAt=currentItem.taskEventArgs, scheduleRepeat=currentItem.taskEventNb, 
-                                            probesEnabled=currentItem.taskWithoutProbes, notificationsEnabled=currentItem.taskWithoutNotif, 
+            RCI.instance().rescheduleTask(taskId=currentItem.taskId, taskEnabled=True, 
+                                            scheduleType=currentItem.taskEventType,
+                                            scheduleAt=currentItem.taskEventArgs, 
+                                            scheduleRepeat=currentItem.taskEventNb, 
+                                            probesEnabled=currentItem.taskWithoutProbes, 
+                                            notificationsEnabled=currentItem.taskWithoutNotif, 
                                             debugEnabled=False, logsEnabled=currentItem.taskNoKeepTr, 
                                             fromTime=currentItem.taskEventFrom, toTime=currentItem.taskEventTo )
     

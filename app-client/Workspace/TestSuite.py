@@ -86,7 +86,8 @@ class WTestSuite(Document.WDocument):
         @param nonameId: 
         @type nonameId: 
         """
-        Document.WDocument.__init__(self, parent, path, filename, extension, nonameId, remoteFile, repoDest, project, isLocked)
+        Document.WDocument.__init__(self, parent, path, filename, extension, nonameId, 
+                                    remoteFile, repoDest, project, isLocked)
         
         self.srcEditor = None
         self.execEditor = None

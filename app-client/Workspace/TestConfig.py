@@ -90,7 +90,8 @@ class WTestConfig(Document.WDocument):
         @param remoteFile: is remote
         @type remoteFile: boolean
         """
-        Document.WDocument.__init__(self, parent, path, filename, extension, nonameId, remoteFile, repoDest, project, isLocked)
+        Document.WDocument.__init__(self, parent, path, filename, extension, 
+                                    nonameId, remoteFile, repoDest, project, isLocked)
         
         self.tc = TestParameters.ParametersQWidget(self, forTestConfig=True)
         
@@ -105,7 +106,8 @@ class WTestConfig(Document.WDocument):
             self.error("bad default inputs provided: %s - %s" % (e,defaultInputs))
         # end of new
         
-        self.dataModel = FileModelTestConfig.DataModel(timeout=defaultTimeout, parameters=_defaults_params)
+        self.dataModel = FileModelTestConfig.DataModel(timeout=defaultTimeout, 
+                                                       parameters=_defaults_params)
 
         self.createWidgets()
         self.createToolbar()

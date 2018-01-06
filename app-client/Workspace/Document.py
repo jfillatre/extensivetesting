@@ -76,7 +76,7 @@ class WDocument(QWidget, Logger.ClassLogger):
             self.filename += str(nonameId)
         else: 
             self.filename = str(filename)
-        #
+
         self.__modify = False
         self.__readOnly = True
         self.__isLocked = isLocked
@@ -169,7 +169,8 @@ class WDocument(QWidget, Logger.ClassLogger):
             self.__modify = True
             self.parent.updateTabTitle(wdoc = self, title = self.getShortName() )
 
-    def getPath (self, absolute = True, withAsterisk = False, withExtension = True, withLocalTag = False):
+    def getPath (self, absolute = True, withAsterisk = False, withExtension = True, 
+                 withLocalTag = False):
         """
         Return the path of the file
 
@@ -182,7 +183,9 @@ class WDocument(QWidget, Logger.ClassLogger):
         @return: 
         @rtype: string
         """
-        fileName = self.getShortName( withAsterisk = withAsterisk, withExtension = withExtension, withLocalTag=withLocalTag)
+        fileName = self.getShortName( withAsterisk = withAsterisk, 
+                                      withExtension = withExtension, 
+                                      withLocalTag=withLocalTag)
         if absolute: 
             root = self.path
         else:
@@ -196,7 +199,8 @@ class WDocument(QWidget, Logger.ClassLogger):
             path = r'%s' % fileName
         return path
 
-    def getShortName (self, withAsterisk = True, withExtension = False, withLocalTag=True):
+    def getShortName (self, withAsterisk = True, withExtension = False, 
+                      withLocalTag=True):
         """
         Return the name of the script
 

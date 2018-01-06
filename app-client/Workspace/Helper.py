@@ -71,7 +71,8 @@ class Item(QTreeWidgetItem):
         """
         Constructor
 
-        @param data: {'default-args': [['description', 'None']], 'args': ['expected', 'description'], 'type': 'method', 'name': 'addStep', 'desc': 'todo'}
+        @param data: {'default-args': [['description', 'None']], 'args': ['expected', 'description'], 
+                      'type': 'method', 'name': 'addStep', 'desc': 'todo'}
         @type data:
 
         @param parent: 

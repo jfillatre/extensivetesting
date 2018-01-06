@@ -1214,7 +1214,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         if dConnect.exec_() == QDialog.Accepted:
             retCtx = dConnect.getCtx()
             if retCtx:
-                # started = self.wWebService.startWorking()
                 started = self.RestService.startWorking()
                 addr, login, pwd, supportProxy, addrProxyHttp, portProxyHttp  = retCtx
                 if started:
@@ -1229,7 +1228,6 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                         self.disconnectAction.setEnabled(True)
                         UCI.instance().connectChannel()
                     else:
-                        # self.wWebService.stopWorking()
                         self.RestService.stopWorking()
             else:
                 self.ConnectCancelled.emit()
@@ -1372,21 +1370,9 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
         @param data: 
         @type data:
         """
-        # data_decoded =  self.decodeData(data)
         Settings.instance().setServerContext(data)
         Miscellaneous.instance().cleanContext()
         Miscellaneous.instance().loadData( data = data )
-
-    # def onRefreshArchives(self, data):
-        # """
-        # Refresh data on xml rpc call, deprecated
-
-        # @param data: 
-        # @type data:     
-        # """
-        # Archives.instance().cleanTreeView()
-        # rootItem = Archives.instance().createRootItem()
-        # Archives.instance().loadData( data = self.decodeData(data), parent=rootItem )
 
     def onRefreshResults(self, listing):
         """

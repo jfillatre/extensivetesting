@@ -73,8 +73,7 @@ class RepoPublic(RepoManager.RepoManager, Logger.ClassLogger):
             else:
                 listing.extend( self.__getBasicListing(testPath=entry.path, initialPath=initialPath) )
         return listing
-        
-###############################
+
 RepoPublicMng = None
 def instance ():
     """

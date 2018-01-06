@@ -540,23 +540,30 @@ class PyEditor(QsciScintilla, Logger.ClassLogger):
         self.undoAction = QtHelper.createAction(self, "Undo", callback = self.undo, icon = QIcon(":/undo.png"),
                                                 shortcut = "Ctrl+Z", tip = 'Undoes the last action' )
         self.redoAction = QtHelper.createAction(self, "Redo", callback = self.redo,  icon = QIcon(":/redo.png"),
-                                                shortcut = "Ctrl+Y", tip = 'Redoes the previously undone action' )
+                                                shortcut = "Ctrl+Y", 
+                                                tip = 'Redoes the previously undone action' )
         self.cutAction = QtHelper.createAction(self, "Cut", callback = self.cut, shortcut = QKeySequence.Cut,
-                                                icon = QIcon(":/cut.png"), tip = 'Cuts the selection and puts it on the clipboard' )
+                                                icon = QIcon(":/cut.png"), 
+                                                tip = 'Cuts the selection and puts it on the clipboard' )
         self.copyAction = QtHelper.createAction(self, "Copy", callback = self.copy,  shortcut = QKeySequence.Copy,
-                                                icon = QIcon(":/copy.png"), tip = 'Copies the selection and puts it on the clipboard' )
+                                                icon = QIcon(":/copy.png"), 
+                                                tip = 'Copies the selection and puts it on the clipboard' )
         self.pasteAction = QtHelper.createAction(self, "Paste", callback = self.paste,  shortcut = QKeySequence.Paste,
-                                                icon = QIcon(":/paste.png"), tip = 'Inserts clipboard contents' )
+                                                icon = QIcon(":/paste.png"), 
+                                                tip = 'Inserts clipboard contents' )
 
         self.deleteAction = QtHelper.createAction( self, "Delete Selection", callback = self.removeSelectedText,
                                                 tip = 'Deletes the selection' )
         self.commentAction = QtHelper.createAction(self, "Comment", callback = self.comment,
-                                                icon = QIcon(":/comment.png"), tip = 'Insert comment sign at the begining of line' )
+                                                icon = QIcon(":/comment.png"), 
+                                                tip = 'Insert comment sign at the begining of line' )
         self.uncommentAction = QtHelper.createAction(self, "Uncomment", callback = self.uncomment,
-                                                icon = QIcon(":/uncomment.png"), tip = 'Remove comment sign at the begining of line' )
+                                                icon = QIcon(":/uncomment.png"), 
+                                                tip = 'Remove comment sign at the begining of line' )
         
         self.foldAllAction = QtHelper.createAction( self, "Fold\nUnfold", callback = self.foldAllLines,
-                                                icon = QIcon(":/folding.png"), tip = 'Fold/Unfold all lines' )
+                                                icon = QIcon(":/folding.png"), 
+                                                tip = 'Fold/Unfold all lines' )
     
     def setupContextMenu (self):
         """
@@ -979,12 +986,15 @@ class FindReplace(QWidget):
          * Next
          * Replace
         """
-        self.previousButton = QtHelper.createButton(self, text= self.tr("Find Previous"),  triggered=self.findPrevious,
-            icon=QIcon(":/find_previous.png") )
-        self.nextButton = QtHelper.createButton(self, text=self.tr("Find Next"), triggered=self.findNext,
-            icon=QIcon(":/find_next.png") )
-        self.replaceButton = QtHelper.createButton(self,  text=self.tr("Replace..."), triggered=self.replaceFind, 
-            icon=QIcon(":/replace.png") )
+        self.previousButton = QtHelper.createButton(self, text= self.tr("Find Previous"),  
+                                                    triggered=self.findPrevious,
+                                                    icon=QIcon(":/find_previous.png") )
+        self.nextButton = QtHelper.createButton(self, text=self.tr("Find Next"), 
+                                                    triggered=self.findNext,
+                                                    icon=QIcon(":/find_next.png") )
+        self.replaceButton = QtHelper.createButton(self,  text=self.tr("Replace..."), 
+                                                    triggered=self.replaceFind, 
+                                                    icon=QIcon(":/replace.png") )
 
     def createWidgets (self):
         """
@@ -999,10 +1009,7 @@ class FindReplace(QWidget):
              QLabel: QLineEdit QButton QCheckBox |
         ....--------------------------------------
         """
-        # self.setFocusPolicy( Qt.StrongFocus )
-        
         glayout = QGridLayout()
-        # glayout.setContentsMargins(0, 0, 0, 0)
 
         self.edit = QLineEditMore(parent=self)
         self.edit.setEditable(1)
@@ -1017,45 +1024,37 @@ class FindReplace(QWidget):
         self.replaceEdit.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )
         self.replaceEdit.lineEdit().setPlaceholderText("Replace the text with?")
         self.replaceEdit.setMinimumWidth(200)
-        
-        # self.line = QFrame()
-        # self.line.setGeometry( QRect(110, 221, 51, 20) )
-        # self.line.setFrameShape( QFrame.VLine )
-        # self.line.setFrameShadow( QFrame.Sunken )
 
         self.caseCheck = QCheckBox( self.tr("Case Sensitive") )
         self.caseCheck.setChecked( 
-                                       QtHelper.str2bool( 
-                                                            Settings.instance().readValue( key = 'Editor/find-case-sensitive' )
-                                                         )
-                                      )
+                                    QtHelper.str2bool( 
+                                                Settings.instance().readValue( key = 'Editor/find-case-sensitive' )
+                                                 )
+                                  )
         self.caseWordCheck = QCheckBox( self.tr("Whole word only") )
         self.caseWordCheck.setChecked( 
                                        QtHelper.str2bool( 
-                                                            Settings.instance().readValue( key = 'Editor/find-whole-word' )
+                                                        Settings.instance().readValue( key = 'Editor/find-whole-word' )
                                                          )
                                       )
         self.allCheck = QCheckBox(  self.tr("All occurences") )
         self.allCheck.setChecked( 
                                        QtHelper.str2bool( 
-                                                            Settings.instance().readValue( key = 'Editor/replace-all' )
+                                                        Settings.instance().readValue( key = 'Editor/replace-all' )
                                                          )
                                       )
         self.caseRegexpCheck = QCheckBox(  self.tr("Regular expression") )
         self.caseRegexpCheck.setChecked( 
                                        QtHelper.str2bool( 
-                                                            Settings.instance().readValue( key = 'Editor/find-regexp' )
+                                                        Settings.instance().readValue( key = 'Editor/find-regexp' )
                                                          )
                                       )
         self.caseWrapCheck = QCheckBox(  self.tr("Wrap at the end") )
         self.caseWrapCheck.setChecked( 
                                        QtHelper.str2bool( 
-                                                            Settings.instance().readValue( key = 'Editor/find-wrap' )
+                                                        Settings.instance().readValue( key = 'Editor/find-wrap' )
                                                          )
                                       )
-        # hlayout = QHBoxLayout()
-        # hlayout.addWidget(self.allCheck)
-        # hlayout.addWidget(self.line)
 
         glayout.addWidget( self.edit, 0, 1 )
         glayout.addWidget( self.nextButton, 0, 3 )
@@ -1077,10 +1076,8 @@ class FindReplace(QWidget):
         flags = Qt.WindowFlags()
         flags |= Qt.Window
         flags |= Qt.WindowTitleHint
-        # flags |= Qt.WindowStaysOnTopHint
         flags |= Qt.WindowCloseButtonHint
         flags |= Qt.MSWindowsFixedSizeDialogHint
-        # flags |= Qt.CustomizeWindowHint
         self.setWindowFlags(flags)
 
         self.setWindowIcon( QIcon(":/main.png") )
@@ -1101,20 +1098,6 @@ class FindReplace(QWidget):
         """
         self.findNext()
 
-    # def focusOutEvent (self, event):
-        # """
-        # Set the windows opacity to 0.5 on lost focus
-        # """
-        # self.setWindowOpacity(0.5)
-        # QWidget.focusOutEvent(self, event)
-        
-    # def focusInEvent (self, event):
-        # """
-        # Set the windows opacity to 1 on focus
-        # """
-        # self.setWindowOpacity(1)
-        # QWidget.focusInEvent(self, event)
-        
     def setEditor(self, editor):
         """
         Set the target to find the text

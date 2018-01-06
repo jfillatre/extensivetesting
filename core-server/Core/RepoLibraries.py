@@ -790,8 +790,7 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         sys.stdout.flush()
         
         return ret
-        
-###############################
+
 RA = None
 def instance ():
     """

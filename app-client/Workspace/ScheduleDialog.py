@@ -959,8 +959,10 @@ class SchedDialog(QtHelper.EnhancedQDialog):
         self.cancelButton.clicked.connect(self.reject)
         self.groupRadio.buttonClicked.connect(self.changePage)
         
-    def fillFields(self, schedType, schedArgs, taskName, taskId, schedNb, withoutProbes, enabled=True,
-                    noKeepTr=False, withoutNotifs=False, schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0) ):
+    def fillFields(self, schedType, schedArgs, taskName, 
+                    taskId, schedNb, withoutProbes, enabled=True,
+                    noKeepTr=False, withoutNotifs=False, 
+                    schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0) ):
         """
         Fill fields
         """
@@ -1350,9 +1352,11 @@ class SchedDialogV1(QtHelper.EnhancedQDialog):
         if toggled:
             self.configBox.setChecked(False)
 
-    def fillFields(self, schedType, schedArgs, taskName, taskId, schedNb, 
-                        withoutProbes, enabled=True, noKeepTr=False, withoutNotifs=False, 
-                        schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0) ):
+    def fillFields(self, schedType, schedArgs, 
+                    taskName, taskId, schedNb, 
+                    withoutProbes, enabled=True, 
+                    noKeepTr=False, withoutNotifs=False, 
+                    schedFrom=(0,0,0,0,0,0), schedTo=(0,0,0,0,0,0) ):
         """
         Fill fields
         """

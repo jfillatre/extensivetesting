@@ -555,7 +555,10 @@ class TextualView2(QWidget):
                 color = event['color']
             else:
                 color = "#000000"
-            self.parent.graphView.addStep(text=msg, color=color, width=w, height=h, data=event['short-msg'], timestamp=event['timestamp'])
+            self.parent.graphView.addStep(text=msg, color=color, 
+                                          width=w, height=h, 
+                                          data=event['short-msg'], 
+                                          timestamp=event['timestamp'])
 
         if event['level'] in 'step-started':
             h = 40; w = 400;
@@ -563,8 +566,11 @@ class TextualView2(QWidget):
             stepMsg = event['short-msg']
             if len(stepMsg) > 50:
                 stepMsg = "%s..." % stepMsg[:50]
-            blockItem = self.parent.graphView.addStep(text="%s: %s" % (stepName,stepMsg), color=event['color'], 
-                                                        width=w, height=h, data=event['data-msg'], timestamp=event['timestamp'])
+            blockItem = self.parent.graphView.addStep(text="%s: %s" % (stepName,stepMsg), 
+                                                      color=event['color'], 
+                                                      width=w, height=h, 
+                                                      data=event['data-msg'], 
+                                                      timestamp=event['timestamp'])
             self.steps[event['from-component']] = blockItem
 
         # update the graph

@@ -151,13 +151,15 @@ class AgentsManager(Logger.ClassLogger):
 
                 # notify all admin and tester
                 notif = ( 'agents-default', ( 'del', self.getDefaultAgents() ) )
-                ESI.instance().notifyByUserTypes(body = notif, admin=True, leader=False, tester=True, developer=False)
+                ESI.instance().notifyByUserTypes(body = notif, admin=True, leader=False, 
+                                                 tester=True, developer=False)
 
                 runningAgent = ASI.instance().getAgent(aname=aName)
                 if runningAgent is not None:
                     runningAgent['auto-startup'] = False
                 notif2 = ( 'agents', ( 'del', ASI.instance().getAgents() ) )
-                ESI.instance().notifyByUserTypes(body = notif2, admin=True, leader=False, tester=True, developer=False)
+                ESI.instance().notifyByUserTypes(body = notif2, admin=True, leader=False, 
+                                                 tester=True, developer=False)
 
 
                 # return OK
@@ -321,7 +323,6 @@ class AgentsManager(Logger.ClassLogger):
         """
         Logger.ClassLogger.trace(self, txt="ATM - %s" % txt)
 
-###############################
 AM = None
 def instance ():
     """
