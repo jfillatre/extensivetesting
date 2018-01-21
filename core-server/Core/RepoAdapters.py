@@ -217,7 +217,7 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
             self.error('unable to set the generic adapter: %s' % e)
         return ret
         
-    def getDefaultV2(self):
+    def getDefault(self):
         """
         Return the default adapters package
         """
@@ -442,15 +442,14 @@ class RepoAdapters(RepoManager.RepoManager, Logger.ClassLogger):
         @rtype: 
         """
         _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
-                                                         extensionsSupported=[RepoManager.ZIP_EXT])
+                                                  extensionsSupported=[RepoManager.ZIP_EXT])
         return backups
 
     def getTree(self, b64=False):
         """
         Get tree folders
         """
-        nb_adps, nb_adps_f, adps, stats =self.getListingFilesV2(path=self.testsPath)
-        return nb_adps, nb_adps_f, adps, stats
+        return self.getListingFilesV2(path=self.testsPath)
 
     def getLastBackupIndex(self, pathBackups ):
         """

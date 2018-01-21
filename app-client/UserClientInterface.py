@@ -101,17 +101,17 @@ CODE_OK                     = 200
 
 ############## USERS TYPE ##############
 RIGHTS_ADMIN                =   "Administrator"
-RIGHTS_USER                 =   "Tester"
-RIGHTS_DEVELOPER            =   "Developer"
-RIGHTS_MANAGER              =   "Leader"
-RIGHTS_LEADER               =   RIGHTS_MANAGER
-RIGHTS_TESTER               =   RIGHTS_USER
+RIGHTS_TESTER               =   "Tester"
+# RIGHTS_DEVELOPER            =   "Developer"
+RIGHTS_MONITOR              =   "Monitor"
+# RIGHTS_LEADER               =   RIGHTS_MANAGER
+# RIGHTS_TESTER               =   RIGHTS_USER
 
 RIGHTS_USER_LIST            =  [ 
                                     RIGHTS_ADMIN, 
-                                    RIGHTS_LEADER,
+                                    RIGHTS_MONITOR,
                                     RIGHTS_TESTER,
-                                    RIGHTS_DEVELOPER
+                                    # RIGHTS_DEVELOPER
                                 ]
 
 ############## SCHEDULATION TYPE ##############

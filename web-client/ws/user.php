@@ -19,29 +19,6 @@
 	if (!defined('WS_OK'))
 		exit( 'access denied' );
 
-	// function licencereached($level, $uid=null) {
-		// global $db, $CORE, $__LWF_DB_PREFIX;
-		// $sql_req = 'SELECT count(*) as nb FROM `'.$__LWF_DB_PREFIX.'-users` WHERE '.$level.'=1';
-		// if ( $uid != null) {
-			// $sql_req .= ' AND id <> \''.$uid.'\';';
-		// }
-		// $sql_req .= ';';
-		// $rslt = $db->query( $sql_req ) ;
-		// if ( !$rslt ) 
-		// {
-			// return -1;
-		// } else {
-			// $cur_u = $db->fetch_assoc($rslt);
-			// if ( $CORE->license['users'][$level] == 'UNLIMITED' ) {
-				// return false;
-			// }
-			// if ( $cur_u['nb'] >= $CORE->license['users'][$level] ){
-				// return true;
-			// }
-		// }
-		// return false;
-	// }
-
 	function changenotfisuser( $uid, $notifications ) {
 		global $db, $CORE, $__LWF_DB_PREFIX;
 		$rsp = array();
@@ -229,15 +206,6 @@
 	
 		$redirect_page_url = "./index.php?p=".get_pindex('administration')."&s=".get_subpindex( 'administration', 'admin-users' );
 
-		// not possible to disable default users
-		//if ( $uid <= 6)  
-		//{
-		//	$rsp["code"] = 603;
-		//	$rsp["msg"] = lang('common-not-authorized');
-		//	$rsp["moveto"] = $redirect_page_url;
-		//	return $rsp;
-		//}
-
 		// check uid
 		$user = getuserbyid($uid);
 		if ( $user == null || $user == false)
@@ -382,7 +350,7 @@
 		return $rsp;
     }
     
-	function adduser( $login, $password, $email, $admin, $leader, $tester, $developer, $lang, $style, $notifications, $projects, $defaultproject, $cli, $gui, $web ) {
+	function adduser( $login, $password, $email, $admin, $monitor, $tester, $lang, $style, $notifications, $projects, $defaultproject) {
 		global $db, $CORE, $__LWF_CFG, $__LWF_DB_PREFIX;
 		$rsp = array();
 		$rsp["code"] = 100;
@@ -441,14 +409,6 @@
 		}
 
 
-		// check the license
-		// $CORE->read_license();
-		// if ( $CORE->license == null ) {
-			// $rsp["code"] = 603;
-			// $rsp["msg"] = $CORE->license_error;
-			// return $rsp;
-		// } 
-
         // set default values
         if ( !strbool2int($admin) and !strbool2int($leader) and !strbool2int($tester) and !strbool2int($developer) ) {
             $tester = "true";
@@ -457,58 +417,6 @@
             $gui = "true";
             $web = "true";
         }
-        
-		// if ( strbool2int($admin) ) {
-			// $reached = licencereached($level="administrator");
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count administrator users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for administrator';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($leader) ) {
-			// $reached = licencereached($level="leader");
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count leader users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for leader';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($tester) ) {
-			// $reached = licencereached($level="tester");
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count tester users");
-				// return $rsp;
-			// } elseif ($reached == true) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for tester';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($developer) ) {
-			// $reached = licencereached($level="developer");
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count developer users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for developer';
-				// return $rsp;
-			// }
-		// }
 
 		// notifications
 		$regex = '/^(((true)|(false));){7}/'; 
@@ -523,9 +431,14 @@
 		$default = 0;
 		$online = 0;
 		$system = 0;
+        $developer = 0;
+        $system = 0;
+        $cli = 1;
+        $gui = 1;
+        $web = 1;
 		$pwd_sha = sha1($__LWF_CFG['misc-salt'].sha1($password));
 
-		$sql_req = 'INSERT INTO `'.$__LWF_DB_PREFIX.'-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`) VALUES(\''.mysql_real_escape_string($login).'\',\''.$pwd_sha.'\',\''.strbool2int($admin).'\',\''.strbool2int($leader).'\',\''.strbool2int($tester).'\',\''.strbool2int($developer).'\',\''.$system.'\',\''.mysql_real_escape_string($email).'\',\''.$lang.'\',\''.$style.'\',\''.$active.'\',\''.$default.'\',\''.$online.'\',\''.$notifications.'\',\''.$defaultproject.'\',\''.strbool2int($cli).'\',\''.strbool2int($gui).'\',\''.strbool2int($web).'\');';
+		$sql_req = 'INSERT INTO `'.$__LWF_DB_PREFIX.'-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`) VALUES(\''.mysql_real_escape_string($login).'\',\''.$pwd_sha.'\',\''.strbool2int($admin).'\',\''.strbool2int($monitor).'\',\''.strbool2int($tester).'\',\''.$developer.'\',\''.$system.'\',\''.mysql_real_escape_string($email).'\',\''.$lang.'\',\''.$style.'\',\''.$active.'\',\''.$default.'\',\''.$online.'\',\''.$notifications.'\',\''.$defaultproject.'\',\''.$cli.'\',\''.$gui.'\',\''.$web.'\');';
 
 		$rslt = $db->query( $sql_req );
 		if ( !$rslt ) 
@@ -568,7 +481,7 @@
 		return $rsp;
 	}
 
-	function updateuser( $login, $email, $admin, $leader, $tester, $developer, $lang, $style, $notifications, $projects, $defaultproject, $uid, $cli, $gui, $web ) {
+	function updateuser( $login, $email, $admin, $monitor, $tester, $lang, $style, $notifications, $projects, $defaultproject, $uid) {
 		global $db, $CORE, $__LWF_DB_PREFIX;
 		$rsp = array();
 		$rsp["code"] = 100;
@@ -634,67 +547,6 @@
 			return $rsp;
 		}
 
-		// check the license
-		// $CORE->read_license();
-		// if ( $CORE->license == null ) {
-			// $rsp["code"] = 603;
-			// $rsp["msg"] = $CORE->license_error;
-			// return $rsp;
-		// } 
-
-		// if ( strbool2int($admin) ) {
-			// $reached = licencereached($level="administrator", $uid=$uid);
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count administrator users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for administrator';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($leader) ) {
-			// $reached = licencereached($level="leader", $uid=$uid);
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count leader users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for leader';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($tester) ) {
-			// $reached = licencereached($level="tester", $uid=$uid);
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count tester users");
-				// return $rsp;
-			// } elseif ($reached == true) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for tester';
-				// return $rsp;
-			// }
-		// }
-
-		// if ( strbool2int($developer) ) {
-			// $reached = licencereached($level="developer", $uid=$uid);
-			// if ( $reached === -1) {
-				// $rsp["code"] = 500;
-				// $rsp["msg"] = $db->str_error("Unable to count developer users");
-				// return $rsp;
-			// } elseif ($reached) {
-				// $rsp["code"] = 603;
-				// $rsp["msg"] = 'The license limit is reached for developer';
-				// return $rsp;
-			// }
-		// }
-
-
 		// notifications
 		$regex = '/^(((true)|(false));){7}/'; 
 		if ( !preg_match($regex, $notifications) ) {
@@ -705,7 +557,7 @@
 
 		// not possible to change group id for the default users
 		if ( $uid >= 6 )
-			$sql_req = 'UPDATE `'.$__LWF_DB_PREFIX.'-users` SET  login=\''.mysql_real_escape_string($login).'\', administrator=\''.strbool2int($admin).'\', leader=\''.strbool2int($leader).'\', tester=\''.strbool2int($tester).'\', developer=\''.strbool2int($developer).'\', email=\''.mysql_real_escape_string($email).'\', lang=\''.$lang.'\', style=\''.$style.'\', notifications=\''.$notifications.'\', defaultproject=\''.$defaultproject.'\', cli=\''.strbool2int($cli).'\', gui=\''.strbool2int($gui).'\', web=\''.strbool2int($web).'\' WHERE id=\''.$uid.'\';';
+			$sql_req = 'UPDATE `'.$__LWF_DB_PREFIX.'-users` SET  login=\''.mysql_real_escape_string($login).'\', administrator=\''.strbool2int($admin).'\', leader=\''.strbool2int($monitor).'\', tester=\''.strbool2int($tester).'\', email=\''.mysql_real_escape_string($email).'\', lang=\''.$lang.'\', style=\''.$style.'\', notifications=\''.$notifications.'\', defaultproject=\''.$defaultproject.'\' WHERE id=\''.$uid.'\';';
 		else
 			$sql_req = 'UPDATE `'.$__LWF_DB_PREFIX.'-users` SET email=\''.mysql_real_escape_string($email).'\', lang=\''.$lang.'\', style=\''.$style.'\', notifications=\''.$notifications.'\', defaultproject=\''.$defaultproject.'\' WHERE id=\''.$uid.'\';';
 		$rslt = $db->query( $sql_req ) ;

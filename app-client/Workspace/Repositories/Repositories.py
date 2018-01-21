@@ -314,98 +314,98 @@ class WRepositories(QWidget, Logger.ClassLogger):
         """
         self.mainTab.setEnabled(True)
         self.labelHelp.setEnabled(True)
-        if UCI.RIGHTS_TESTER in RCI.instance().userRights:
-            self.remoteRepository.setConnected() 
-            self.remoteRepository.setEnabled(True)
-            self.localRepository.setEnabled(True)
+        # if UCI.RIGHTS_TESTER in RCI.instance().userRights:
+            # self.remoteRepository.setConnected() 
+            # self.remoteRepository.setEnabled(True)
+            # self.localRepository.setEnabled(True)
             
-            self.testsTab.setTabEnabled( TAB_REMOTE_POS, True )
-            if self.localConfigured != "Undefined":
-                self.testsTab.setTabEnabled( TAB_LOCAL_POS, True )
-            else:
-                self.testsTab.setTabEnabled( TAB_LOCAL_POS, False )
-            self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, False )
-            self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, False )
+            # self.testsTab.setTabEnabled( TAB_REMOTE_POS, True )
+            # if self.localConfigured != "Undefined":
+                # self.testsTab.setTabEnabled( TAB_LOCAL_POS, True )
+            # else:
+                # self.testsTab.setTabEnabled( TAB_LOCAL_POS, False )
+            # self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, False )
+            # self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, False )
  
-            defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
-            if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
-                self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
-                self.testsTab.setCurrentIndex(int(defaultTab))   
-            else:
-                self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
-                self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
+            # defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
+            # if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
+                # self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
+                # self.testsTab.setCurrentIndex(int(defaultTab))   
+            # else:
+                # self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
+                # self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
             
-            self.remoteRepository.defaultActions()
-            self.remoteRepository.initialize(listing= data['repo']  )
-            self.remoteRepository.initializeProjects( projects=data['projects'], 
-                                                      defaultProject=data['default-project'] )
+            # self.remoteRepository.defaultActions()
+            # self.remoteRepository.initialize(listing= data['repo']  )
+            # self.remoteRepository.initializeProjects( projects=data['projects'], 
+                                                      # defaultProject=data['default-project'] )
         
-        if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
-            self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, True )
+        # if UCI.RIGHTS_TESTER in RCI.instance().userRights:
+            # self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
+            # self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, True )
 
-            if UCI.RIGHTS_TESTER in RCI.instance().userRights: # exception if the developer if also a tester
-                defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
-                if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
-                    self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
-                    self.testsTab.setCurrentIndex(int(defaultTab))   
-                else:
-                    self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
-                    self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
-            else:
-                defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-dev' )
-                if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
-                    self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
-                    self.testsTab.setCurrentIndex(int(defaultTab))   
-                else:
-                    self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
-                    self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
+            # if UCI.RIGHTS_TESTER in RCI.instance().userRights: # exception if the developer if also a tester
+            # defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
+            # if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
+                # self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
+                # self.testsTab.setCurrentIndex(int(defaultTab))   
+            # else:
+                # self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
+                # self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
+            # else:
+                # defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-dev' )
+                # if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
+                    # self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
+                    # self.testsTab.setCurrentIndex(int(defaultTab))   
+                # else:
+                    # self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
+                    # self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
                     
-            self.adaptersRemoteRepository.setConnected() 
-            self.adaptersRemoteRepository.setEnabled(True)
-            self.adaptersRemoteRepository.defaultActions()
-            self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
+            # self.adaptersRemoteRepository.setConnected() 
+            # self.adaptersRemoteRepository.setEnabled(True)
+            # self.adaptersRemoteRepository.defaultActions()
+            # self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
 
-            self.librariesRemoteRepository.setConnected() 
-            self.librariesRemoteRepository.setEnabled(True)
-            self.librariesRemoteRepository.defaultActions()
-            self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
+            # self.librariesRemoteRepository.setConnected() 
+            # self.librariesRemoteRepository.setEnabled(True)
+            # self.librariesRemoteRepository.defaultActions()
+            # self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
 
-        if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
-            self.remoteRepository.setConnected() 
-            self.remoteRepository.setEnabled(True)
-            self.localRepository.setEnabled(True)
+        # if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
+        self.remoteRepository.setConnected() 
+        self.remoteRepository.setEnabled(True)
+        self.localRepository.setEnabled(True)
 
-            self.testsTab.setTabEnabled( TAB_REMOTE_POS, True )
-            if self.localConfigured != "Undefined":
-                self.testsTab.setTabEnabled( TAB_LOCAL_POS, True )
-            else:
-                self.testsTab.setTabEnabled( TAB_LOCAL_POS, False )
-            self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
-            self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, True )
-  
-            defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
-            if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
-                self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
-                self.testsTab.setCurrentIndex(int(defaultTab))   
-            else:
-                self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
-                self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
-                    
-            self.remoteRepository.defaultActions()
-            if self.remoteRepository.initializeProjects( projects=data['projects'], 
-                                                         defaultProject=data['default-project']  ) :
-                self.remoteRepository.initialize(listing= data['repo'])
+        self.testsTab.setTabEnabled( TAB_REMOTE_POS, True )
+        if self.localConfigured != "Undefined":
+            self.testsTab.setTabEnabled( TAB_LOCAL_POS, True )
+        else:
+            self.testsTab.setTabEnabled( TAB_LOCAL_POS, False )
+        self.connectorsTab.setTabEnabled( TAB_ADAPTER_POS, True )
+        self.connectorsTab.setTabEnabled( TAB_LIBRARY_POS, True )
 
-            self.adaptersRemoteRepository.setConnected() 
-            self.adaptersRemoteRepository.setEnabled(True)
-            self.adaptersRemoteRepository.defaultActions()
-            self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
+        defaultTab = Settings.instance().readValue( key = 'Repositories/default-repo-test' )
+        if int(defaultTab) == TAB_LOCAL_POS or int(defaultTab) == TAB_REMOTE_POS:
+            self.mainTab.setCurrentIndex(MAIN_TAB_TEST)  
+            self.testsTab.setCurrentIndex(int(defaultTab))   
+        else:
+            self.mainTab.setCurrentIndex(MAIN_TAB_DEV)  
+            self.connectorsTab.setCurrentIndex(int(defaultTab)-2)   
+                
+        self.remoteRepository.defaultActions()
+        if self.remoteRepository.initializeProjects( projects=data['projects'], 
+                                                     defaultProject=data['default-project']  ) :
+            self.remoteRepository.initialize(listing= data['repo'])
 
-            self.librariesRemoteRepository.setConnected() 
-            self.librariesRemoteRepository.setEnabled(True)
-            self.librariesRemoteRepository.defaultActions()
-            self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
+        self.adaptersRemoteRepository.setConnected() 
+        self.adaptersRemoteRepository.setEnabled(True)
+        self.adaptersRemoteRepository.defaultActions()
+        self.adaptersRemoteRepository.initialize(listing=data['repo-adp'] )
+
+        self.librariesRemoteRepository.setConnected() 
+        self.librariesRemoteRepository.setEnabled(True)
+        self.librariesRemoteRepository.defaultActions()
+        self.librariesRemoteRepository.initialize( listing=data['repo-lib-adp'] )
 
     def onResetRemote(self):
         """

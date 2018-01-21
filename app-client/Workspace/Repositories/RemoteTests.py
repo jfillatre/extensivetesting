@@ -214,8 +214,8 @@ class Repository(RemoteRepository.Repository):
         if UCI.RIGHTS_ADMIN in RCI.instance().userRights:
             self.createSamplesAction.setEnabled(True)
 
-        if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            self.createSamplesAction.setEnabled(True)
+        # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+            # self.createSamplesAction.setEnabled(True)
 
         RemoteRepository.Repository.initialize(self, listing)
 

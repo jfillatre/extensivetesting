@@ -224,7 +224,7 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
             self.error('unable to set the generic library: %s' % e)
         return ret
         
-    def getDefaultV2(self):
+    def getDefault(self):
         """
         Return the default libraries package
         """
@@ -414,7 +414,7 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         @rtype: 
         """
         _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
-                                                         extensionsSupported=[RepoManager.ZIP_EXT])
+                                                  extensionsSupported=[RepoManager.ZIP_EXT])
 
         return backups
 
@@ -422,8 +422,7 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         """
         Return a tree of files 
         """
-        nb_libs, nb_libs_f, libs_ret, stats  = self.getListingFilesV2(path=self.testsPath)
-        return nb_libs, nb_libs_f, libs_ret, stats
+        return self.getListingFilesV2(path=self.testsPath)
 
     def getLastBackupIndex(self, pathBackups ):
         """

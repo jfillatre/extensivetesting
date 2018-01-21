@@ -635,10 +635,14 @@ class WelcomePage(QWidget):
             self.captureLink.setEnabled(True)
             self.captureWebLink.setEnabled(True)
             self.captureMobileLink.setEnabled(True)
+            self.basicLink.setEnabled(True)
+            self.sysLink.setEnabled(True)
         else:
             self.captureLink.setEnabled(False)
             self.captureWebLink.setEnabled(False)
             self.captureMobileLink.setEnabled(False)
+            self.basicLink.setEnabled(False)
+            self.sysLink.setEnabled(False)
             
     def updateConnectLink(self, connected=False):
         """
@@ -657,8 +661,8 @@ class WelcomePage(QWidget):
             self.connectLink.setTextDescription("Disconnection from the test center")
             self.connectLink.setIcon(QPixmap(":/disconnect.png") )
             self.captureFrame.setEnabled(True)
-            if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-                self.devFrame.setEnabled(True)
+            # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+                # self.devFrame.setEnabled(True)
         else:
             self.filesFrame.setEnabled(False)
             self.captureFrame.setEnabled(False)

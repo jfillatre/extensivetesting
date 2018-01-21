@@ -28,7 +28,6 @@ import zlib
 import json
 import shutil
 import time
-import scandir
 import hashlib
 import re
 try:
@@ -155,7 +154,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         @rtype: list
         """
         _, _, backups, _ = self.getListingFilesV2(path=self.destBackup, 
-                                                         extensionsSupported=[RepoManager.ZIP_EXT])
+                                                  extensionsSupported=[RepoManager.ZIP_EXT])
         return backups
 
     def getTree(self, b64=False, fullTree=False, project=1):
@@ -164,21 +163,16 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         """
         nb = Settings.getInt( 'WebServices', 'nb-archives' )
         if nb == -1: nb=None
-        if nb == 0:
-            return 0, 0, ''
+        if nb == 0: return (0, 0, [])
 
-        if fullTree:
-            nb=None
-        # archs_ret = []
-        stats = {}
-        res = os.path.exists( "%s/%s" % (self.testsPath, project) )
-        if not res:
-            nb_archs, nb_archs_f, archs = (0, 0, [])
+        if fullTree: nb=None
+            
+        success = os.path.exists( "%s/%s" % (self.testsPath, project) )
+        if not success:
+            return (0, 0, [])
         else:
-            nb_archs, nb_archs_f, archs, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, project),
-                                                                        nbDirs=nb, project=project, archiveMode=True)
-
-        return nb_archs, nb_archs_f, archs, stats
+            return self.getListingFilesV2(path="%s/%s" % (self.testsPath, project),
+                                          nbDirs=nb, project=project, archiveMode=True)
 
     def getLastEventIndex(self, pathEvents ):
         """
@@ -255,7 +249,10 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
                 backupSize = os.path.getsize( "%s/%s.zip" % (self.destBackup, backupFilename) )
                 notif = {}
                 notif['repo-archives'] = {}
-                notif['repo-archives']['backup'] = {'name': backupName, 'date': backupDate, 'size': backupSize, 'fullname': "%s.zip" % backupFilename }
+                notif['repo-archives']['backup'] = {'name': backupName, 
+                                                    'date': backupDate, 
+                                                    'size': backupSize, 
+                                                    'fullname': "%s.zip" % backupFilename }
                 data = ( 'archives', ( 'add-backup' , notif) )  
                 ESI.instance().notifyAllAdmins(body = data)
             else:
@@ -308,7 +305,8 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
 
     def resetArchives(self, projectId=1):
         """
-        Removes all archives from hard disk, no way to reverse this call
+        Removes all archives from hard disk, 
+        no way to reverse this call
 
         @return: response code
         @rtype: int
@@ -321,15 +319,8 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             # reset the cache
             if projectId in self.cacheUuids:
                 del self.cacheUuids[projectId]
-
-            # update all connected users
-            if ret == self.context.CODE_OK:
-                _, _, backups, _ =self.getListingFilesV2(path="%s/%s/" % (self.testsPath, projectId), 
-                                                                project=projectId )
-                data = ( 'archive', ( 'reset', backups ) )  
-                ESI.instance().notifyAll(body = data)
         except Exception as e:
-            raise Exception( "[resetArchives] %s" % str(e) )
+            self.error( "Unable to reset archives %s" % str(e) )
         return ret
     
     def getLastLogIndex(self, pathZip, projectId=1):
@@ -532,146 +523,6 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             return ( self.context.CODE_ERROR, archivePath )
         return ( self.context.CODE_OK, archivePath  )
 
-    def getTestDesign(self, archivePath, archiveName, returnXml=False, projectId=1):
-        """
-        Returns the test result design
-
-        @type  archivePath:
-        @param archivePath:
-
-        @return: 
-        @rtype: 
-        """
-        designs = ''
-        try:
-            completePath = None
-            for f in os.listdir( "%s/%s/%s" % (self.testsPath,projectId, archivePath) ):
-                if returnXml:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_DESIGN_XML_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-                else:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_DESIGN_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-            if completePath is None:
-                raise Exception('Test result design not found')
-        except Exception as e:
-            self.trace( str(e) )
-            return ( self.context.CODE_NOT_FOUND, designs )
-        else:
-            try:
-                try:
-                    f = open( completePath , 'r'  )
-                    raw_designs = f.read()
-                    f.close()
-                except Exception as e:
-                    raise Exception( "open test result design failed: %s" % str(e) )
-                else:
-                    designs = self.zipb64(data=raw_designs)
-            except Exception as e:
-                self.error( str(e) )
-                return ( self.context.CODE_ERROR, designs )
-        return ( self.context.CODE_OK, designs )
-
-    def getTestReport(self, archivePath, archiveName, returnXml=False, projectId=1):
-        """
-        Returns the test result report
-
-        @type  archivePath:
-        @param archivePath:
-
-        @return: 
-        @rtype: 
-        """
-        reports = ''
-        try:
-            completePath = None
-            for f in os.listdir( "%s/%s/%s" % (self.testsPath,projectId, archivePath) ):
-                if returnXml:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_REPORT_XML_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-                else:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_REPORT_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-            if completePath is None:
-                raise Exception('Test result report not found')
-        except Exception as e:
-            self.trace( str(e) )
-            return ( self.context.CODE_NOT_FOUND, reports )
-        else:
-            try:
-                try:
-                    f = open( completePath , 'r'  )
-                    raw_reports = f.read()
-                    f.close()
-                except Exception as e:
-                    raise Exception( "open test result report failed: %s" % str(e) )
-                else:
-                    reports = self.zipb64(data=raw_reports)
-            except Exception as e:
-                self.error( str(e) )
-                return ( self.context.CODE_ERROR, reports )
-        return ( self.context.CODE_OK, reports )
-
-    def getTestVerdict(self, archivePath, archiveName, returnXml=False, projectId=1):
-        """
-        Returns the test result csv
-
-        @type  archivePath:
-        @param archivePath:
-
-        @return: 
-        @rtype: 
-        """
-        verdict = ''
-        try:
-            completePath = None
-            for f in os.listdir( "%s/%s/%s" % (self.testsPath, projectId, archivePath) ):
-                if returnXml:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_VERDICT_XML_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-                else:
-                    if f.startswith( archiveName ) and f.endswith( RepoManager.TEST_RESULT_VERDICT_EXT ):
-                        completePath = "%s/%s/%s/%s" % (self.testsPath, projectId, archivePath, f) 
-                        break
-            if completePath is None:
-                raise Exception('Test result verdict not found')
-        except Exception as e:
-            self.trace( str(e) )
-            return ( self.context.CODE_NOT_FOUND, verdict )
-        else:
-            try:
-                try:
-                    f = open( completePath , 'r'  )
-                    raw_verdict = f.read()
-                    f.close()
-                except Exception as e:
-                    raise Exception( "open test result verdict failed: %s" % str(e) )
-                else:
-                    verdict = self.zipb64(data=raw_verdict)
-            except Exception as e:
-                self.error( str(e) )
-                return ( self.context.CODE_ERROR, verdict )
-        return ( self.context.CODE_OK, verdict )
-
-    def zipb64(self, data):
-        """
-        """
-        try: 
-            zipped = zlib.compress(data)
-        except Exception as e:
-            raise Exception( "Unable to compress data: %s" % str(e) )
-        else:
-            try: 
-                encoded = base64.b64encode(zipped)
-            except Exception as e:
-                raise Exception( "Unable to encode data in base 64: %s" % str(e) )
-        return encoded
-        
     def createResultLog(self, testsPath, logPath, logName, logData ):
         """
         Create result log
@@ -754,8 +605,6 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
     def cacheUuid(self, taskId, testPath):
         """
         """
-        # self.trace("add in testresult cache TaskId=%s TestPath=%s" % (taskId, testPath) )
-        
         # extract projet
         try:
             if testPath.startswith("/"):

@@ -1069,47 +1069,47 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
             self.disconnectAction.setEnabled(True)
             self.checkUpdateAction.setEnabled(True)
             
-            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights:
+            # if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights:
 
-                TestManager.instance().active()
-                TestManager.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_TESTMGR_POS, True )
-                TestManager.instance().loadProjects( data= data['projects'] )
-                TestManager.instance().loadRunning( data = data['tasks-running'] )
-                TestManager.instance().loadWaiting( data = data['tasks-waiting'] )
-                TestManager.instance().loadHistory( data = data['tasks-history'] )
-                TestManager.instance().loadEnqueued( data = data['tasks-enqueued'] )
+            TestManager.instance().active()
+            TestManager.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_TESTMGR_POS, True )
+            TestManager.instance().loadProjects( data= data['projects'] )
+            TestManager.instance().loadRunning( data = data['tasks-running'] )
+            TestManager.instance().loadWaiting( data = data['tasks-waiting'] )
+            TestManager.instance().loadHistory( data = data['tasks-history'] )
+            TestManager.instance().loadEnqueued( data = data['tasks-enqueued'] )
 
-                Probes.instance().active()
-                Probes.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_PROBES_POS, True )
-                Probes.instance().loadData( data = data['probes-running'],
-                                            dataInstalled=data['probes-installed']
-                                            )
-                Probes.instance().loadDefault( data = data['probes-default'] )
-    
-                Agents.instance().active()
-                Agents.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_AGENTS_POS, True )
-                Agents.instance().loadData( data = data['agents-running'],
-                                            dataInstalled=data['agents-installed']
-                                            )
-                Agents.instance().loadDefault( data = data['agents-default'] )
+            Probes.instance().active()
+            Probes.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_PROBES_POS, True )
+            Probes.instance().loadData( data = data['probes-running'],
+                                        dataInstalled=data['probes-installed']
+                                        )
+            Probes.instance().loadDefault( data = data['probes-default'] )
 
-            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights \
-                  or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
+            Agents.instance().active()
+            Agents.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_AGENTS_POS, True )
+            Agents.instance().loadData( data = data['agents-running'],
+                                        dataInstalled=data['agents-installed']
+                                        )
+            Agents.instance().loadDefault( data = data['agents-default'] )
 
-                Archives.instance().active()
-                Archives.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_ARCHIVES_POS, True )
-                self.serverTab.setCurrentIndex(TAB_ARCHIVES_POS)
-                Archives.instance().cleanTreeView()
-                Repositories.instance().cleanStatsArchives()
-                rootItem = Archives.instance().createRootItem()
-                Archives.instance().loadData( data = data['archives'], 
-                                              parent=rootItem )
-                Archives.instance().initializeProjects( projects=data['projects'], 
-                                                        defaultProject=data['default-project'] )
+            # if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights \
+                  # or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
+
+            Archives.instance().active()
+            Archives.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_ARCHIVES_POS, True )
+            self.serverTab.setCurrentIndex(TAB_ARCHIVES_POS)
+            Archives.instance().cleanTreeView()
+            Repositories.instance().cleanStatsArchives()
+            rootItem = Archives.instance().createRootItem()
+            Archives.instance().loadData( data = data['archives'], 
+                                          parent=rootItem )
+            Archives.instance().initializeProjects( projects=data['projects'], 
+                                                    defaultProject=data['default-project'] )
 
             if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
 
@@ -1134,28 +1134,28 @@ class WServerExplorer(QWidget, Logger.ClassLogger):
                 Repositories.instance().loadDataArchives( data = data['stats-repo-archives'],
                                                             backups=data['backups-repo-archives'] )
                 
-            if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or \
-                UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
+            # if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_TESTER in RCI.instance().userRights or \
+                # UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or  UCI.RIGHTS_LEADER in RCI.instance().userRights:
 
-                Settings.instance().setServerContext( data['informations'] )
-                ReleaseNotes.instance().active()
-                ReleaseNotes.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_RN_POS, True )
-                if len(RCI.instance().userRights) == 1 and RCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
-                    self.serverTab.setCurrentIndex(TAB_RN_POS)
+            Settings.instance().setServerContext( data['informations'] )
+            ReleaseNotes.instance().active()
+            ReleaseNotes.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_RN_POS, True )
+            # if len(RCI.instance().userRights) == 1 and RCI.instance().userRights[0] == UCI.RIGHTS_DEVELOPER:
+                # self.serverTab.setCurrentIndex(TAB_RN_POS)
 
-                ReleaseNotes.instance().loadData(   data = data['core'], 
-                                                    dataAdp = data['adapters'],
-                                                    dataLibAdp=data['libraries'], 
-                                                    dataToolbox=data['toolbox']  )
+            ReleaseNotes.instance().loadData(   data = data['core'], 
+                                                dataAdp = data['adapters'],
+                                                dataLibAdp=data['libraries'], 
+                                                dataToolbox=data['toolbox']  )
 
-                Counters.instance().active()
-                Counters.instance().setEnabled(True)
-                self.serverTab.setTabEnabled( TAB_CT_POS, True )
+            Counters.instance().active()
+            Counters.instance().setEnabled(True)
+            self.serverTab.setTabEnabled( TAB_CT_POS, True )
 
-                Counters.instance().loadData(counters=data['stats'] )
-            
-            if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+            Counters.instance().loadData(counters=data['stats'] )
+        
+            if UCI.RIGHTS_TESTER in RCI.instance().userRights:
                 Counters.instance().deactivate()
             else:
                 Counters.instance().active()

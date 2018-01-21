@@ -22,6 +22,10 @@
 		18. (minor) xtcpyrc-3.0.tar.gz removed from the project, no more development on it
 		19. (minor) code cleanup to support python 3.5 and more in future
 		20. (major) rest api: no more return base64 and compressed data en response
+		21. (medium) test interop: new functions in quality center plugin
+		22. (major) cleanup on default users, new monitor user with read only access
+		23. (major) New major client 18.0.0 embedded
+		24. (medium) Web server: change on add user page, no more options for access rights
 	Issues Fixed
 		1. (minor) test library: undefined variable in virtualRun function #issue1
 		2. (minor) unable to reset libraries and adapters repositories

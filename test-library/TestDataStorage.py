@@ -67,15 +67,6 @@ class TestDataStorage:
 
         storagePath = '%s/%s' % (self.__path, self.__filename)
         try:
-            #validData = False
-            #if isinstance(data, str):
-            #    validData = True
-            #if isinstance(data, list):
-            #    validData = True
-            #if isinstance(data, dict):
-            #    validData = True
-            #if isinstance(data, tuple):
-            #    validData = True
             if validData:
                 fd = open(storagePath, 'wb')
                 fd.write( pickle.dumps(data) )

@@ -662,10 +662,10 @@ class Context(Logger.ClassLogger):
         """
         levels = []
         if userProfile['administrator']: levels.append( Settings.get('Server', 'level-admin') )
-        if userProfile['leader']: levels.append( Settings.get('Server', 'level-leader') )
+        if userProfile['leader']: levels.append( Settings.get('Server', 'level-monitor') )
         if userProfile['tester']: levels.append( Settings.get('Server', 'level-tester') )
-        if userProfile['developer']: levels.append( Settings.get('Server', 'level-developer') )
-        if userProfile['system']: levels.append( Settings.get('Server', 'level-system') )
+        # if userProfile['developer']: levels.append( Settings.get('Server', 'level-developer') )
+        # if userProfile['system']: levels.append( Settings.get('Server', 'level-system') )
         return levels
 
     def registerUser (self, user):
@@ -783,9 +783,9 @@ class Context(Logger.ClassLogger):
             if self.networkRoutes is not None:
                 ret.append( {'routes': self.networkRoutes } )
             ret.append( {'server-date': self.getServerDateTime() } )
-            ret.append( {'default-library': "%s" % RepoLibraries.instance().getDefaultV2() } ) # dynamic value
+            ret.append( {'default-library': "%s" % RepoLibraries.instance().getDefault() } ) # dynamic value
             ret.append( {'libraries': "%s" % RepoLibraries.instance().getInstalled() } )
-            ret.append( {'default-adapter': "%s" % RepoAdapters.instance().getDefaultV2() } ) # dynamic value
+            ret.append( {'default-adapter': "%s" % RepoAdapters.instance().getDefault() } ) # dynamic value
             ret.append( {'adapters': "%s" % RepoAdapters.instance().getInstalled() } )
 
             if user is not None:

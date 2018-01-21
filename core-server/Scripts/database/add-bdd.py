@@ -338,16 +338,12 @@ INSERT INTO `%s-users` (`login`, `password`, `administrator`, `leader`, `develop
 ('%s', '%s', 0, 0, 0, 0, 1, '%s@localhost', '%s', '%s',  1, 1, 0, 1, 0, 0, 'false;false;false;false;false;false;false;', 1 ),
 ('%s', '%s', 1, 0, 0, 0, 0, '%s@localhost', '%s', '%s',  1, 1, 0, 1, 1, 1, 'false;false;false;false;false;false;false;', 1 ),
 ('%s', '%s', 0, 1, 0, 0, 0, '%s@localhost',  '%s', '%s', 1, 1, 0, 1, 1, 1, 'false;false;false;false;false;false;false;', 1 ),
-('%s', '%s', 0, 0, 1, 0, 0, '%s@localhost', '%s', '%s', 1, 1, 0, 1, 1, 1, 'false;false;false;false;false;false;false;', 1 ),
-('%s', '%s', 0, 0, 0, 1, 0, '%s@localhost',  '%s', '%s', 1, 1, 0, 1, 1, 1, 'false;false;false;false;false;false;false;', 1 ),
 ('%s', '%s', 0, 0, 1, 1, 0, '%s@localhost',  '%s', '%s', 1, 1, 0, 1, 1, 0, 'false;false;false;false;false;false;false;', 1 );
 """ % ( prefix_table, 
         Settings.get('Default', 'user-sys' ), pwd_hash_sys, Settings.get('Default', 'user-sys' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
         Settings.get('Default', 'user-admin' ), pwd_sha, Settings.get('Default', 'user-admin' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
-        Settings.get('Default', 'user-leader' ), pwd_sha, Settings.get('Default', 'user-leader' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
-        Settings.get('Default', 'user-developer' ), pwd_sha, Settings.get('Default', 'user-developer' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
-        Settings.get('Default', 'user-tester' ), pwd_sha, Settings.get('Default', 'user-tester' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
-        Settings.get('Default', 'user-automaton' ), pwd_sha, Settings.get('Default', 'user-automaton' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style')
+        Settings.get('Default', 'user-monitor' ), pwd_sha, Settings.get('Default', 'user-monitor' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style'),
+        Settings.get('Default', 'user-tester' ), pwd_sha, Settings.get('Default', 'user-tester' ), Settings.get('Default', 'lang' ), Settings.get('Default', 'style')
     )
 )
 

@@ -28,14 +28,7 @@ except ImportError: # support python 3
     import io as cStringIO
 import time
 
-import sys
-import copy
 import os
-import tarfile
-
-import json
-import zlib
-import base64
 
 def indent(code, nbTab = 1):
     """

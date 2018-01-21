@@ -755,8 +755,8 @@ class SystemAbout(Handler):
         versions["web"] = Context.instance().apacheVersion
         versions["adapters"] = "%s" % RepoAdapters.instance().getInstalled()
         versions["libraries"] = "%s" % RepoLibraries.instance().getInstalled()
-        versions["default-library"] = RepoLibraries.instance().getDefaultV2()
-        versions["default-adapter"] = RepoAdapters.instance().getDefaultV2()
+        versions["default-library"] = RepoLibraries.instance().getDefault()
+        versions["default-adapter"] = RepoAdapters.instance().getDefault()
 
         about["changelogs"] = rn
         about["version"] = versions

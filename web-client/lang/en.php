@@ -119,7 +119,7 @@
 		# Users
 		'administrator'					=> 'Administrator',
 		'tester'						=> 'Tester',
-		'leader'						=> 'Leader',
+		'monitor'						=> 'Monitor',
 		'developer'						=> 'Developer',
 
 		# Menu

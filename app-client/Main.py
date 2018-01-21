@@ -2596,17 +2596,17 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                                             self.tr("Connect you to the test center!") )
                            
                 elif tplFile['type']==UCI.REPO_TESTS_LOCAL or tplFile['type']==UCI.REPO_UNDEFINED :
-                    if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-                        QMessageBox.warning(self, self.tr("Authorization") , 
-                                            self.tr("You are not authorized to do that!") )
-                    else:
-                        extension = str(tplFile['file']).rsplit(".", 1)[1]
-                        tmp = str(tplFile['file']).rsplit("/", 1)
-                        path = tmp[0]
-                        filename = tmp[1].rsplit(".", 1)[0]
-                        WWorkspace.WDocumentViewer.instance().newTab( path = path, filename = filename, 
-                                                                      extension = extension, 
-                                                                      repoDest=tplFile['type'])
+                    # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+                        # QMessageBox.warning(self, self.tr("Authorization") , 
+                                            # self.tr("You are not authorized to do that!") )
+                    # else:
+                    extension = str(tplFile['file']).rsplit(".", 1)[1]
+                    tmp = str(tplFile['file']).rsplit("/", 1)
+                    path = tmp[0]
+                    filename = tmp[1].rsplit(".", 1)[0]
+                    WWorkspace.WDocumentViewer.instance().newTab( path = path, filename = filename, 
+                                                                  extension = extension, 
+                                                                  repoDest=tplFile['type'])
                 else:
                     self.error('type unkwnown')
 
@@ -2746,85 +2746,109 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         WWorkspace.WDocumentViewer.instance().updateConnectLink(connected=True)
         WWorkspace.WDocumentViewer.instance().updateMacroLink()
         
-        if UCI.RIGHTS_MANAGER in RCI.instance().userRights:
-            self.mainTab.setTabEnabled( self.TAB_WORKSPACE, False )
-            self.mainTab.setCurrentIndex( self.TAB_SERVER )
-            self.openMenu.setEnabled(False)
+        # if UCI.RIGHTS_MANAGER in RCI.instance().userRights:
+            # self.mainTab.setTabEnabled( self.TAB_WORKSPACE, False )
+            # self.mainTab.setCurrentIndex( self.TAB_SERVER )
+            # self.openMenu.setEnabled(False)
 
         WServerExplorer.instance().onConnection(data = data)
         WWorkspace.WRepositories.instance().onLoadRemote(data = data)
-        if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
-                or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            WWorkspace.WHelper.instance().onLoad(data=data)
+        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
+                # or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+        WWorkspace.WHelper.instance().onLoad(data=data)
 
-        if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
-                or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights :
-            self.mainTab.setTabEnabled( self.TAB_WORKSPACE, True )
-            self.mainTab.setCurrentIndex( self.TAB_WORKSPACE )
-            WWorkspace.WDocumentViewer.instance().enableWorkspace()
-            WWorkspace.WDocumentViewer.instance().enableTabs()
-            if not WWorkspace.WDocumentViewer.instance().isEmpty():
-                # active test properties only if the first tab need it
-                currentIndexTab = WWorkspace.WDocumentViewer.instance().tab.currentIndex()
-                if WWorkspace.WDocumentViewer.instance().supportProperties( tabId=currentIndexTab ):
-                    WWorkspace.WDocumentProperties.instance().setEnabled(True)
-           
-            self.editMenu.setDisabled(False)
-            self.sourceMenu.setDisabled(False)
-            self.newMenu.setEnabled(True)
-            if len(self.listActionsRecentFiles) > 0:
-                self.recentMenu.setEnabled(True)
-                self.openAllRecentFilesAction.setEnabled(True)
-                self.emptyRecentFilesListAction.setEnabled(True)
+        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
+                # or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights :
+        self.mainTab.setTabEnabled( self.TAB_WORKSPACE, True )
+        self.mainTab.setCurrentIndex( self.TAB_WORKSPACE )
+        WWorkspace.WDocumentViewer.instance().enableWorkspace()
+        WWorkspace.WDocumentViewer.instance().enableTabs()
+        if not WWorkspace.WDocumentViewer.instance().isEmpty():
+            # active test properties only if the first tab need it
+            currentIndexTab = WWorkspace.WDocumentViewer.instance().tab.currentIndex()
+            if WWorkspace.WDocumentViewer.instance().supportProperties( tabId=currentIndexTab ):
+                WWorkspace.WDocumentProperties.instance().setEnabled(True)
+       
+        self.editMenu.setDisabled(False)
+        self.sourceMenu.setDisabled(False)
+        self.newMenu.setEnabled(True)
+        if len(self.listActionsRecentFiles) > 0:
+            self.recentMenu.setEnabled(True)
+            self.openAllRecentFilesAction.setEnabled(True)
+            self.emptyRecentFilesListAction.setEnabled(True)
 
-        if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights :
-            WWorkspace.Repositories.instance().initLocalRepo()
-            WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
-            if not WWorkspace.WDocumentViewer.instance().isEmpty():
-                WWorkspace.WDocumentViewer.instance().setCurrentActions()
-            else:
-                WWorkspace.WDocumentViewer.instance().runAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().runStepByStepAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().runBreakpointAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().runBackgroundAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().checkAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().checkSyntaxAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().checkDesignAction.setEnabled(False)
-                WWorkspace.WDocumentViewer.instance().runSchedAction.setEnabled(False)
+        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights :
+        WWorkspace.Repositories.instance().initLocalRepo()
+        WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
+        if not WWorkspace.WDocumentViewer.instance().isEmpty():
+            WWorkspace.WDocumentViewer.instance().setCurrentActions()
+        else:
+            WWorkspace.WDocumentViewer.instance().runAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().runStepByStepAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().runBreakpointAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().runBackgroundAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().checkAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().checkSyntaxAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().checkDesignAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().runSchedAction.setEnabled(False)
 
+        WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestConfigAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestPlanAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestGlobalAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().newTestDataAction.setEnabled(True)
+        WWorkspace.WDocumentViewer.instance().openAction.setEnabled(True)
+        self.importImageAction.setEnabled(True)
+
+        if UCI.RIGHTS_MONITOR in RCI.instance().userRights :
             WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(False)
             WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(False)
             WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(False)
             WWorkspace.WDocumentViewer.instance().newTestConfigAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTestPlanAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTestGlobalAction.setEnabled(True)
+            WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().newTestPlanAction.setEnabled(False)
+            WWorkspace.WDocumentViewer.instance().newTestGlobalAction.setEnabled(False)
             WWorkspace.WDocumentViewer.instance().newTestDataAction.setEnabled(True)
             WWorkspace.WDocumentViewer.instance().openAction.setEnabled(True)
-            self.importImageAction.setEnabled(True)
-
-            if sys.platform == "win32": 
-                WRecorder.instance().restartGuiAction.setEnabled(True)
-                self.desktopCaptureMenu.setEnabled(True)
-                self.webCaptureMenu.setEnabled(True)
-                self.mobCaptureMenu.setEnabled(True)
-                self.basicCaptureMenu.setEnabled(True)
-                self.sysCaptureMenu.setEnabled(True)
-                
-            self.networkCaptureMenu.setEnabled(True)
+            self.importImageAction.setEnabled(False)
             
-        if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
-            WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
+        if sys.platform == "win32": 
+            WRecorder.instance().restartGuiAction.setEnabled(True)
+            self.desktopCaptureMenu.setEnabled(True)
+            self.webCaptureMenu.setEnabled(True)
+            self.mobCaptureMenu.setEnabled(True)
+            self.basicCaptureMenu.setEnabled(True)
+            self.sysCaptureMenu.setEnabled(True)
+            
+            if UCI.RIGHTS_MONITOR in RCI.instance().userRights :
+                WRecorder.instance().restartGuiAction.setEnabled(False)
+                self.desktopCaptureMenu.setEnabled(False)
+                self.webCaptureMenu.setEnabled(False)
+                self.mobCaptureMenu.setEnabled(False)
+                self.basicCaptureMenu.setEnabled(False)
+                self.sysCaptureMenu.setEnabled(False)
+                
+        self.networkCaptureMenu.setEnabled(True)
+        if UCI.RIGHTS_MONITOR in RCI.instance().userRights :
+            self.networkCaptureMenu.setEnabled(False)
+            
+        # if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
+            # WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
+            # WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
+            # WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
+            # WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
 
-        if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
-            WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
+        # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+            # WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
+            # WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
+            # WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
 
     def onDisconnection (self):
         """
@@ -2994,21 +3018,25 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
 
             if RCI.instance().isAuthenticated():
                 WWorkspace.WDocumentViewer.instance().enableWorkspace()
-                if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights:
-                    WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
-                    WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
-                    WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
-                    WWorkspace.WDocumentViewer.instance().newTestConfigAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestPlanAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestGlobalAction.setEnabled(False)
-                    WWorkspace.WDocumentViewer.instance().newTestDataAction.setEnabled(False)
-                    self.openTestResultAction.setEnabled(False)
+                # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights:
+                    # WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
+                    # WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
+                    # WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
+                    # WWorkspace.WDocumentViewer.instance().newTestConfigAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestPlanAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestGlobalAction.setEnabled(False)
+                    # WWorkspace.WDocumentViewer.instance().newTestDataAction.setEnabled(False)
+                    # self.openTestResultAction.setEnabled(False)
                 if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights :
                     WWorkspace.WDocumentViewer.instance().setCurrentActions()
                         
+                    WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
+                    WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
+                    WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
+                    
                     WWorkspace.WDocumentViewer.instance().newTestUnitAction.setEnabled(True)
                     WWorkspace.WDocumentViewer.instance().newTestAbstractAction.setEnabled(True)
                     WWorkspace.WDocumentViewer.instance().newTestSuiteAction.setEnabled(True)

@@ -50,7 +50,7 @@
 	$__LWF_DB_HOST='127.0.0.1';
 	$__LWF_DB_USER='root';
 	$__LWF_DB_PWD='';
-	$__LWF_DB_NAME='xtc170';
+	$__LWF_DB_NAME='xtc180';
 	$__LWF_DB_PREFIX='xtc';
 	$__LWF_DB_CONNECT					= true; # persistent connection
 

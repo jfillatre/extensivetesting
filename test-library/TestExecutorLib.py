@@ -1977,6 +1977,7 @@ class Interact(object):
         Constructor
         """
         self.tcparent = parent
+        
     @doc_public
     def interact(self, ask, timeout=30.0, default=None, cache=''):
         """
@@ -1988,8 +1989,11 @@ class Interact(object):
         @param default: provide a default value
         @type default: string/none
 
-        @param timeout: max time to respond (default=30s)
-        @type timeout: float
+        @param cache: max time to respond (default=30s)
+        @type cache: float
+        
+        @param timeout: key name
+        @type timeout: string
 
         @return: user response
         @rtype: string

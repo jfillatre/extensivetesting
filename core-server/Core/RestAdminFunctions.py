@@ -26,13 +26,8 @@ from pycnic.errors import HTTP_401, HTTP_400, HTTP_500, HTTP_403, HTTP_404
 
 import os
 import wrapt
-try:
-    import hashlib
-    sha1_constructor = hashlib.sha1
-except ImportError as e: # support python 2.4
-    import sha
-    sha1_constructor = sha.new
-   
+import hashlib
+
 from Libs import Settings, Logger
 
 try:
@@ -150,7 +145,7 @@ class TasksKillAll(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         # kill all tasks
         success = TaskManager.instance().killAllTasks()
@@ -197,7 +192,7 @@ class TasksCancelAll(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         # kill all tasks
         success = TaskManager.instance().cancelAllTasks()
@@ -244,7 +239,7 @@ class TasksHistoryClear(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         success = TaskManager.instance().clearHistory()
         if not success:
@@ -297,7 +292,7 @@ class AdaptersCheckSyntaxAll(Handler):
         """
         user_profile = _get_user(self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success, details = RepoAdapters.instance().checkGlobalSyntax()
         
@@ -343,7 +338,7 @@ class AdaptersStatistics(Handler):
         """
         user_profile = _get_user(self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         _, _, _, statistics = RepoAdapters.instance().getTree()
         
@@ -393,7 +388,7 @@ class AdaptersFileUnlockAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoAdapters.instance().cleanupLocks( )
         if not success:
@@ -451,7 +446,7 @@ class AdaptersBackup(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             backupName = self.request.data.get("backup-name")
@@ -524,7 +519,7 @@ class AdaptersBackupDownload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             destName = self.request.data.get("dest-name")
@@ -588,7 +583,7 @@ class AdaptersBackupListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         backups =  RepoAdapters.instance().getBackups()  
 
@@ -637,7 +632,7 @@ class AdaptersBackupRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
           
         success = RepoAdapters.instance().deleteBackups()  
         if success != Context.instance().CODE_OK:
@@ -689,7 +684,7 @@ class AdaptersReset(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoAdapters.instance().uninstall()
         if not success:
@@ -748,7 +743,7 @@ class AdaptersDirectoryRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             folderPath = self.request.data.get("directory-path")
@@ -817,7 +812,7 @@ class LibrariesCheckSyntaxAll(Handler):
         """
         user_profile = _get_user(self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success, details = RepoLibraries.instance().checkGlobalSyntax()
         
@@ -874,7 +869,7 @@ class LibrariesDirectoryRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             folderPath = self.request.data.get("directory-path")
@@ -947,7 +942,7 @@ class LibrariesBackup(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             backupName = self.request.data.get("backup-name")
@@ -1021,7 +1016,7 @@ class LibrariesBackupDownload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             destName = self.request.data.get("dest-name")
@@ -1085,7 +1080,7 @@ class LibrariesBackupListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         backups =  RepoLibraries.instance().getBackups()  
 
@@ -1134,7 +1129,7 @@ class LibrariesBackupRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoLibraries.instance().deleteBackups()  
         if success != Context.instance().CODE_OK:
@@ -1186,7 +1181,7 @@ class LibrariesFileUnlockAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoLibraries.instance().cleanupLocks( )
         if not success:
@@ -1234,7 +1229,7 @@ class LibrariesStatistics(Handler):
         """
         user_profile = _get_user(self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         _, _, _, statistics = RepoLibraries.instance().getTree()
         
@@ -1284,7 +1279,7 @@ class LibrariesReset(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoLibraries.instance().uninstall()
         if not success:
@@ -1347,7 +1342,7 @@ class AdminConfigListing(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         config = {}
         for section in Settings.instance().sections():
@@ -1408,7 +1403,7 @@ class AdminConfigReload(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         CliFunctions.instance().reload()
 
@@ -1466,7 +1461,7 @@ class AdminClientsDeploy(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         CliFunctions.instance().deployclients()
         CliFunctions.instance().deployclients(portable=True)
@@ -1525,7 +1520,7 @@ class AdminProjectsListing(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         success, details = ProjectsManager.instance().getProjectsFromDB()
         if success == Context.instance().CODE_ERROR:
@@ -1585,7 +1580,7 @@ class AdminProjectsStatistics(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         success, details = ProjectsManager.instance().getStatisticsFromDb()
         if success == Context.instance().CODE_ERROR:
@@ -1647,7 +1642,7 @@ class AdminProjectsAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             projectName = self.request.data.get("project-name")
@@ -1721,7 +1716,7 @@ class AdminProjectsRename(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         try:
             projectId = self.request.data.get("project-id")
@@ -1801,7 +1796,7 @@ class AdminProjectsRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             projectId = self.request.data.get("project-id")
@@ -2007,7 +2002,7 @@ class AdminUsersStatistics(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         success, details = UsersManager.instance().getStatisticsFromDb()
         if success == Context.instance().CODE_ERROR:
@@ -2067,7 +2062,7 @@ class AdminUsersAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             login = self.request.data.get("login")
@@ -2216,7 +2211,7 @@ class AdminUsersRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userId = self.request.data.get("user-id")
@@ -2290,7 +2285,7 @@ class AdminUsersStatus(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userId = self.request.data.get("user-id")
@@ -2366,7 +2361,7 @@ class AdminUsersChannelDisconnect(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userLogin = self.request.data.get("login")
@@ -2434,7 +2429,7 @@ class AdminUsersDuplicate(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userId = self.request.data.get("user-id")
@@ -2504,7 +2499,7 @@ class AdminUsersPasswordReset(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userId = self.request.data.get("user-id")
@@ -2574,7 +2569,7 @@ class AdminUsersPasswordUpdate(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
             
         try:
             userId = self.request.data.get("user-id")
@@ -2591,7 +2586,7 @@ class AdminUsersPasswordUpdate(Handler):
             raise HTTP_400("Bad request provided (%s ?)" % e)
         
         # check current password
-        sha1 = sha1_constructor()
+        sha1 = hashlib.sha1()
         sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), currentPwd )  )
         if sha1.hexdigest() != user_profile['password']:
             raise HTTP_403("bad current password provided")
@@ -2657,7 +2652,7 @@ class AdminUsersSearch(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
            
         try:
             userLogin = self.request.data.get("user-login")
@@ -2732,7 +2727,7 @@ class AdminTimeShift(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
            
         try:
             shift = self.request.data.get("shift")
@@ -2796,7 +2791,7 @@ class MetricsTestsReset(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = StatsManager.instance().resetStats()
         if not success:
@@ -2851,7 +2846,7 @@ class TestsBuild(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = Context.instance().generateSamples()
         if not success:
@@ -2903,7 +2898,7 @@ class TestsFileUnlockAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoTests.instance().cleanupLocks( )
         if not success:
@@ -2954,7 +2949,7 @@ class TestsFileDefaultAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoTests.instance().setTestsWithDefault()
         if not success:
@@ -3010,7 +3005,7 @@ class TestsStatistics(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         try:
             projectId = self.request.data.get("project-id")
@@ -3087,7 +3082,7 @@ class TestsDirectoryRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             projectId = self.request.data.get("project-id")
@@ -3168,7 +3163,7 @@ class TestsBackup(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             backupName = self.request.data.get("backup-name")
@@ -3242,7 +3237,7 @@ class TestsBackupDownload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             destName = self.request.data.get("dest-name")
@@ -3306,7 +3301,7 @@ class TestsBackupListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         backups =  RepoTests.instance().getBackups()  
 
@@ -3355,7 +3350,7 @@ class TestsBackupRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoTests.instance().deleteBackups()  
         if success != Context.instance().CODE_OK:
@@ -3407,7 +3402,7 @@ class TestsReset(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoTests.instance().emptyRepo(projectId='')
         if not success:
@@ -3474,7 +3469,7 @@ class TestsSnapshotRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             projectId = self.request.data.get("project-id")
@@ -3571,7 +3566,7 @@ class VariablesReset(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             projectId = self.request.data.get("project-id")
@@ -3656,7 +3651,7 @@ class ResultsReset(Handler):
         """
         user_profile = _get_user(request=self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             projectId = self.request.data.get("project-id")
@@ -3676,11 +3671,9 @@ class ResultsReset(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        success = RepoArchives.instance().emptyRepo(projectId=projectId)  
-        if success == Context.instance().CODE_ERROR:
+        success = RepoArchives.instance().resetArchives(projectId=projectId)  
+        if success != Context.instance().CODE_OK:
             raise HTTP_500("Unable to reset test results")
-        if success == Context.instance().CODE_FORBIDDEN:
-            raise HTTP_403("Reset results forbidden")
             
         return { "cmd": self.request.path, "message": "results successfully reseted", 
                  'project-id': projectId }
@@ -3736,7 +3729,7 @@ class ResultsBackup(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             backupName = self.request.data.get("backup-name")
@@ -3795,7 +3788,7 @@ class ResultsBackupListing(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         backups =  RepoArchives.instance().getBackups()  
 
@@ -3859,7 +3852,7 @@ class ResultsBackupDownload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         try:
             destName = self.request.data.get("dest-name")
@@ -3923,7 +3916,7 @@ class ResultsBackupRemoveAll(Handler):
         """
         user_profile = _get_user(request=self.request)
 
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
         
         success = RepoArchives.instance().deleteBackups()  
         if success != Context.instance().CODE_OK:
@@ -3979,7 +3972,7 @@ class ResultsStatistics(Handler):
         """
         user_profile = _get_user(self.request)
         
-        if not user_profile['administrator']: raise HTTP_401("Access refused")
+        if not user_profile['administrator']: raise HTTP_403("Access refused")
 
         try:
             projectId = self.request.data.get("project-id")

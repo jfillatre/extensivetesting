@@ -230,9 +230,8 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
         """
         Returns tree
         """
-        nb_tests, nb_tests_f, tests, stats = self.getListingFilesV2(path="%s/%s" % (self.testsPath, str(project)), 
-                                                                    project=project, supportSnapshot=True  )
-        return nb_tests, nb_tests_f, tests, stats
+        return self.getListingFilesV2(path="%s/%s" % (self.testsPath, str(project)), 
+                                      project=project, supportSnapshot=True  )
 
     def __getBasicListing(self, testPath, initialPath):
         """

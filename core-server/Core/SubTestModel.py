@@ -26,6 +26,8 @@
 # the test is not compliant with python recommandation
 # /!\ WARNING /!\
 
+import sys
+
 try:
     import TestModel
     import RepoAdapters
@@ -37,8 +39,12 @@ except ImportError: # python3 support
     from . import RepoLibraries
     from . import Common
     
-indent = Common.indent
+# indent = Common.indent
 
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
 def createSubTest(dataTest, descriptions, trPath, defaultLibrary='', defaultAdapter='', isTestUnit=True, 
                     isTestAbstract=False, isTestPlan=False, isTestGlobal=False):
     """
@@ -240,10 +246,10 @@ try:
 	# !! test injection
 """)
     if isTestUnit or isTestAbstract:
-        te.append(indent(srcTest, nbTab=2))
+        te.append(Common.indent(srcTest, nbTab=2))
     else:
 
-        te.append(indent(srcTest, nbTab=1))
+        te.append(Common.indent(srcTest, nbTab=1))
 
     te.append("""	
 except Exception as e:

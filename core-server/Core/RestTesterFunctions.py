@@ -67,7 +67,7 @@ import Libs.FileModels.TestSuite as TestSuite
 import Libs.FileModels.TestUnit as TestUnit
 import Libs.FileModels.TestPlan as TestPlan
 import Libs.FileModels.TestAbstract as TestAbstract
-import Libs.FileModels.TestConfig as TestConfig
+# import Libs.FileModels.TestConfig as TestConfig
     
 class EmptyValue(Exception): pass
 
@@ -159,6 +159,8 @@ class AdaptersAdapterAddByWsdlFile(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             wsdlFile = self.request.data.get("wsdl-file")
             if wsdlFile is None: raise EmptyValue("Please specify a wsdl file")   
@@ -239,6 +241,8 @@ class AdaptersAdapterAddByWsdlUrl(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             wsdlUrl = self.request.data.get("wsdl-url")
             if wsdlUrl is None: raise EmptyValue("Please specify a wsdl url")   
@@ -317,6 +321,8 @@ class AdaptersAdapterAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             packageName = self.request.data.get("package-name")
             if packageName is None: raise EmptyValue("Please specify a package name")   
@@ -387,6 +393,8 @@ class AdaptersPackageAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             packageName = self.request.data.get("package-name")
             if packageName is None: raise EmptyValue("Please specify a package name")
@@ -454,7 +462,9 @@ class AdaptersPackageDefault(Handler):
           '500':
             description: Server error
         """
-        # user_profile = _get_user(self.request)
+        user_profile = _get_user(self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             packageName = self.request.data.get("package-name")
@@ -521,6 +531,8 @@ class AdaptersPackageGeneric(Handler):
             description: Server error
         """
         user_profile = _get_user(self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             packageName = self.request.data.get("package-name")
@@ -647,6 +659,8 @@ class AdaptersBuild(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         success = Context.instance().generateAdapters()
         if not success:
             raise HTTP_500("Unable to package adapters")
@@ -767,6 +781,8 @@ class AdaptersFileMove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -870,6 +886,8 @@ class AdaptersDirectoryMove(Handler):
         """
         # get the user profile
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         # checking json request on post
         try:
@@ -981,6 +999,8 @@ class AdaptersFileRename(Handler):
         """
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -1090,7 +1110,8 @@ class AdaptersDirectoryRename(Handler):
         """
         user_profile = _get_user(request=self.request)
 		
-        projectId = None
+        if user_profile['leader']: raise HTTP_403("Access refused")
+
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -1194,6 +1215,8 @@ class AdaptersFileDuplicate(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -1300,10 +1323,9 @@ class AdaptersDirectoryDuplicate(Handler):
         """
         # get the user profile
         user_profile = _get_user(request=self.request)
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         # checking json request on post
-        projectId = None
-        newProjectId = None
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -1394,6 +1416,8 @@ class AdaptersFileRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             filePath = self.request.data.get("file-path")
             if not filePath: raise EmptyValue("Please specify a file path")
@@ -1544,6 +1568,8 @@ class AdaptersDirectoryRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             folderPath = self.request.data.get("directory-path")
             if folderPath is None: raise EmptyValue("Please specify a source folder path")
@@ -1617,6 +1643,8 @@ class AdaptersDirectoryAdd(Handler):
             description: Server error
         """
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             folderName = self.request.data.get("directory-name")
@@ -1705,6 +1733,8 @@ class AdaptersFileUpload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             filePath = self.request.data.get("file-path")
             if filePath is None: raise EmptyValue("Please specify a file path")
@@ -1992,6 +2022,8 @@ class LibrariesLibraryAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             packageName = self.request.data.get("package-name")
             if packageName is None: raise EmptyValue("Please specify a package name")   
@@ -2062,6 +2094,8 @@ class LibrariesPackageAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             packageName = self.request.data.get("package-name")
             if packageName is None: raise EmptyValue("Please specify a package name")
@@ -2130,6 +2164,8 @@ class LibrariesPackageDefault(Handler):
         """
         user_profile = _get_user(self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             packageName = self.request.data.get("package-name")
             if not packageName: raise EmptyValue("Please specify the package name")
@@ -2194,6 +2230,8 @@ class LibrariesPackageGeneric(Handler):
             description: Server error 
         """
         user_profile = _get_user(self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             packageName = self.request.data.get("package-name")
@@ -2323,6 +2361,8 @@ class LibrariesBuild(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         success = Context.instance().generateLibraries()
         if not success:
             raise HTTP_500("Unable to package libraries")
@@ -2443,6 +2483,8 @@ class LibrariesFileMove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -2545,6 +2587,8 @@ class LibrariesDirectoryMove(Handler):
         """
         # get the user profile
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         # checking json request on post
         try:
@@ -2656,6 +2700,8 @@ class LibrariesFileRename(Handler):
         """
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -2765,6 +2811,8 @@ class LibrariesDirectoryRename(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -2863,6 +2911,8 @@ class LibrariesFileDuplicate(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -2974,6 +3024,8 @@ class LibrariesDirectoryDuplicate(Handler):
         # get the user profile
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         # checking json request on post
         try:
             source = self.request.data.get("source")
@@ -3065,6 +3117,8 @@ class LibrariesFileRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             filePath = self.request.data.get("file-path")
             if filePath is None: raise EmptyValue("Please specify a file path")
@@ -3213,6 +3267,8 @@ class LibrariesDirectoryRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             folderPath = self.request.data.get("directory-path")
             if folderPath is None: raise EmptyValue("Please specify a source folder path")
@@ -3286,6 +3342,8 @@ class LibrariesDirectoryAdd(Handler):
             description: Server error
         """
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             folderName = self.request.data.get("directory-name")
@@ -3374,6 +3432,8 @@ class LibrariesFileUpload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             filePath = self.request.data.get("file-path")
             if filePath is None: raise EmptyValue("Please specify a file path")
@@ -6992,6 +7052,8 @@ class TestsFileUpload(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -7113,6 +7175,8 @@ class TestsFileRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -7312,6 +7376,8 @@ class TestsFileRename(Handler):
         """
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify source")
@@ -7443,6 +7509,8 @@ class TestsFileDuplicate(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify source")
@@ -7581,6 +7649,8 @@ class TestsFileMove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify source")
@@ -7702,6 +7772,8 @@ class TestsDirectoryAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -7808,6 +7880,8 @@ class TestsDirectoryRename(Handler):
         """
         user_profile = _get_user(request=self.request)
 		
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify source")
@@ -7927,9 +8001,9 @@ class TestsDirectoryDuplicate(Handler):
         # get the user profile
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         # checking json request on post
-        projectId = None
-        newProjectId = None
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -8064,10 +8138,9 @@ class TestsDirectoryMove(Handler):
         """
         # get the user profile
         user_profile = _get_user(request=self.request)
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         # checking json request on post
-        projectId = None
-        newProjectId = None
         try:
             source = self.request.data.get("source")
             if source is None: raise EmptyValue("Please specify a source")
@@ -8189,6 +8262,8 @@ class TestsDirectoryRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -8283,6 +8358,8 @@ class TestsSnapshotAdd(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -8377,6 +8454,8 @@ class TestsSnapshotRemove(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -8469,6 +8548,8 @@ class TestsSnapshotRestore(Handler):
         """
         user_profile = _get_user(request=self.request)
 
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -8568,6 +8649,8 @@ class VariablesAdd(Handler):
             description: Server error
         """
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             projectId = self.request.data.get("project-id")
@@ -8671,6 +8754,8 @@ class VariablesDuplicate(Handler):
         """
         user_profile = _get_user(request=self.request)
         
+        if user_profile['leader']: raise HTTP_403("Access refused")
+        
         try:
             projectId = self.request.data.get("project-id")
             if projectId is None: raise EmptyValue("Please specify a project id")
@@ -8763,6 +8848,8 @@ class VariablesUpdate(Handler):
             description: Server error
         """
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             variableId = self.request.data.get("variable-id")
@@ -8862,6 +8949,8 @@ class VariablesRemove(Handler):
             description: Server error
         """
         user_profile = _get_user(request=self.request)
+        
+        if user_profile['leader']: raise HTTP_403("Access refused")
         
         try:
             variableId = self.request.data.get("variable-id")

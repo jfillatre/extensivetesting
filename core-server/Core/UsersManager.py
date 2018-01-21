@@ -26,10 +26,7 @@ try:
 except ImportError: # python3 support
     import pymysql as MySQLdb
 import time
-import base64
-import zlib
 import hashlib
-import json
 
 try:
     import DbManager
@@ -95,25 +92,25 @@ class UsersManager(Logger.ClassLogger):
         self.trace( 'get nb tester from db' )
         return self.getNbUserOfType(userType=Settings.get( 'Server', 'level-tester'))
 
-    def getNbDeveloper(self):
-        """
-        Returns the number of developers present in database
+    # def getNbDeveloper(self):
+        # """
+        # Returns the number of developers present in database
 
-        @return: nb developers
-        @rtype: int
-        """
-        self.trace( 'get nb developer from db' )
-        return self.getNbUserOfType(userType=Settings.get( 'Server', 'level-developer'))
+        # @return: nb developers
+        # @rtype: int
+        # """
+        # self.trace( 'get nb developer from db' )
+        # return self.getNbUserOfType(userType=Settings.get( 'Server', 'level-developer'))
 
-    def getNbLeader(self):
-        """
-        Returns the number of leaders present in database
+    # def getNbMonitor(self):
+        # """
+        # Returns the number of leaders present in database
 
-        @return: nb managers
-        @rtype: int
-        """
-        self.trace( 'get nb managers from db' )
-        return self.getNbUserOfType(userType=Settings.get( 'Server', 'level-leader'))
+        # @return: nb managers
+        # @rtype: int
+        # """
+        # self.trace( 'get nb managers from db' )
+        # return self.getNbUserOfType(userType=Settings.get( 'Server', 'level-leader'))
 
     def getNbOfUsers(self):
         """

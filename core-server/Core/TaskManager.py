@@ -79,6 +79,10 @@ except ImportError:
 from Libs import Scheduler, Settings, Logger
 import Libs.FileModels.TestResult as TestResult
 
+try:
+    xrange
+except NameError: # support python3
+    xrange = range
 
 TASKS_RUNNING           = 0
 TASKS_WAITING           = 1
@@ -686,7 +690,11 @@ class Task(Logger.ClassLogger):
         ret = []
         ret.append( time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(self.prepareTime)) )
         ret.append( self.taskUuid )
-        ret.append( base64.b64encode(testidentifier.encode("utf8")) )
+        if sys.version_info > (3,):
+            encoded = base64.b64encode(testidentifier.encode("utf8"))
+            ret.append( encoded.decode("utf8") )
+        else:
+            ret.append( base64.b64encode(testidentifier.encode("utf8")) )
         ret.append( self.userName )
         
         # join with . separator and return it
@@ -1058,8 +1066,8 @@ class Task(Logger.ClassLogger):
                                                 trPath=self.getTestPath(withDate=True), 
                                                 logFilename=self.completeId(), 
                                                 withoutProbes=self.withoutProbes,
-                                                defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
-                                                defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                defaultLibrary=RepoLibraries.instance().getDefault(), 
+                                                defaultAdapter=RepoAdapters.instance().getDefault(),
                                                 userId=self.userId, projectId=self.projectId, 
                                                 stepByStep=self.stepByStep, 
                                                 breakpoint=self.breakpoint,
@@ -1234,8 +1242,8 @@ class Task(Logger.ClassLogger):
             if  isTu or isTs or isTa:
                 subte = SubTestModel.createSubTest( dataTest = self.dataTest, trPath=self.getTestPath(),
                                                     descriptions=self.dataTest['test-properties']['descriptions']['description'],
-                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
+                                                    defaultLibrary=RepoLibraries.instance().getDefault(),
+                                                    defaultAdapter=RepoAdapters.instance().getDefault(), 
                                                     isTestUnit=isTu, isTestAbstract=isTa )
                 sub_tes.append( (isTu, isTa, self.testName, subte) )
 
@@ -1252,8 +1260,8 @@ class Task(Logger.ClassLogger):
                     if ts['enable'] == TestModel.TS_ENABLED:
                         subte = SubTestModel.createSubTest( dataTest = ts, trPath=self.getTestPath(),
                                                         descriptions=self.dataTest['test-properties']['descriptions']['description'],
-                                                        defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                        defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
+                                                        defaultLibrary=RepoLibraries.instance().getDefault(),
+                                                        defaultAdapter=RepoAdapters.instance().getDefault(), 
                                                         isTestUnit=isSubTu, isTestAbstract=isSubTa,
                                                         isTestPlan=isTp, isTestGlobal=isTg )
                         sub_tes.append( ( isSubTu, isSubTa, ts['file'], subte) )
@@ -1269,8 +1277,8 @@ class Task(Logger.ClassLogger):
                 te = TestModel.createTestExecutable(dataTest = self.dataTest, userName=self.userName, 
                                                     testName=self.testName, trPath=self.getTestPath(), 
                                                     logFilename=self.completeId(), withoutProbes=self.withoutProbes,
-                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
-                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                    defaultLibrary=RepoLibraries.instance().getDefault(), 
+                                                    defaultAdapter=RepoAdapters.instance().getDefault(),
                                                     userId=self.userId, projectId=self.projectId, 
                                                     subTEs=len(sub_tes), channelId=self.channelId,
                                                     parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName),
@@ -1449,8 +1457,8 @@ class Task(Logger.ClassLogger):
             if  isTu or isTs or isTa:
                 subte = SubTestModel.createSubTest( dataTest = dataTest, trPath=self.getTestPath(),
                                                     descriptions=dataTest['test-properties']['descriptions']['description'],
-                                                    defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                    defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                    defaultLibrary=RepoLibraries.instance().getDefault(),
+                                                    defaultAdapter=RepoAdapters.instance().getDefault(),
                                                     isTestUnit=isTu, isTestAbstract=isTa )
                 sub_tes.append( subte )
 
@@ -1468,8 +1476,8 @@ class Task(Logger.ClassLogger):
                         subte = SubTestModel.createSubTest( dataTest = ts, 
                                                             descriptions=dataTest['test-properties']['descriptions']['description'],
                                                             trPath=self.getTestPath(),
-                                                            defaultLibrary=RepoLibraries.instance().getDefaultV2(),
-                                                            defaultAdapter=RepoAdapters.instance().getDefaultV2(), 
+                                                            defaultLibrary=RepoLibraries.instance().getDefault(),
+                                                            defaultAdapter=RepoAdapters.instance().getDefault(), 
                                                             isTestUnit=isSubTu, isTestAbstract=isSubTa,
                                                             isTestPlan=isTp, isTestGlobal=isTg )
                         sub_tes.append( subte )
@@ -1490,8 +1498,8 @@ class Task(Logger.ClassLogger):
                                                 dataTest = dataTest, userName=self.userName, 
                                                 testName=self.testName, trPath=self.getTestPath(), 
                                                 logFilename=self.completeId(), withoutProbes=self.withoutProbes,
-                                                defaultLibrary=RepoLibraries.instance().getDefaultV2(), 
-                                                defaultAdapter=RepoAdapters.instance().getDefaultV2(),
+                                                defaultLibrary=RepoLibraries.instance().getDefault(), 
+                                                defaultAdapter=RepoAdapters.instance().getDefault(),
                                                 userId=self.userId, projectId=self.projectId, 
                                                 subTEs=len(sub_tes), channelId=self.channelId,
                                                 parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName),
@@ -1517,19 +1525,19 @@ class Task(Logger.ClassLogger):
 
             self.trace("Writing all sub te")
             for i in xrange(len(sub_tes)):
-                f = open( "%s/SubTE%s.py" % (self.getPath(envTmp=envTmp), i ) ,  'w')
+                f = open( "%s/SubTE%s.py" % (self.getPath(envTmp=envTmp), i ) ,  'wb')
                 f.write(sub_tes[i])
                 f.close()
                 
             self.trace("Writing main path of the te")
             # write test path
             f = open( "%s/TESTPATH" % self.getPath(envTmp=envTmp) ,  'w') # change in v16
-            f.write("%s" % self.testPath)
+            f.write( "%s" % self.testPath)
             f.close()
             
             self.trace("Writing main te")
             # write test
-            f = open( "%s/MainTE.py" % self.getPath(envTmp=envTmp) ,  'w') # change in v16
+            f = open( "%s/MainTE.py" % self.getPath(envTmp=envTmp) ,  'wb') # change in v16
             f.write(te)
             f.close()
             
@@ -1545,7 +1553,7 @@ class Task(Logger.ClassLogger):
 
             self.trace("Writing log file")
             # write log
-            f = open( "%s/test.out" % self.getPath(envTmp=envTmp), 'w' )
+            f = open( "%s/test.out" % self.getPath(envTmp=envTmp), 'wb' )
             f.close()
 
             # write tests settings 
@@ -1704,10 +1712,13 @@ class Task(Logger.ClassLogger):
             t0 = time.time()
             for i in xrange(len(sub_tes)):
                 try:
-                    parser.suite(sub_tes[i]).compile()
+                    if sys.version_info > (3,):
+                        parser.suite(sub_tes[i].decode("utf8")).compile()
+                    else:
+                        parser.suite(sub_tes[i]).compile()
                 except SyntaxError as e:
                     e.lineno = None
-                    self.trace( 'unable to compile sub te syntax te: %s' % e )
+                    self.trace( 'unable to compile sub te syntax: %s' % e )
                     self.setState(state = STATE_ERROR, envTmp=envTmp)
                     raise Exception( e )
                 except SystemError as e:
@@ -1721,7 +1732,10 @@ class Task(Logger.ClassLogger):
 
             self.trace( "Compile the main test executable" )
             try:
-                parser.suite(te).compile()
+                if sys.version_info > (3,):
+                    parser.suite(te.decode("utf8")).compile()
+                else:
+                    parser.suite(te).compile()
             except SyntaxError as e:
                 e.lineno = None
                 self.trace( 'unable to compile syntax te: %s' % e )
@@ -1938,6 +1952,8 @@ class Task(Logger.ClassLogger):
                                         RepoManager.TEST_RESULT_EXT ) 
         f = open( filenameTrx, 'wb')
         raw_data = dataModel.toXml()
+        if sys.version_info > (3,): # python3 support
+            raw_data = bytes(raw_data, "utf8")
         f.write( zlib.compress( raw_data ) )
         f.close()
         
@@ -2072,7 +2088,7 @@ class Task(Logger.ClassLogger):
                 else:
                     os.execve(executable, args, env)
             except Exception as e:
-                self.error( 'unable to fork te' )
+                self.error( 'unable to fork te: %s' % e )
                 self.setState(state = STATE_ERROR)
             else:
                 if sig > 0:
@@ -2268,8 +2284,15 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
         Save the PID of the child to kill it on stop if always running
         """
         self.trace("adding child pid %s" % pid)
-        file("%s/%s/%s.pid" % (Settings.getDirExec(), Settings.get('Paths','run'),pid),'w+').write("%s\n" % pid)
-
+        # file("%s/%s/%s.pid" % (Settings.getDirExec(), Settings.get('Paths','run'),pid),'w+').write("%s\n" % pid)
+        
+        fileName = "%s/%s/%s.pid" % (Settings.getDirExec(), 
+                                     Settings.get('Paths','run'),
+                                     pid)
+        f = open( fileName, 'w' )
+        f.write( "%s\n" % pid )
+        f.close()
+        
     def delChildPid(self, pid):
         """
         Delete the PID of the child to kill it on stop if always running

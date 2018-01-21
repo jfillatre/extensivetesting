@@ -1109,7 +1109,7 @@ class WHelper(QWidget, Logger.ClassLogger):
         self.masterTab.setEnabled(True)
 
         self.reloadAllAction.setEnabled(True)
-        if UCI.RIGHTS_ADMIN in RCI.instance().userRights or  UCI.RIGHTS_DEVELOPER in RCI.instance().userRights :
+        if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
             self.rebuildCacheAction.setEnabled(True)
             self.generateAdaptersAction.setEnabled(True)
             self.generateLibrariesAction.setEnabled(True)
@@ -1262,17 +1262,17 @@ class WHelper(QWidget, Logger.ClassLogger):
             except Exception as e:
                 self.error( 'unable to loads helper data: %s' % str(e) )
 
-        if  UCI.RIGHTS_ADMIN in RCI.instance().userRights or UCI.RIGHTS_TESTER in RCI.instance().userRights or \
-                UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            self.setConnected() 
+        # if  UCI.RIGHTS_ADMIN in RCI.instance().userRights or UCI.RIGHTS_TESTER in RCI.instance().userRights or \
+                # UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
+        self.setConnected() 
 
-            self.helper.setEnabled(True)
-            self.helperInterop.setEnabled(True)
-            self.helperAdapters.setEnabled(True)
-            self.helperLibraries.setEnabled(True)
+        self.helper.setEnabled(True)
+        self.helperInterop.setEnabled(True)
+        self.helperAdapters.setEnabled(True)
+        self.helperLibraries.setEnabled(True)
 
-            self.textEdit.setEnabled(True)
-            self.initialize(listing=helpObj)
+        self.textEdit.setEnabled(True)
+        self.initialize(listing=helpObj)
          
     def helpAllObjects(self):
         """
