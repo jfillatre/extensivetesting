@@ -5212,7 +5212,7 @@ class TestsScheduleGroup(Handler):
                     type: string
                 postpone-at:
                   type: array
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 parallel-mode:
@@ -5403,7 +5403,7 @@ class TestsSchedule(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, test-definition, test-execution, test-properties, test-extension, test-path, test-name, schedule-id, schedule-at]
+              required: [ project-id, test-extension, test-path, test-name]
               properties:
                 project-id:
                   type: integer
@@ -5421,9 +5421,10 @@ class TestsSchedule(Handler):
                   type: string
                 schedule-id:
                   type: integer
+                  description: '0 => now, 1 => at, 2 => in'
                 schedule-at:
                   type: array
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 schedule-repeat:
@@ -5438,12 +5439,12 @@ class TestsSchedule(Handler):
                   type: boolean 
                 from-time:
                   type: array
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 to-time:
                   type: array 
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 tab-id:
@@ -5519,7 +5520,12 @@ class TestsSchedule(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/tests/schedule"
+                  "cmd": "/tests/schedule",
+                  "message": ""
+                  "test-id": "",
+                  "task-id": "",
+                  "tab-id": ""
+                  "test-name": ""
                 }
           '400':
             description: Bad request provided
@@ -5535,13 +5541,13 @@ class TestsSchedule(Handler):
             if projectId is None: raise EmptyValue("Please specify a project id")
 
             testDefinition = self.request.data.get("test-definition")
-            if testDefinition is None: raise EmptyValue("Please specify a test definition")
+            if testDefinition is None: testDefinition = ""
             
             testExecution = self.request.data.get("test-execution")
-            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            if testExecution is None: testExecution = ""
             
             testProperties = self.request.data.get("test-properties")
-            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            if testProperties is None: testProperties = {}
             
             testExtension = self.request.data.get("test-extension")
             if testExtension is None: raise EmptyValue("Please specify a test extension")
@@ -5553,11 +5559,9 @@ class TestsSchedule(Handler):
             if testName is None: raise EmptyValue("Please specify a test name")
             
             scheduleId = self.request.data.get("schedule-id")
-            if scheduleId is None : raise EmptyValue("Please specify schedule-id")
+            if scheduleId is None : scheduleId = 0
             
-            scheduleAt = self.request.data.get("schedule-at")
-            if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
-            
+            _scheduleAt = self.request.data.get("schedule-at")  
             _scheduleRepeat = self.request.data.get("schedule-repeat")
             _tabId = self.request.data.get("tab-id")
             _backgroundMode = self.request.data.get("background-mode")
@@ -5583,6 +5587,8 @@ class TestsSchedule(Handler):
         # checking input    
         if not isinstance(projectId, int):
             raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(scheduleId, int):
+            raise HTTP_400("Bad schedule id provided in request, int expected")
 
         if _testInputs is not None:
             if not isinstance(_testInputs, list): 
@@ -5718,7 +5724,8 @@ class TestsSchedule(Handler):
         toTime = (0,0,0,0,0,0)
         message = "success"
         scheduleRepeat = 0
-
+        scheduleAt = (0,0,0,0,0,0)
+        
         if _scheduleRepeat is not None: scheduleRepeat = _scheduleRepeat
         if _tabId is not None: tabId = _tabId
         if _backgroundMode is not None: backgroundMode=_backgroundMode
@@ -5730,6 +5737,7 @@ class TestsSchedule(Handler):
         if _probesEnabled is not None: probesEnabled=_probesEnabled
         if _fromTime is not None: fromTime=_fromTime
         if _toTime is not None: toTime=_toTime
+        if _scheduleAt is not None: scheduleAt=_scheduleAt
         
         # personalize test description ?
         if _sutAdapters is not None:
@@ -5765,22 +5773,28 @@ class TestsSchedule(Handler):
                     if newAgt["name"] == origAgt["name"]:
                         origAgt["value"] = newAgt["value"]
                         origAgt["type"] = newAgt["type"]
-                        
+        
+        if not testPath.endswith(testName):
+            _testPath = "%s/%s" % (testPath, testName)
+            _testPath = os.path.normpath(_testPath)
+        else:
+            _testPath = testPath
+            
         task = TaskManager.instance().registerTask( 
                                                 testData=testData, 
                                                 testName=testName, 
-                                                testPath=testPath, 
+                                                testPath=_testPath, 
                                                 testUserId=user_profile['id'],
                                                 testUser=user_profile['login'],
                                                 testId=tabId, 
                                                 testBackground=backgroundMode,
                                                 runAt=scheduleAt, 
-                                                runType=scheduleId, 
+                                                runType=(scheduleId-1), 
                                                 runNb=scheduleRepeat, 
                                                 withoutProbes=probesEnabled,
                                                 debugActivated=debugEnabled, 
                                                 withoutNotif=notificationsEnabled, 
-                                                noKeepTr=logsEnabled,
+                                                noKeepTr=not logsEnabled,
                                                 testProjectId=projectId, 
                                                 runFrom=fromTime, 
                                                 runTo=toTime, 
@@ -5835,12 +5849,10 @@ class TestsScheduleTpg(Handler):
             in: body
             required: true
             schema:
-              required: [ project-id, test-definition, test-execution, test-properties, test-extension, test-path, test-name, schedule-id, schedule-at]
+              required: [ project-id, test-extension, test-path, test-name]
               properties:
                 project-id:
                   type: integer
-                test-definition:
-                  type: string
                 test-execution:
                   type: string 
                 test-properties:
@@ -5853,9 +5865,10 @@ class TestsScheduleTpg(Handler):
                   type: string
                 schedule-id:
                   type: integer
+                  description: '0 => now, 1 => at, 2 => in'
                 schedule-at:
                   type: array
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 schedule-repeat:
@@ -5870,12 +5883,12 @@ class TestsScheduleTpg(Handler):
                   type: boolean 
                 from-time:
                   type: array
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 to-time:
                   type: array 
-                  description: [ Y,M,D,H,M,S ]
+                  description: '[ Y,M,D,H,M,S ]'
                   items:
                     type: integer
                 tab-id:
@@ -5966,10 +5979,10 @@ class TestsScheduleTpg(Handler):
             if projectId is None: raise EmptyValue("Please specify a project id")
 
             testExecution = self.request.data.get("test-execution")
-            if testExecution is None: raise EmptyValue("Please specify a test execution")
+            if testExecution is None: testExecution = ""
             
             testProperties = self.request.data.get("test-properties")
-            if testProperties is None: raise EmptyValue("Please specify a test properties")
+            if testProperties is None: testProperties = {}
             
             testExtension = self.request.data.get("test-extension")
             if testExtension is None: raise EmptyValue("Please specify a test extension")
@@ -5981,11 +5994,9 @@ class TestsScheduleTpg(Handler):
             if testName is None: raise EmptyValue("Please specify a test name")
             
             scheduleId = self.request.data.get("schedule-id")
-            if scheduleId is None : raise EmptyValue("Please specify schedule-id")
+            if scheduleId is None : scheduleId = 0
             
-            scheduleAt = self.request.data.get("schedule-at")
-            if scheduleAt is None: raise EmptyValue("Please specify schedule-at")
-            
+            _scheduleAt = self.request.data.get("schedule-at")
             _scheduleRepeat = self.request.data.get("schedule-repeat")
             _tabId = self.request.data.get("tab-id")
             _backgroundMode = self.request.data.get("background-mode")
@@ -6011,6 +6022,8 @@ class TestsScheduleTpg(Handler):
         # checking input    
         if not isinstance(projectId, int):
             raise HTTP_400("Bad project id provided in request, int expected")
+        if not isinstance(scheduleId, int):
+            raise HTTP_400("Bad schedule id provided in request, int expected")
 
         if _testInputs is not None:
             if not isinstance(_testInputs, list): 
@@ -6138,6 +6151,7 @@ class TestsScheduleTpg(Handler):
         probesEnabled = False
         fromTime = (0,0,0,0,0,0)
         toTime = (0,0,0,0,0,0)
+        scheduleAt = (0,0,0,0,0,0)
         message = "success" 
         scheduleRepeat = 0
 
@@ -6152,6 +6166,7 @@ class TestsScheduleTpg(Handler):
         if _probesEnabled is not None: probesEnabled=_probesEnabled
         if _fromTime is not None: fromTime=_fromTime
         if _toTime is not None: toTime=_toTime
+        if _scheduleAt is not None: scheduleAt=_scheduleAt
         
         # personalize test description ?
         if _sutAdapters is not None:
@@ -6187,21 +6202,28 @@ class TestsScheduleTpg(Handler):
                     if newAgt["name"] == origAgt["name"]:
                         origAgt["value"] = newAgt["value"]
                         origAgt["type"] = newAgt["type"]
+        
+        if not testPath.endswith(testName):            
+            _testPath = "%s/%s" % (testPath, testName)
+            _testPath = os.path.normpath(_testPath)
+        else:
+            _testPath = testPath
+            
         task = TaskManager.instance().registerTask( 
                                                 testData=testData, 
                                                 testName=testName, 
-                                                testPath=testPath, 
+                                                testPath=_testPath, 
                                                 testUserId=user_profile['id'],
                                                 testUser=user_profile['login'],
                                                 testId=tabId, 
                                                 testBackground=backgroundMode,
                                                 runAt=scheduleAt, 
-                                                runType=scheduleId, 
+                                                runType=(scheduleId-1), 
                                                 runNb=scheduleRepeat, 
                                                 withoutProbes=probesEnabled,
                                                 debugActivated=debugEnabled, 
                                                 withoutNotif=notificationsEnabled, 
-                                                noKeepTr=logsEnabled,
+                                                noKeepTr=not logsEnabled,
                                                 testProjectId=projectId, 
                                                 runFrom=fromTime, 
                                                 runTo=toTime, 
@@ -9684,7 +9706,7 @@ class ResultsListingIdByDateTime(Handler):
             examples:
               application/json: |
                 {
-                  "cmd": "/results/reports", 
+                  "cmd": "/results/listing/id/by/datetime", 
                   "listing":  [...]
                 }
           '400':

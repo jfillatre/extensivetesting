@@ -194,7 +194,6 @@ class DataModel(Logger.ClassLogger):
             self.error( "uncompress testresult error: %s" % e )
             return False
         try:
-            self.trace( decompressed_data.decode("utf8") )
             if sys.version_info > (3,): # python3 support
                 ret = self.codecX2D.parseXml( xml = bytes2str(decompressed_data), huge_tree=True  )
             else:

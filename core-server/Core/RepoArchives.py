@@ -139,7 +139,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             ESI.instance().notifyAll(body = data)
             return self.context.CODE_OK
         except OSError as e:
-            self.trace( e )
+            self.error( e )
             return self.context.CODE_FORBIDDEN
         except Exception as e:
             raise Exception( e )

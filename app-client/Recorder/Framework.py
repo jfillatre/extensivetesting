@@ -338,7 +338,7 @@ class WFramework(QWidget, Logger.ClassLogger):
         self.askTextCacheCombo.addItems( [ "CACHE" ] )
         
         mainAsklayout = QGridLayout()
-        mainAsklayout.addWidget(  QLabel( self.tr("Ask to user:") ), 0, 0 )
+        mainAsklayout.addWidget(  QLabel( self.tr("User input prompt:") ), 0, 0 )
         mainAsklayout.addWidget(  self.askTextCombo, 0, 1 )
         mainAsklayout.addWidget(  self.askTextLine, 0, 2 )
         mainAsklayout.addWidget(  QLabel( self.tr("And save response in:") ), 1, 0 )

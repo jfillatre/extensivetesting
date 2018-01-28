@@ -380,7 +380,7 @@ SYSTEM_CLOSE                = "CLOSE SESSION"
 SYSTEM_CLEAR_SCREEN         = "CLEAR SCREEN"
 SYSTEM_TEXT                 = "SEND TEXT"
 SYSTEM_SHORTCUT             = "SEND SHORTCUT"
-SYSTEM_CHECK_SCREEN           = "CHECKING IF SCREEN"
+SYSTEM_CHECK_SCREEN         = "CHECKING IF SCREEN"
 
 ACTION_SYSTEM_DESCR = [
         { SYSTEM_SESSION:             "Open a ssh session" },
@@ -1006,11 +1006,11 @@ class StepsTableModel(QAbstractTableModel, Logger.ClassLogger):
                 if index.column() == COL_NAME:
                     actions = [ ]
                     if self.mydata[ index.row() ]['parameters']['from-cache']:
-                        actions.append("ASK TO USER FROM CACHE" )
+                        actions.append("USER INPUT PROMPT FROM CACHE" )
                     elif self.mydata[ index.row() ]['parameters']['from-alias']:
-                        actions.append("ASK TO USER FROM ALIAS" )
+                        actions.append("USER INPUT PROMPT FROM ALIAS" )
                     else:
-                        actions.append("ASK TO USER" )
+                        actions.append("USER INPUT PROMPT" )
                         
                     actions.append("AND SAVE IT IN CACHE")
                     

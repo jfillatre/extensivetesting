@@ -2093,7 +2093,7 @@ class Repository(QWidget, Logger.ClassLogger):
             _json = DocumentViewer.instance().prepareTest( wdocument=None, tabId=testId, background = False, 
                                                            runAt = (0,0,0,0,0,0), runType=UCI.SCHED_NOW, runNb=-1, 
                                                            withoutProbes=False, debugActivated=False, 
-                                                           withoutNotif=False, noKeepTr=False, 
+                                                           withoutNotif=False, keepTr=True, 
                                                            prjId=projectId, testFileExtension=self.itemCurrent.fileExtension, 
                                                            testFilePath=pathFile, testFileName=self.itemCurrent.fileName, 
                                                            fromTime=(0,0,0,0,0,0), 

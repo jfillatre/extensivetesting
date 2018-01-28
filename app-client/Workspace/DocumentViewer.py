@@ -4230,7 +4230,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             
     def prepareTest (self, wdocument=None, tabId=0, background = False, runAt = (0,0,0,0,0,0), 
                            runType=0, runNb=-1, withoutProbes=False, debugActivated=False, 
-                           withoutNotif=False, noKeepTr=False, prjId=0, testFileExtension=None, 
+                           withoutNotif=False, keepTr=True, prjId=0, testFileExtension=None, 
                            testFilePath=None, testFileName=None, fromTime=(0,0,0,0,0,0), 
                            toTime=(0,0,0,0,0,0), prjName='', stepByStep=False, breakpoint=False,
                            channelId=False, basicMode=False):
@@ -4291,7 +4291,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
                             'probes-enabled': withoutProbes, 
                             'debug-enabled': debugActivated, 
                             'notifications-enabled': withoutNotif, 
-                            'logs-enabled': noKeepTr,
+                            'logs-enabled': keepTr,
                             'from-time': fromTime, 
                             'to-time': toTime, 
                             'step-mode': stepByStep, 
@@ -4629,19 +4629,19 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         """
         dSched = SchedDialog.SchedDialog( self )
         if dSched.exec_() == QDialog.Accepted:
-            runAt, runType, runNb, withoutProbes, runEnabled, noKeepTr, withoutNotifs, runFrom, runTo = dSched.getSchedtime()
+            runAt, runType, runNb, withoutProbes, runEnabled, keepTr, withoutNotifs, runFrom, runTo = dSched.getSchedtime()
             recursive = False
             if runType > UCI.SCHED_IN:
                 recursive = True
             self.runDocument( background = True, runAt = runAt, runType=runType, runNb=runNb, 
-                                withoutProbes=withoutProbes, noKeepTr=noKeepTr, 
+                                withoutProbes=withoutProbes, keepTr=keepTr, 
                                withoutNotif=withoutNotifs, fromTime=runFrom, toTime=runTo)
         
     def runDocumentNoKeepTr(self):
         """
         Run document without keep testresult
         """
-        self.runDocument(noKeepTr=True)
+        self.runDocument(keepTr=False)
 
     def runDocumentWithoutNotif(self):
         """
@@ -4705,7 +4705,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         return currentDocument
 
     def runDocument (self, background = False, runAt = (0,0,0,0,0,0) , runType=None, runNb=-1, withoutProbes=False, debugActivated=False, 
-                           withoutNotif=False, noKeepTr=False, fromTime=(0,0,0,0,0,0), toTime=(0,0,0,0,0,0), hideApplication=False,
+                           withoutNotif=False, keepTr=True, fromTime=(0,0,0,0,0,0), toTime=(0,0,0,0,0,0), hideApplication=False,
                            reduceApplication=False, stepByStep=False, breakpoint=False):
         """
         Run document
@@ -4747,7 +4747,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
 
         _json = self.prepareTest (  wdocument=currentDocument, tabId=testId, background = background, 
                                     runAt = runAt, runType=schedType, runNb=runNb, withoutProbes=withoutProbes, 
-                                    debugActivated=debugActivated, withoutNotif=withoutNotif, noKeepTr=noKeepTr, 
+                                    debugActivated=debugActivated, withoutNotif=withoutNotif, keepTr=keepTr, 
                                     prjId=currentDocument.project, fromTime=fromTime, toTime=toTime, 
                                     stepByStep=stepByStep, breakpoint=breakpoint  )
 
