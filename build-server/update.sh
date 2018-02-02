@@ -338,6 +338,6 @@ fi
 echo_success; echo
 
 echo "========================================================================="
-echo "- Update terminated!"
+echo "- Update completed successfully!"
 echo "- Continue and go to the web interface (https://$PREVIOUS_EXT_IP/web/index.php)"
 echo "========================================================================="

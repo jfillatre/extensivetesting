@@ -646,7 +646,7 @@ class RepoManager(Logger.ClassLogger):
                     fd_lock.close()
                     
                     # cancel lock when login
-                    if base64.b64encode(login) !=  lockedBy:
+                    if base64.b64encode(login) != lockedBy:
                         return (self.context.CODE_OK,) + ret + (is_locked, lockedBy,)
                                 
             # create missing directory

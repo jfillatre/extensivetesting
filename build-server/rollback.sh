@@ -169,5 +169,5 @@ fi
 echo_success; echo
 
 echo "========================================================================="
-echo "- Rollback terminated!"
+echo "- Rollback completed successfully!"
 echo "========================================================================="

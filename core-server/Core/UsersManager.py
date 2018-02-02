@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
+from binascii import hexlify
+import os
+
 try:
     import MySQLdb
 except ImportError: # python3 support
@@ -215,8 +218,15 @@ class UsersManager(Logger.ClassLogger):
         sha1 = hashlib.sha1()
         sha1.update( "%s%s" % ( Settings.get( 'Misc', 'salt'), password )  )
 
-        sql = """INSERT INTO `%s-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`)""" % prefix
-        sql += """ VALUES('%s', '%s', '0', '0', '1', '0', '0', '%s', '%s', '%s', '1', '0', '0', '%s', '%s', '1', '1', '1')""" % (escape(login), escape(sha1.hexdigest()), escape(email), escape(lang), escape(style), escape(notifications), defaultPrj)
+        apikey_secret = hexlify(os.urandom(20))
+        sql = """INSERT INTO `%s-users`(`login`, `password`, `administrator`, """  % prefix
+        sql += """`leader`, `tester`, `developer`, `system`, `email`, `lang`, """
+        sql += """`style`, `active`, `default`, `online`, `notifications`, """
+        sql += """`defaultproject`, `cli`, `gui`, `web`, `apikey_id`, `apikey_secret`)"""
+        sql += """ VALUES('%s', '%s', '0', """ % (escape(login), escape(sha1.hexdigest()))
+        sql += """'0', '1', '0', '0', '%s', '%s',""" % ( escape(email), escape(lang) )
+        sql += """'%s', '1', '0', '0', '%s', """ % (escape(style), escape(notifications))
+        sql += """'%s', '1', '1', '1', '%s', '%s')""" % (defaultPrj, escape(login), apikey_secret )
         dbRet, lastRowId = DbManager.instance().querySQL( query = sql, insertData=True  )
         if not dbRet: 
             self.error("unable to insert user")

@@ -1246,7 +1246,8 @@ class AdaptersFileDuplicate(Handler):
                                                         mainPath=filePath,
                                                         oldFilename=fileName,
                                                         newFilename=newFileName,
-                                                        extFilename=fileExt
+                                                        extFilename=fileExt,
+                                                        newMainPath=newFilePath
                                                     )
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to duplicate file")
@@ -2942,7 +2943,8 @@ class LibrariesFileDuplicate(Handler):
                                                         mainPath=filePath,
                                                         oldFilename=fileName,
                                                         newFilename=newFileName,
-                                                        extFilename=fileExt
+                                                        extFilename=fileExt,
+                                                        newMainPath=newFilePath
                                                     )
         if success == Context.instance().CODE_ERROR:
             raise HTTP_500("Unable to duplicate file")

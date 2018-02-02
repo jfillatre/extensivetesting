@@ -3347,11 +3347,12 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         self.trace("on adapters file uploaded") 
         
+        lockedBy = base64.b64decode(details["locked-by"])
+        if sys.version_info > (3,): # python3 support
+            lockedBy = lockedBy.decode("utf8")
+            
         if details["code"] == CODE_OK:
-            if details["locked"]:
-                lockedBy = base64.b64decode(details["locked-by"])
-                if sys.version_info > (3,): # python3 support
-                    lockedBy = lockedBy.decode("utf8")
+            if details["locked"] and lockedBy != self.__login:
                 msg = "This file is locked by the user %s\nUnable to save the file!" %  lockedBy
                 self.WarningMsg.emit( "File locked" , msg  )
             else:
@@ -3396,11 +3397,12 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         self.trace("on libraries file uploaded") 
         
+        lockedBy = base64.b64decode(details["locked-by"])
+        if sys.version_info > (3,): # python3 support
+            lockedBy = lockedBy.decode("utf8")
+            
         if details["code"] == CODE_OK:
-            if details["locked"]:
-                lockedBy = base64.b64decode(details["locked-by"])
-                if sys.version_info > (3,): # python3 support
-                    lockedBy = lockedBy.decode("utf8")
+            if details["locked"] and lockedBy != self.__login:
                 msg = "This file is locked by the user %s\nUnable to save the file!" %  lockedBy
                 self.WarningMsg.emit( "File locked" , msg  )
             else:

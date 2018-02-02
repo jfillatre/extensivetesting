@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -25,22 +25,16 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 
 Generic = None
-TestAdapterLib.setVersion("v1110")
+TestAdapterLib.setVersion("v1120")
 TestLibraryLib.setVersion("v800")
 
-__RN__ = """Date: 22/10/2017
+__RN__ = """Date: xx/02/2018
 What's new
-	1. (minor) Gui selenium: new high level function doSwitchToDefaultWindow
-	2. (medium) Tcp server: update to support agent mode
-	3. (medium) Http server: update to support agent mode
-	4. (medium) Ssh terminal: opened event splitted in two, first screen event added
-	5. (minor) Ssh terminal: no more possible to send data if not connected
-	6. (minor) Ssh client: new handleConnectionFailed on bad authentication and negotiation
-	7. (medium) Ssh terminal: new event "open error" when the authentication failed
-	8. (minor) Tcp: wait complete ssl handshake on connection
+	1. (minor) New curl wrapper adapter
+	2. (minor) New dig wrapper adapter
+	3. (minor) New nmap wrapper adapter
 Issues fixed
-	1. (medium) Ssl: disable SNI feature
-	2. (minor) Ssh client: disconnected status not set properly on bad authentication and negotiation
+	1. (medium) xxx
 """
 
 __DESCRIPTION__ = """This library contains all adapters available to test your SUT (System Under Test).

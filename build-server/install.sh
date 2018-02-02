@@ -51,7 +51,7 @@ PRODUCT_VERSION="$(cat "$APP_SRC_PATH"/VERSION)"
 PRODUCT_SVC_NAME="$(echo $APP_NAME | sed 's/.*/\L&/')"
 PRODUCT_SVC_CTRL="xtctl"
 
-read -p "Are you sure to install the product? (yes or no) " yn 
+read -p "Are you sure you want to install the product? (yes or no) " yn 
 case $yn in 
 	[Yy]* ) ;; 
 	[Nn]* ) echo "Ok, goodbye."; exit 1;; 

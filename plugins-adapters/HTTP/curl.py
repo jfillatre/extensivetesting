@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding=utf-8 -*-
 
-# -------------------------------------------------------------------
+# ------------------------------------------------------------------
 # Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
@@ -21,6 +21,7 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
+
 import TestExecutorLib.TestValidatorsLib as TestValidators
 import TestExecutorLib.TestTemplatesLib as TestTemplates
 import TestExecutorLib.TestOperatorsLib as TestOperators
@@ -29,34 +30,23 @@ import TestExecutorLib.TestLibraryLib as TestLibrary
 from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
+import subprocess
 
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-__NAME__="""AUTOMATE"""
+__NAME__="""Curl"""
 
 AGENT_EVENT_INITIALIZED = "AGENT_INITIALIZED"
 AGENT_TYPE_EXPECTED='myagent'
 
-ACTION_PLAY = "play"
-ACTION_PAUSE = "pause"
-ACTION_STOP = "stop"
-ACTION_POWERON = "power on"
-ACTION_POWEROFF = "power off"
+CURL_BIN = "/usr/bin/curl"
 
-STATE_PLAYING         = "playing"
-STATE_ON                 = "on"
-STATE_STANDBY         = "standby"
-STATE_PAUSING        = "pausing"
-STATE_OFF                = "off"
-
-import adapter
-
-class Automate(TestAdapter.Adapter):
-	@doc_public
-	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, agent=None):
+class Curl(TestAdapter.Adapter):
+	@doc_public	
+	def __init__(self, parent, name=None, debug=False, shared=False, agentSupport=False, agent=None, logEventSent=True, logEventReceived=True):
 		"""
-		My adapter
+		Curl wrapper
 
 		@param parent: parent testcase
 		@type parent: testcase
@@ -77,18 +67,23 @@ class Automate(TestAdapter.Adapter):
 		@type agent: string/none
 		"""
 		# check the agent
-		if agent is not None:
-			if agentSupport:
-				if not isinstance(agent, dict) : 
-					raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent argument is not a dict (%s)" % type(agent) )
-				if not len(agent['name']): 
-					raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "agent name cannot be empty" )
-				if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
-					raise TestAdapterLib.ValueException(TestAdapterLib.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
-				
+		if agentSupport and agent is None:
+			raise TestAdapter.ValueException(TestAdapter.caller(), "Agent cannot be undefined!" )
+		if agentSupport:
+			if not isinstance(agent, dict) : 
+				raise TestAdapter.ValueException(TestAdapter.caller(), "agent argument is not a dict (%s)" % type(agent) )
+			if not len(agent['name']): 
+				raise TestAdapter.ValueException(TestAdapter.caller(), "agent name cannot be empty" )
+			if  unicode(agent['type']) != unicode(AGENT_TYPE_EXPECTED): 
+				raise TestAdapter.ValueException(TestAdapter.caller(), 'Bad agent type: %s, expected: %s' % (agent['type'], unicode(AGENT_TYPE_EXPECTED))  )
+		
 		TestAdapter.Adapter.__init__(self, name = __NAME__, parent = parent, debug=debug, realname=name,
 																							agentSupport=agentSupport, agent=agent, shared=shared)
 		self.parent = parent
+		
+		self.logEventSent = logEventSent
+		self.logEventReceived = logEventReceived
+		
 		self.codecX2D = Xml2Dict.Xml2Dict()
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		self.cfg = {}
@@ -96,7 +91,7 @@ class Automate(TestAdapter.Adapter):
 			self.cfg['agent'] = agent
 			self.cfg['agent-name'] = agent['name']
 		self.cfg['agent-support'] = agentSupport
-
+		
 		self.TIMER_ALIVE_AGT = TestAdapter.Timer(parent=self, duration=20, name="keepalive-agent", callback=self.aliveAgent,
 																																logEvent=False, enabled=True)
 		self.__checkConfig()
@@ -105,19 +100,9 @@ class Automate(TestAdapter.Adapter):
 		if agent is not None:
 			if self.cfg['agent-support']:
 				self.prepareAgent(data={'shared': shared})
-				if self.agentIsReady(timeout=30) is None: 
-					raise TestAdapter.ValueException(TestAdapter.caller(), "Agent %s is not ready" % self.cfg['agent-name'] )
-
+				if self.agentIsReady(timeout=30) is None: raise Exception("Agent %s is not ready" % self.cfg['agent-name'] )
 				self.TIMER_ALIVE_AGT.start()
 			
-		# state and timer initialization
-		self.state = TestAdapter.State(parent=self, name='AUTOMATE', initial=STATE_OFF)
-		self.TIMER_A = TestAdapter.Timer(parent=self, duration=2, name="TIMER A", callback=self.onTimerA_Fired, 
-																										logEvent=True, enabled=True, callbackArgs={})
-		self.TIMER_A.start()
-		
-		self.ADP = adapter.Adapter(parent=parent, debug=debug, name=None, shared=shared)
-		
 	def __checkConfig(self):	
 		"""
 		Private function
@@ -207,103 +192,54 @@ class Automate(TestAdapter.Adapter):
 		evt = self.received( expected = tpl, timeout = timeout )
 		return evt
 		
-	def encapsule(self, cmd):
+	@doc_public	
+	def execute(self, cmd):
 		"""
-		pass
+		Execute the curl command
+
+		@param cmd: curl argument
+		@type cmd: string
 		"""
-		tpl = TestTemplates.TemplateMessage()
-		layer = TestTemplates.TemplateLayer(name='AUTOMATE')
-		layer.addKey(name='cmd', data=cmd)
-		tpl.addLayer(layer)
-		return tpl
+		run = "%s %s" % (CURL_BIN, cmd)
+		self.debug(run)
+		ps = subprocess.Popen(run, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		out, err  = ps.communicate() 
+		if out is None:
+			self.error("unable to run curl command: %s" % err)
 		
-	def onTimerA_Fired(self):
+		out = out.decode('latin-1').encode("utf-8") 
+		
+		tpl_rsp = TestTemplates.TemplateMessage()
+		layer_curl = TestTemplates.TemplateLayer('CURL')
+		layer_curl.addKey(name='output', data=out)
+		tpl_rsp.addLayer( layer_curl )
+		
+		if self.logEventReceived:
+			self.logRecvEvent( shortEvt = "curl event", tplEvt = tpl_rsp ) # log event 		
+
+	@doc_public	
+	def hasReceivedEvent(self, expected, timeout=1.0):
 		"""
-		"""
-		self.info("Timer A fired, restart")
-		self.onCallback()
-		self.TIMER_A.restart()
+		Wait to receive "curl event" until the end of the timeout.
+		
+		@param expected:  output expected
+		@type expected: string
+
+		@param timeout: time to wait in seconds (default=1s)
+		@type timeout: float
 	
-	def onCallback(self):
+		@return: curl event or none otherwise
+		@rtype:	templatemessage/templatelayer/none	
 		"""
-		Function to reimplement
-		"""
-		pass
-		
-	def setKO(self):
-		"""
-		"""
-		self.testcase().step1.setFailed("Result set to KO")	
-		
-	def setOK(self):
-		"""
-		"""
-		self.testcase().step1.setPassed("Result set to OK")	
-		
-	def Play(self):
-		"""
-		pass
-		"""
-		# adding event in queue
-		self.logSentEvent(shortEvt=ACTION_PLAY, tplEvt=self.encapsule(cmd=ACTION_PLAY) )
-			
-		if self.state.get() in [ STATE_STANDBY, STATE_ON ]:
-			self.state.set(state=STATE_PLAYING)
-			
-			self.logRecvEvent(shortEvt=STATE_PLAYING, tplEvt=self.encapsule(cmd=STATE_PLAYING) )
-
-	def Stop(self):
-		"""
-		pass
-		"""
-		# adding event in queue
-		self.logSentEvent(shortEvt=ACTION_STOP, tplEvt=self.encapsule(cmd=ACTION_STOP) )
-		
-		if self.state.get() in [ STATE_PLAYING, STATE_PAUSING ]:
-			self.state.set(state=STATE_STANDBY)
-			
-			self.logRecvEvent(shortEvt=STATE_STANDBY, tplEvt=self.encapsule(cmd=STATE_STANDBY) )
-
-	def Pause(self):
-		"""
-		pass
-		"""
-		# adding event in queue
-		self.logSentEvent(shortEvt=ACTION_PAUSE, tplEvt=self.encapsule(cmd=ACTION_PAUSE) )
-			
-		if self.state.get() in [ STATE_PLAYING ]:
-			self.state.set(state=STATE_PAUSING)
-			
-			self.logRecvEvent(shortEvt=STATE_PAUSING, tplEvt=self.encapsule(cmd=STATE_PAUSING) )
-			
-	def On(self):
-		"""
-		pass
-		"""
-		# adding event in queue
-		self.logSentEvent(shortEvt=ACTION_POWERON, tplEvt=self.encapsule(cmd=ACTION_POWERON) )
-			
-		self.state.set(state=STATE_ON)
-
-	def Off(self):
-		"""
-		pass
-		"""
-		# adding event in queue
-		self.logSentEvent(shortEvt=ACTION_POWEROFF, tplEvt=self.encapsule(cmd=ACTION_POWEROFF) )
-			
-		self.state.set(state=STATE_OFF)
-		
-	def getNbPlaying(self, nb=2, timeout=10):
-		"""
-		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ): 
+		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
-		
-		events = []
 
-		events.append( self.encapsule(cmd=STATE_PLAYING) )
-		events.append( self.encapsule(cmd=STATE_PLAYING) )
-
-		return self.received(expected=events, timeout=timeout, AND=True, XOR=False)
+		tpl_expected = TestTemplatesLib.TemplateMessage()
+		layer_curl = TestTemplates.TemplateLayer('CURL')
+		layer_curl.addKey(name='output', data=expected)
+		tpl_expected.addLayer( layer_curl )
 		
+		evt = self.received( expected = tpl_expected, timeout = timeout )
+		if evt is None:
+			return None
+		return evt

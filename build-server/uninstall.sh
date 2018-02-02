@@ -306,5 +306,5 @@ if [ "$CONFIG_APACHE" = "Yes" ]; then
 fi
 
 echo "========================================================================="
-echo "- Uninstallation terminated!"
+echo "- Uninstallation completed successfully!"
 echo "========================================================================="

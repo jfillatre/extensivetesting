@@ -455,13 +455,8 @@
 							$selected_admin = $cur_usr['administrator'];
 							$selected_monitor = $cur_usr['leader'];
 							$selected_tester = $cur_usr['tester'];
-							// $selected_developer = $cur_usr['developer'];
-							// $selected_system = $cur_usr['system'];
 							$selected_lang = $cur_usr['lang'];
 							$selected_style = $cur_usr['style'];
-							// $selected_cli = $cur_usr['cli'];
-							// $selected_gui = $cur_usr['gui'];
-							// $selected_web = $cur_usr['web'];
 							$default_project = $cur_usr['defaultproject'];
 							// PASS;FAIL;UNDEF;COMPLETE;ERROR;KILLED;CANCELLED
 							// false;false;false;false;false;false;false;
@@ -476,7 +471,8 @@
                     if ($c_called == "edit")
                         $req_login = "disabled";
                 }
-				$tb = '<table border="0" ><tr><td></td><td><div class="line" /></div> </td></tr><tr><td  class="col1">'.lang('admin-users-login').': </td><td><input '.$req_login.' id="req_login" type="text" value="'.$val_login.'"></td></tr>';
+				$tb = '<table border="0" ><tr><td></td><td><div class="line" /></div> </td></tr>';
+                $tb .= '<tr><td  class="col1">'.lang('admin-users-login').': </td><td><input '.$req_login.' id="req_login" type="text" value="'.$val_login.'"></td></tr>';
 				
 				// password
 				$req_pwd = "";
@@ -485,6 +481,14 @@
 				}
 				$tb .= '<tr><td  class="col1">'.lang('password').': </td><td><input '.$req_pwd.' id="req_pwd" type="password" value="'.$val_pwd.'"></td></tr>';
 				
+                $val_apikey = '';
+                $val_apiid = $cur_usr['apikey_id'];
+                $val_apisecret = $cur_usr['apikey_secret'];
+                if ( $val_apiid != null and $val_apisecret != null) {
+                  $val_apikey = base64_encode( $val_apiid.":".$val_apisecret);
+                }
+                $tb .= '<tr><td  class="col1">'.lang('api-key').': </td><td><label>'.$val_apikey.'</label></td></tr>';
+                
 				// levels
 				$checked = '';
 				$disabled = '';
@@ -505,26 +509,8 @@
                     $checked='checked="true"';
                 }
 				$levels .= '<input type="radio" name="level" id="req_level_tester" '.$checked.' '.$disabled.' />'.lang('tester');
-				// if ( $selected_developer ) { $checked='checked="true"'; } else {$checked = ''; };
-				// $levels .= '<input type="checkbox" id="req_level_developer" '.$checked.' '.$disabled.' >'.lang('developer');
-				// if ( $selected_system ) { $checked='checked="true"'; } else {$checked = ''; };
-				// $levels .= '<input type="checkbox" id="req_level_system" '.$checked.' disabled >'.lang('system');
 
 				$tb .= '<tr><td></td><td><div class="line" /></div> </td></tr><tr><td  class="col1">'.lang('admin-users-rights').': </td><td>'.$levels.'</td></tr>';
-
-				// if ( $selected_cli ) { $checked='checked="true"'; } else {$checked = ''; };
-				// $access = '<input type="checkbox" id="req_access_cli" '.$checked.' '.$disabled.' >'.lang('cli');
-				// if ( $selected_gui ) { $checked='checked="true"'; } else {$checked = ''; };
-                // set default value to web/api if nothing is checked
-                // if ( !$selected_cli and !$selected_gui and !$selected_web) { $checked='checked="true"'; }
-				// $access .= '<input type="checkbox" id="req_access_gui" '.$checked.' '.$disabled.' >'.lang('gui');
-				// if ( $selected_web ) { $checked='checked="true"'; } else {$checked = ''; };
-                // set default value to web/api if nothing is checked
-                // if ( !$selected_cli and !$selected_gui and !$selected_web) { $checked='checked="true"'; }
-				// $access .= '<input type="checkbox" id="req_access_web" '.$checked.' '.$disabled.' >'.lang('web').'/'.lang('api');
-			
-				// $tb .= '<tr><td  class="col1">'.lang('admin-users-access').': </td><td>'.$access.'</td></tr>';
-
 
 				// email
 				$tb .= '<tr><td></td><td><div class="line" /></div> </td></tr><tr><td  class="col1">'.lang('admin-users-email').': </td><td><input id="req_email" type="text" size="30" value="'.$val_email.'"></td><td><small>(ex: user1@foo.com; user2@foo.com)</small></td></tr>';

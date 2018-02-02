@@ -463,7 +463,7 @@ fi
 
 if [ "$DL_MISSING_PKGS" = "Yes" ]; then
     echo -ne "* Adding network tools                \r" 
-	$YUM_BIN -y install vim net-snmp-utils unzip zip gmp wget ntp nmap 1>> "$LOG_FILE" 2>&1
+	$YUM_BIN -y install vim net-snmp-utils unzip zip gmp wget curl ntp nmap bind-utils 1>> "$LOG_FILE" 2>&1
     if [ $? -ne 0 ]; then
         echo_failure; echo
         echo "Unable to download packages httpd and more with yum" >> "$LOG_FILE"
@@ -1403,7 +1403,7 @@ rm -rf "$APP_PATH"/default.cfg.tmp 1>> "$LOG_FILE" 2>&1
 
 if [ "$SILENT" == "custom" -o  "$SILENT" == "install" ]; then
         echo "========================================================================="
-        echo "- Installation terminated!"
+        echo "- Installation completed successfully!"
         echo "- Continue and go to the web interface (https://$EXT_IP/web/index.php)"
         echo "========================================================================="
 fi
