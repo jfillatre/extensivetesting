@@ -1522,8 +1522,9 @@ class Socket(GenericTool.Tool):
         """
         Constructor
         """
-        GenericTool.Tool.__init__(self, controllerIp, controllerPort, toolName, toolDesc, defaultTool, supportProxy=supportProxy,
-                                        proxyIp=proxyIp, proxyPort=proxyPort, sslSupport=sslSupport)
+        GenericTool.Tool.__init__(self, controllerIp, controllerPort, toolName, 
+                                  toolDesc, defaultTool, supportProxy=supportProxy,
+                                  proxyIp=proxyIp, proxyPort=proxyPort, sslSupport=sslSupport)
         self.__type__ = __TYPE__
 
     def onResetAgentCalled(self):

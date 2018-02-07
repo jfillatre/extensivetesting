@@ -68,7 +68,9 @@ if sys.version_info > (3,):
 
 __TOOL_TYPE__ = GenericTool.TOOL_AGENT
 __WITH_IDE__ = False  
-__APP_PATH__ = '%s\%s\%s' % (Settings.getDirExec(), Settings.get('Paths', 'bin'), Settings.get('BinWin', 'adb') )
+__APP_PATH__ = '%s\%s\%s' % (Settings.getDirExec(), 
+                             Settings.get('Paths', 'bin'), 
+                             Settings.get('BinWin', 'adb') )
 __TYPE__="""adb"""
 __RESUME__="""This agent enables to control mobile phone throught android debug bridge.
 Can be used on Windows only."""
@@ -149,8 +151,11 @@ class UiAutomatorThread(threading.Thread):
         """
         self.parent.onToolLogWarningCalled("Starting UIautomator on device...")
 
-        __adbexe__ = '%s\%s\%s' % (Settings.getDirExec(), Settings.get('Paths', 'bin'), Settings.get('BinWin', 'adb-exe') )
-        __adbbin__ = '%s\%s' % (Settings.getDirExec(), Settings.get('Paths', 'bin'))
+        __adbexe__ = '%s\%s\%s' % (Settings.getDirExec(), 
+                                   Settings.get('Paths', 'bin'), 
+                                   Settings.get('BinWin', 'adb-exe') )
+        __adbbin__ = '%s\%s' % (Settings.getDirExec(), 
+                                Settings.get('Paths', 'bin'))
         
         self.trace("uploading jar files on devices")
         __cmd__ = '"%s" push "%s\\Adb\\bundle.jar" /data/local/tmp/' % (__adbexe__, __adbbin__ )
@@ -187,7 +192,9 @@ class UiAutomatorThread(threading.Thread):
                 self.parent.onToolLogWarningCalled("UIautomator is started")
                 
                 
-                __cmd__ = '"%s" forward tcp:%s tcp:%s' % (__adbexe__, self.parent.localPort, self.parent.devicePort )
+                __cmd__ = '"%s" forward tcp:%s tcp:%s' % (__adbexe__, 
+                                                          self.parent.localPort, 
+                                                          self.parent.devicePort )
                 self.trace("activate forward: %s" % __cmd__)
                 ret = subprocess.call(__cmd__, shell=True)
                 self.trace("%s" % ret)
@@ -247,7 +254,9 @@ class AdbScreenThread(threading.Thread):
         """
         On running thread
         """
-        __adbexe__ = '%s\%s\%s' % (Settings.getDirExec(), Settings.get('Paths', 'bin'), Settings.get('BinWin', 'adb-exe') )
+        __adbexe__ = '%s\%s\%s' % (Settings.getDirExec(), 
+                                   Settings.get('Paths', 'bin'), 
+                                   Settings.get('BinWin', 'adb-exe') )
         __ret__ = '%s\screncapture.png' % self.parent.getTemp()
         __cmd__ = '"%s" pull /data/local/tmp/screncapture.png "%s"' % ( __adbexe__, __ret__)
         __ret2__ = '%s\layout.xml' % self.parent.getTemp()  
@@ -693,13 +702,16 @@ class Adb(GenericTool.Tool):
         Run action received from server
         """
         try:
-            globalId = "%s_%s_%s" % (request['script_id'], request['source-adapter'], request['data']['command-id'] )
+            globalId = "%s_%s_%s" % (request['script_id'], 
+                                     request['source-adapter'], 
+                                     request['data']['command-id'] )
             self.onToolLogWarningCalled( "<< %s #%s" % (request['data']['command-name'], globalId) )
         except Exception as e:
             self.error('unable to read request: %s' % e )
         else:
-            t = threading.Thread(target=self.__runAction, kwargs={ 'request': request, 'method': request['data']['command-name'], 
-                                                                    'params': request['data']['command-params'] } )
+            t = threading.Thread(target=self.__runAction, kwargs={ 'request': request, 
+                                                                   'method': request['data']['command-name'], 
+                                                                   'params': request['data']['command-params'] } )
             t.start()
 
     def __runAction(self, request, method, params):
@@ -751,7 +763,7 @@ class Adb(GenericTool.Tool):
             else:
 
                 # notify the tester
-                self.sendNotify( request=request, data={ 'command-name': request['data']['command-name'],
+                self.sendNotify( request=request, data={'command-name': request['data']['command-name'],
                                                         'command-id': request['data']['command-id'],
                                                         'command-result': False,
                                                         'command-value': ret }  )  

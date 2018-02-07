@@ -39,7 +39,7 @@ from Libs import Settings
 
 # Initialize settings module
 Settings.initialize()
-settings = Settings.instance()
+# settings = Settings.instance()
 
 # prepare the build date
 today = datetime.datetime.today()

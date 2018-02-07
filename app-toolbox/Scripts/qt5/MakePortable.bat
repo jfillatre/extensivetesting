@@ -33,5 +33,6 @@ echo Build the project...
 cd "%Project%"
 %Python% "%Project%\ConfigureExe.py" portable
 %PythonPath%\Scripts\pyinstaller.exe --clean --noconfirm BuildWinIns.spec
+%Python% "%Project%\BuildWinIns.py"
 
 pause

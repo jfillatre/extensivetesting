@@ -628,7 +628,7 @@ class Task(Logger.ClassLogger):
         # END
         
         else:
-            self.error('should not be happen')
+            self.error('[Run Type=%s] not supported' % str(runType) )
         return timestamp
 
     def isSuccessive(self):

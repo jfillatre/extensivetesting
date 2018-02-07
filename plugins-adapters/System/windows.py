@@ -186,6 +186,10 @@ class Windows(TestAdapterLib.Adapter):
 				#			Invalid GET Expression.
 							
 				# raw format
+				# decode the dos response command with cp850 encoding
+				# and convert to utf8
+				raw = raw.decode("cp850").encode("utf8")
+
 				if data['get'] == EXEC_CMD:
 					if self.logEventReceived:		
 						tplWin = TestTemplatesLib.TemplateLayer(name='WINDOWS')

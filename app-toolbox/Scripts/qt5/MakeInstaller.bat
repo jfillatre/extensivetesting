@@ -24,7 +24,7 @@ set Project=%~dp0..\..\
 
 set PythonPath=C:\Python36
 set Python=%PythonPath%\python.exe
-set Output=E:\My Lab\01 ExtensiveTesting\02 - Output\
+set Output=D:\My Lab\outputs\
 
 :: make resources
 %PythonPath%\python.exe -m PyQt5.pyrcc_main -o "%Project%\Resources\Resources.py" "%Project%\Resources\__resources.qrc"

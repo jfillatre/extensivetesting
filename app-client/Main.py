@@ -44,11 +44,11 @@ __TESTERS__ = [ "Emmanuel Monsoro", "Thibault Lecoq"  ]
 # project start in year
 __BEGIN__="2010"
 # year of the latest build
-__END__="2017"
+__END__="2018"
 # date and time of the buid
-__BUILDTIME__="29/12/2017 17:56:00"
+__BUILDTIME__="07/02/2018 19:06:15"
 # Redirect stdout and stderr to log file only on production
-REDIRECT_STD=False
+REDIRECT_STD=True
 # disable warning from qt framework on production 
 QT_WARNING_MODE=False
 # workspace offline, for dev only
@@ -138,7 +138,7 @@ if sys.platform in [ "win32", "linux2", "linux" ]:
                                 QThread, pyqtSignal, QT_VERSION_STR, PYQT_VERSION_STR, QSettings, 
                                 QFile, Qt, QTimer, QSize, QUrl, QIODevice, QT_VERSION_STR, QEvent,
                                 qInstallMsgHandler, QTranslator, QLibraryInfo, QObject, QProcess,
-                                QByteArray)
+                                QByteArray, QLocale )
         from PyQt4.QtNetwork import (QUdpSocket, QHostAddress)
     except ImportError:
         from PyQt5.QtGui import (QIcon, QDesktopServices, QCursor, QColor, QPixmap, QFont)
@@ -149,7 +149,8 @@ if sys.platform in [ "win32", "linux2", "linux" ]:
         from PyQt5.QtCore import (QDateTime, QtDebugMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg, 
                                 QThread, pyqtSignal, QT_VERSION_STR, PYQT_VERSION_STR, QSettings, 
                                 QFile, Qt, QTimer, QSize, QUrl, QIODevice, QT_VERSION_STR, 
-                                QTranslator, QLibraryInfo, QObject, QProcess, QEvent, QByteArray )
+                                QTranslator, QLibraryInfo, QObject, QProcess, QEvent, QByteArray,
+                                QLocale )
         from PyQt5.QtCore import qInstallMessageHandler as qInstallMsgHandler
         from PyQt5.QtNetwork import (QUdpSocket, QHostAddress)
 else:
@@ -183,6 +184,10 @@ import Settings
 import Recorder as WRecorder
 import ReleaseNotes as RN
 import Workspace.Repositories as Repositories
+
+# set locale to english
+newLocale = QLocale(QLocale().English)
+QLocale().setDefault(newLocale)
 
 class MessageHandler(object):
     """
@@ -403,6 +408,9 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         self.trace( "Qt version: %s" % QT_VERSION_STR )
         self.trace( "PyQt version: %s" % PYQT_VERSION_STR )
 
+        self.trace( "Locale Country: %s" % QLocale().countryToString(QLocale().country()) )
+        self.trace( "Locale Point: %s" % QLocale().decimalPoint() )
+        
         # read update settings ?
         settingsBackup = "%s//Update//backup_settings.ini" % QtHelper.dirExec()
         if os.path.exists(settingsBackup):
@@ -3179,18 +3187,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         rnDialog.parseRn( text = rn )
         rnDialog.exec_()
 
-    # def onRefreshRepo(self, repoType, data, saveAsOnly, forRuns, projectid):
-        # """
-        # On refresh repo
-        # """
-        # if forRuns:
-            # WWorkspace.WDocumentViewer.instance().onRefreshRepositoryRuns(repoType, data, projectid)
-        # else:
-            # if repoType == UCI.REPO_ARCHIVES:
-                # WServerExplorer.instance().onRefreshArchives(data=data)
-            # else:
-                # WWorkspace.WRepositories.instance().onRefreshRemote(repoType, data, saveAsOnly, projectid)
-
     def onRefreshTestsRepo(self, data, projectId, forSaveAs, forRuns):
         """
         """
@@ -3443,6 +3439,7 @@ if __name__ == '__main__':
     if sys.platform in [ "linux", "linux2" ] :
         app = QApplication(sys.argv)
 
+        
     # register an alternative Message Handler to hide warning
     # messageHandler = MessageHandler()
     # qInstallMsgHandler(messageHandler.process) # disable in v11, crash with webkit

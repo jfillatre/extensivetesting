@@ -62,7 +62,9 @@ if sys.version_info > (3,):
 __TOOL_TYPE__ = GenericTool.TOOL_AGENT
 __WITH_IDE__ = True
   
-__APP_PATH__ = '%s\%s\%s' % (Settings.getDirExec(), Settings.get('Paths', 'bin'), Settings.get('BinWin', 'sikuli') )
+__APP_PATH__ = '%s\%s\%s' % (Settings.getDirExec(), 
+                             Settings.get('Paths', 'bin'), 
+                             Settings.get('BinWin', 'sikuli') )
 if sys.platform == "linux2": __APP_PATH__ = Settings.get('BinLinux', 'sikulix')
 
 __TYPE__="""sikulix-server"""
@@ -527,8 +529,10 @@ class SikulixServer(GenericTool.Tool):
 
         # send through notify only a thumbnail
         try:
-            self.sendData(request=request, data={   'data': thumbnail, 'filename': '%s_%s.%s' % (action, actionId, extension),
-                                                    'action': action, 'action-id': "%s" % actionId, 
+            self.sendData(request=request, data={   'data': thumbnail, 
+                                                    'filename': '%s_%s.%s' % (action, actionId, extension),
+                                                    'action': action, 
+                                                    'action-id': "%s" % actionId, 
                                                     'adapter-id': "%s" % adapterId  } )
         except Exception as e:
             self.error("unable to send notify through notify: %s" % e)
@@ -540,8 +544,10 @@ class SikulixServer(GenericTool.Tool):
         Exec action
         """
         # globalID = <id_script>_<test_replay_id>_<id_adapter>_<id_action>
-        globalId = "%s_%s_%s_%s" % (request['script_id'], request['test-replay-id'],
-                                    request['source-adapter'], request['data']['action-id'] )
+        globalId = "%s_%s_%s_%s" % (request['script_id'], 
+                                    request['test-replay-id'],
+                                    request['source-adapter'], 
+                                    request['data']['action-id'] )
         self.onToolLogWarningCalled( "<< Action (%s) called: %s" % (globalId, request['data']['action'])  )
         
         # dispatch action

@@ -540,7 +540,8 @@ class File(GenericTool.Tool):
                 self.sendNotify(request, data={ 'cmd': request['data']['cmd'],
                                                 'result': fileExists,
                                                 'request-id': request['data']['request-id'],
-                                                'path':request['data']['path'], 'modification-date': str(fileDate) } )
+                                                'path':request['data']['path'], 
+                                                'modification-date': str(fileDate) } )
                                                 
             elif request['data']['cmd'] == 'List Files':
                 self.trace("get list of files in : %s" % request['data']['path'] )
@@ -678,14 +679,18 @@ class File(GenericTool.Tool):
             elif request['data']['cmd'] == 'Start Follow File':
                 
                 
-                follow_id = "%s_%s_%s" % (request['script_id'], request['source-adapter'], request['data']['request-id'] )
-                self.trace( "Starting follow ScriptId=%s AdapterId=%s" % (request['script_id'], request['source-adapter']) )
+                follow_id = "%s_%s_%s" % (request['script_id'], 
+                                          request['source-adapter'], 
+                                          request['data']['request-id'] )
+                self.trace( "Starting follow ScriptId=%s AdapterId=%s" % (request['script_id'], 
+                                                                          request['source-adapter']) )
                 
                 if follow_id not in self.followThreads:
 
                     req_saved = copy.deepcopy(request)
                     newthread = FollowThread(parent=self, request=request  )
-                    newthread.startFollow(path=req_saved['data']['path'], extensions=req_saved['data']['extensions'])
+                    newthread.startFollow(path=req_saved['data']['path'], 
+                                          extensions=req_saved['data']['extensions'])
                     newthread.start()
                     
                     self.followThreads[ follow_id ] = newthread
@@ -709,8 +714,11 @@ class File(GenericTool.Tool):
                                                 
             elif request['data']['cmd'] == 'Stop Follow File':
 
-                follow_id = "%s_%s_%s" % (request['script_id'], request['source-adapter'], request['data']['follow-id'] )
-                self.trace("stopping follow ScriptId=%s AdapterId=%s" % (request['script_id'], request['source-adapter']) )
+                follow_id = "%s_%s_%s" % (request['script_id'], 
+                                          request['source-adapter'], 
+                                          request['data']['follow-id'] )
+                self.trace("stopping follow ScriptId=%s AdapterId=%s" % (request['script_id'], 
+                                                                         request['source-adapter']) )
                 if follow_id in self.followThreads:
                     self.followThreads[ follow_id ].stop()
                     self.followThreads[ follow_id ].join()
@@ -723,7 +731,8 @@ class File(GenericTool.Tool):
                 self.trace("follow id=%s - notify sent" % follow_id)
 
             elif request['data']['cmd'] == 'Compare Files':
-                self.trace("compare file %s with %s" % (request['data']['path'], request['data']['path-dst']) )
+                self.trace("compare file %s with %s" % (request['data']['path'], 
+                                                        request['data']['path-dst']) )
                 filesExists = True
                 htmlResult = ''
                 try:
@@ -774,7 +783,8 @@ class File(GenericTool.Tool):
                 a = self.context()[request['uuid']][request['source-adapter']]
                 a.putItem( lambda: self.execAction(request) )
             else:
-                self.error("Adapter context does not exists TestUuid=%s AdapterId=%s" % (request['uuid'], request['source-adapter'] ) )
+                self.error("Adapter context does not exists TestUuid=%s AdapterId=%s" % (request['uuid'], 
+                                                                                         request['source-adapter'] ) )
         else:
             self.error("Test context does not exits TestUuid=%s" % request['uuid'])
         self.__mutex__.release()

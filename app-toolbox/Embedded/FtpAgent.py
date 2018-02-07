@@ -296,7 +296,9 @@ class Ftp(GenericTool.Tool):
         On reset test context event
         """
         self.onToolLogWarningCalled( "<< Resetting Context TestId=%s AdapterId=%s" % (scriptId, adapterId) )
-        self.trace("Resetting TestUuid=%s ScriptId=%s AdapterId=%s" % (testUuid, scriptId, adapterId) )
+        self.trace("Resetting TestUuid=%s ScriptId=%s AdapterId=%s" % (testUuid, 
+                                                                       scriptId, 
+                                                                       adapterId) )
 
         currentTest = self.context()[testUuid][adapterId]
         if currentTest.ctx() is not None:
@@ -337,7 +339,8 @@ class Ftp(GenericTool.Tool):
                 
                 # connect
                 try:
-                    connected = currentTest.ctx().FTP_LIB.connect(host=data['dest-ip'] , port=data['dest-port'] )
+                    connected = currentTest.ctx().FTP_LIB.connect(host=data['dest-ip'] , 
+                                                                  port=data['dest-port'] )
                 except Exception as e:
                     self.sendError( request , data={"cmd": cmd , "err-msg": str(e)} )
                 else:
@@ -359,7 +362,8 @@ class Ftp(GenericTool.Tool):
             elif cmd == 'Login':
                 if not currentTest.ctx().connected: raise Exception('not connected')
                 try:
-                    logged = currentTest.ctx().FTP_LIB.login(user=data['user'] , passwd=data['password'] )
+                    logged = currentTest.ctx().FTP_LIB.login(user=data['user'] , 
+                                                             passwd=data['password'] )
                 except Exception as e:
                     self.sendError( request , data={"cmd": cmd , "err-msg": str(e)} )
                 else:
@@ -509,8 +513,9 @@ class Ftp(GenericTool.Tool):
                         f.close()
                         
                         # zip the file and upload them
-                        ret, pathZip, filenameZip = self.createZip(callId=internalID, zipReplayId=request['test-replay-id'],
-                                                                            zipPrefix="agent") 
+                        ret, pathZip, filenameZip = self.createZip(callId=internalID, 
+                                                                   zipReplayId=request['test-replay-id'],
+                                                                   zipPrefix="agent") 
                         if not ret:
                             self.error('unable to create zip file')
                             try:
@@ -525,9 +530,11 @@ class Ftp(GenericTool.Tool):
                     self.sendError( request , data={"cmd": cmd , "err-msg": str(e)} )
                 else:
                     if toPrivate:
-                        self.sendNotify(request, data={ 'cmd': cmd, 'result': "%s" % rsp, 'content': "%s" % len(read_data) } )
+                        self.sendNotify(request, data={ 'cmd': cmd, 'result': "%s" % rsp, 
+                                                        'content': "%s" % len(read_data) } )
                     else:
-                        self.sendNotify(request, data={ 'cmd': cmd, 'result': "%s" % rsp, 'content': read_data } )
+                        self.sendNotify(request, data={ 'cmd': cmd, 'result': "%s" % rsp, 
+                                                        'content': read_data } )
                     
             # put file
             elif cmd == 'Put File': 

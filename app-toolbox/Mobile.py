@@ -25,6 +25,8 @@
 Mobile widget
 """
 
+import sys
+
 try:
 	from PyQt4.QtGui import (QWidget, QLabel, QCheckBox, QVBoxLayout, QTreeView, QAbstractItemView, 
 							QHBoxLayout, QIcon, QMenu, QCursor, QApplication, QPainter, QPen,
@@ -421,7 +423,13 @@ class MobileWidget(QWidget):
                 bounds_str = attribute.nodeValue()
  
         self.tableModel.mylist = attributes
-        self.tableModel.reset()
+
+        if sys.version_info > (3,):
+            self.tableModel.beginResetModel()
+            self.tableModel.endResetModel()
+        else:
+            self.tableModel.reset()
+            
         self.mobileTableView.resizeColumnsToContents ()
         self.mobileTableView.resizeRowsToContents()
         

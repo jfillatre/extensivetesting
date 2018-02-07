@@ -1,12 +1,12 @@
 
 18.0.0
-	Date: xx/xx/2018
+	Date: xx/02/2018
 	What's new
 		1. (minor) test library: change open source project url in test report header
 		2. (major) toolboxes windows and linux no more embedded in the package
 		3. (medium) no more default agent and probe running on server side
 		4. (medium) no more toolbox deployed on boot server
-		5. (medium) build: update of the python selenium library with version 3.7.0
+		5. (medium) build: update of the python selenium library with version 3.9.0
 		6. (minor) remove deprecated python modules: commands, compiler
 		7. (major) rest api: /rest/results/* updated to support replay id, new type of reports and more
 		8. (major) test library: task uuid added in test logger xml events
@@ -26,7 +26,12 @@
 		22. (major) cleanup on default users, new monitor user with read only access
 		23. (major) New major client 18.0.0 embedded
 		24. (medium) Web server: change on add user page, no more options for access rights
+		25. (medium) New set of sut adapters 12.0.0
+		26. (minor) New tests samples
+		27. (minor) test library: support float with comma in test properties
 	Issues Fixed
 		1. (minor) test library: undefined variable in virtualRun function #issue1
 		2. (minor) unable to reset libraries and adapters repositories
 		3. (minor) unable to import test abstract, extension not authorized
+		4. (minor) test library: fix bad test basic report with test abstract in testplan
+		5. (minor) test library: fix encoding in info messages in test report

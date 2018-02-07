@@ -299,6 +299,8 @@ class ProjectsManager(Logger.ClassLogger):
         prefix = Settings.get( 'MySql', 'table-prefix')
         escape = MySQLdb.escape_string
         
+        projectId = str(projectId)
+        
         # not possible to delete default project common
         if int(projectId) == 1:
             self.error("delete the default project not authorized")

@@ -840,11 +840,17 @@ class TestSuitesManager(object):
                 elif ts['is-abstract']:
                     v = ts['tc'][0].get_final_verdict()
                     if v == PASS: 
-                        reports.append( u'<li data-type="passed"><font color="#008000">%s</font>' % tsName )
+                        reports.append( u'<li data-type="passed">')
+                        reports.append( u'<input type="checkbox" id="c%s"  class="isexpanded" />' % index)
+                        reports.append( u'<label for="c%s"><font color="#008000">%s</font></label>' % (index,tsName) )
                     elif v == FAIL: 
-                        reports.append( u'<li data-type="failed"><font color="#FF00000">%s</font>' % tsName )
+                        reports.append( u'<li data-type="failed">')
+                        reports.append( u'<input type="checkbox" id="c%s"  class="isexpanded" />' % index)
+                        reports.append( u'<label for="c%s"><font color="#FF00000">%s</font></label>' % (index,tsName) )
                     else: 
-                        reports.append( u'<li data-type="undefined"><font color="#FFBB3D">%s</font>' % tsName )
+                        reports.append( u'<li data-type="undefined">')
+                        reports.append( u'<input type="checkbox" id="c%s"  class="isexpanded" />' % index)
+                        reports.append( u'<label for="c%s"><font color="#FFBB3D">%s</font></label>' % (index,tsName) )
 
                     if self.__tp_name is None: reports.append(  u" <span class=\"test_time\">(%s, %.3f seconds)</span >" % (ts['started-at'], ts['duration']) )
 
@@ -2809,8 +2815,10 @@ class Step(object):
         tpl.addLayer(tpl_layer)
 
         # log event
-        TLX.instance().log_step_failed( dataMsg=tpl.getEvent(), shortMsg=shortMsg, fromComponent = "%s [Step_%s]" % (TC,  self.id_),
-                                        tcid = self.tcid_, fromlevel=LEVEL_TE, tolevel=LEVEL_USER, testInfo=self.tcparent.getTestInfo() )
+        TLX.instance().log_step_failed( dataMsg=tpl.getEvent(), shortMsg=shortMsg, 
+                                        fromComponent = "%s [Step_%s]" % (TC,  self.id_),
+                                        tcid = self.tcid_, fromlevel=LEVEL_TE, tolevel=LEVEL_USER, 
+                                        testInfo=self.tcparent.getTestInfo() )
 
         self.saveStep()
         
@@ -3709,9 +3717,11 @@ class TestCase(object):
         if not internal: self.warning("setFailed: deprecated function")
         self.__TESTCASE_VERDICT = FAIL
         if len( "%s" % str(internalErr) ): 
-            # self.__errors.append( str(internalErr).decode("latin1") )
+            # try:
             self.__errors.append( str(internalErr).decode("utf8") )
-
+            # except Exception as e:
+                # self.__errors.append( str(internalErr).decode("utf8", errors="ignore") )
+                
     def getErrors(self):
         """
         """
@@ -4262,9 +4272,11 @@ class TestCase(object):
         
         typeMsg = ''
         if txt:
-            # self.__logs.append( str(txt).decode("latin1") )
-            self.__logs.append( str(txt).decode("utf8") )
-            
+            try:
+                self.__logs.append( str(txt).decode("utf8") )
+            except Exception as e:
+                self.__logs.append( str(txt).decode("utf8", errors="replace") )
+                
             if raw: typeMsg = 'raw'
             try:
                 TLX.instance().log_testcase_info(message=txt,component=TC, tcid = self.__id, bold=bold,
@@ -4272,9 +4284,9 @@ class TestCase(object):
                         tolevel=LEVEL_USER, testInfo=self.__testInfo )
             except UnicodeEncodeError:
                 TLX.instance().log_testcase_info(message=txt.encode('utf8'),component=TC, tcid = self.__id, bold=bold,
-                        italic=italic, multiline=multiline, typeMsg=typeMsg, fromlevel=LEVEL_TE, 
-                        tolevel=LEVEL_USER, testInfo=self.__testInfo )
-                        
+                    italic=italic, multiline=multiline, typeMsg=typeMsg, fromlevel=LEVEL_TE, 
+                    tolevel=LEVEL_USER, testInfo=self.__testInfo )
+                    
     def error (self, txt, bold = False, italic=False, multiline=False, raw=False):
         """
         Display an error message associated to the testcase

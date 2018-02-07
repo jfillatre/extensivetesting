@@ -402,7 +402,7 @@ class SessionContextNotify(Handler):
           - session
         summary: Notify all users with context
         description: ''
-        operationId: sessionContext
+        operationId: sessionContextNotify
         produces:
           - application/json
         parameters:

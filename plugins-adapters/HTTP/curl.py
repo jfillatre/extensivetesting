@@ -234,7 +234,7 @@ class Curl(TestAdapter.Adapter):
 		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
 
-		tpl_expected = TestTemplatesLib.TemplateMessage()
+		tpl_expected = TestTemplates.TemplateMessage()
 		layer_curl = TestTemplates.TemplateLayer('CURL')
 		layer_curl.addKey(name='output', data=expected)
 		tpl_expected.addLayer( layer_curl )

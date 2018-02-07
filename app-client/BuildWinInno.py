@@ -94,7 +94,7 @@ class InnoScript:
         d.append( "AppVersion=%s" % appVersion )
         d.append( "AppVerName=%s %s" % ( appName, appVersion ) )
         d.append( "AppPublisher=%s" % appAuthor )
-        d.append( "AppPublisherURL=http://%s" % settings.readValue( key = 'Common/url' ) )
+        d.append( "AppPublisherURL=https://%s" % settings.readValue( key = 'Common/url' ) )
         d.append( "VersionInfoVersion=%s" % appVersion )
         d.append( "DefaultDirName={pf}\%s" % appName )
         d.append( "DefaultGroupName=\%s" % appName )

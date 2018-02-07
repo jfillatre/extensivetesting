@@ -1639,7 +1639,7 @@ class SharedListModel(QAbstractListModel):
         Constructor
         """
         super(SharedListModel, self).__init__(parent)
-        self.listdata = []
+        self.listdata = [ ]
  
     def rowCount(self, parent=QModelIndex()): 
         """
@@ -1670,18 +1670,23 @@ class SharedListModel(QAbstractListModel):
             self.endResetModel()
         else:
             self.reset()
-            
+
     def data(self, index, role=Qt.DisplayRole): 
         """
         Return data
         """
-        if not index.isValid():
-            return q()
-        
-        if role == Qt.DisplayRole:
-            return q(self.listdata[index.row()]['name'])
+        if index.isValid() and role == Qt.DisplayRole:
+            return QVariant(self.listdata[index.row()]["name"])
+        else:
+            return QVariant()
             
-        return q()
+        # if not index.isValid():
+            # return q()
+
+        # if role == Qt.DisplayRole: 
+            # return q(self.listdata[index.row()]['name'])
+            
+        # return q()
         
 class SharedListView(QListView, Logger.ClassLogger):
     """
@@ -1700,7 +1705,7 @@ class SharedListView(QListView, Logger.ClassLogger):
 
         self.proxyModel = QSortFilterProxyModel(self)
         self.proxyModel.setDynamicSortFilter(True)
-        
+
         self.setModel(self.proxyModel)
         self.proxyModel.setSourceModel(self.model__)
         
@@ -2060,6 +2065,7 @@ class SharedParameter(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         """
         super(SharedParameter, self).__init__(parent)
         self.testEnvironment = Settings.instance().serverContext['test-environment']
+
         self.createDialog()
         self.createConnections()
 
@@ -2094,7 +2100,7 @@ class SharedParameter(QtHelper.EnhancedQDialog, Logger.ClassLogger):
             i += 1
         common = projects.pop(i)      
         projects.insert(0, common)
-        
+
         self.projectCombo.addItems ( projects  )
         self.projectCombo.insertSeparator(1)
         
@@ -2110,6 +2116,7 @@ class SharedParameter(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         self.secondList = QListWidget(self)
         self.secondList.setSortingEnabled(True)
         self.valueLabel = QLabel()
+        self.valueLabel.setWordWrap(True)
 
         self.mainFilterText = QLineEdit(self)
         self.mainFilterText.setToolTip(self.tr("Name filter"))
@@ -2250,10 +2257,10 @@ class SharedParameter(QtHelper.EnhancedQDialog, Logger.ClassLogger):
         selectedIndex = sourceIndex.row()
         row = self.mainList.model__.getData()[selectedIndex]
         
-        if isinstance(row['value'], dict):
-            self.valueLabel.setText( "%s: ..." % row['name'] )
-        else:
-            self.valueLabel.setText( "%s: %s" % (row['name'], row['value']) )
+        # if isinstance(row['value'], dict):
+            # self.valueLabel.setText( "%s: ..." % row['name'] )
+        # else:
+        self.valueLabel.setText( "%s: %s" % (row['name'], row['value']) )
         
         self.secondList.clear()
         

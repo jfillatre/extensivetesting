@@ -80,9 +80,9 @@ __BEGIN__ = "2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="04/11/2017 18:04:27"
+__BUILDTIME__="07/02/2018 19:24:56"
 # Redirect stdout and stderr to log file only on production
-REDIRECT_STD=False
+REDIRECT_STD=True
 
 __LICENCE__ = """This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

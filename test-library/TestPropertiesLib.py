@@ -538,8 +538,12 @@ def decodeParameter(parameter, sharedParameters=[]):
             raise TestPropertiesException( 'ERR_PRO_001: bad int value in input (%s=%s)' % (parameter['name'],parameter['value']) )
             
     elif parameter['type'] == "float":
-        return float(parameter['value'])
-
+        try:
+            parameter['value'] = parameter['value'].replace(",", ".")
+            return float(parameter['value'])
+        except ValueError as e:
+            raise TestPropertiesException( 'ERR_PRO_002: bad float value in input (%s=%s)' % (parameter['name'],parameter['value']) )
+            
     elif parameter['type'] == "list":
         if len(parameter['value']):
             return [ (i.rstrip().lstrip()).encode("utf-8") for i in parameter['value'].split(',') ]

@@ -328,9 +328,11 @@ class SockTcpThread(threading.Thread):
         try:
             self.sshChannel.remove(filename)
         except Exception as e:
-            self.sendNotify(data={'sftp-event': 'response-error', 'cmd': DELETE_FILE, 'err': "%s" % e } )
+            self.sendNotify(data={'sftp-event': 'response-error', 
+                                  'cmd': DELETE_FILE, 'err': "%s" % e } )
         else:
-            self.sendNotify(data={'sftp-event': 'file-deleted', 'cmd': DELETE_FILE } )
+            self.sendNotify(data={'sftp-event': 'file-deleted', 
+                                  'cmd': DELETE_FILE } )
         
     def __renameFile(self, currentFilename, newFilename):
         """
@@ -340,9 +342,11 @@ class SockTcpThread(threading.Thread):
         try:
             self.sshChannel.rename(currentFilename, newFilename)
         except Exception as e:
-            self.sendNotify(data={'sftp-event': 'response-error', 'cmd': RENAME_FILE, 'err': "%s" % e } )
+            self.sendNotify(data={'sftp-event': 'response-error', 
+                                  'cmd': RENAME_FILE, 'err': "%s" % e } )
         else:
-            self.sendNotify(data={'sftp-event': 'file-renamed', 'cmd': RENAME_FILE } )
+            self.sendNotify(data={'sftp-event': 'file-renamed', 
+                                  'cmd': RENAME_FILE } )
         
     def __deleteFolder(self, path):
         """
@@ -352,9 +356,11 @@ class SockTcpThread(threading.Thread):
         try:
             self.sshChannel.rmdir(path)
         except Exception as e:
-            self.sendNotify(data={'sftp-event': 'response-error', 'cmd': DELETE_FOLDER, 'err': "%s" % e } )
+            self.sendNotify(data={'sftp-event': 'response-error', 
+                                  'cmd': DELETE_FOLDER, 'err': "%s" % e } )
         else:
-            self.sendNotify(data={'sftp-event': 'folder-deleted', 'cmd': DELETE_FOLDER } )
+            self.sendNotify(data={'sftp-event': 'folder-deleted', 
+                                  'cmd': DELETE_FOLDER } )
                 
     def __getFile(self, filename, toPrivate=False):
         """
@@ -528,7 +534,9 @@ class SockTcpThread(threading.Thread):
                 except Exception as e:
                     if not overwrite: raise e
                 # recursive call in this folder
-                nb_file += self.__putFolderSub(fromPath=itempath, toPath=destFolder, overwrite=overwrite)
+                nb_file += self.__putFolderSub(fromPath=itempath, 
+                                               toPath=destFolder, 
+                                               overwrite=overwrite)
         return nb_file
         
     def __getFolder(self, fromPath, toPath, overwrite=False):
@@ -538,11 +546,15 @@ class SockTcpThread(threading.Thread):
         """
         try:
             rsp = 0 # nb files detected
-            rsp = self.__getFolderSub(fromPath=fromPath, toPath=toPath, overwrite=overwrite)
+            rsp = self.__getFolderSub(fromPath=fromPath, 
+                                      toPath=toPath, 
+                                      overwrite=overwrite)
         except Exception as e:
-            self.sendNotify(data={'sftp-event': 'response-error', 'cmd': GET_FOLDER, 'err': "%s" % e } )
+            self.sendNotify(data={'sftp-event': 'response-error', 
+                                  'cmd': GET_FOLDER, 'err': "%s" % e } )
         else:
-            self.sendNotify(data={'sftp-event': 'folder-downloaded', 'cmd': GET_FOLDER, 'rsp': str(rsp) } )
+            self.sendNotify(data={'sftp-event': 'folder-downloaded', 
+                                  'cmd': GET_FOLDER, 'rsp': str(rsp) } )
 
     def __getFolderSub(self, fromPath, toPath, overwrite=False):
         """

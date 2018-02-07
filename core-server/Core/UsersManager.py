@@ -267,7 +267,7 @@ class UsersManager(Logger.ClassLogger):
         if not len(dbRows): return (self.context.CODE_NOT_FOUND, "this user id does not exist")
         
         # disconnect user before deletion
-        disconnected = self.context.unregisterUserFromXmlrpc(login=dbRows[0]['login'])
+        # todo
         
         # delete from db
         sql = """DELETE FROM `%s-users` WHERE  id='%s'""" % ( prefix, escape(userId) )
@@ -381,7 +381,7 @@ class UsersManager(Logger.ClassLogger):
         if not len(dbRows): return (self.context.CODE_NOT_FOUND, "this user id does not exist")
         
         # disconnect user before 
-        disconnected = self.context.unregisterUserFromXmlrpc(login=dbRows[0]['login'])
+        # todo
         
         # update password
         emptypwd = hashlib.sha1()
@@ -414,7 +414,7 @@ class UsersManager(Logger.ClassLogger):
         if not len(dbRows): return (self.context.CODE_NOT_FOUND, "this user id does not exist")
 
         # disconnect user before 
-        disconnected = self.context.unregisterUserFromXmlrpc(login=dbRows[0]['login'])
+        # todo
         
         # update password
         sha1 = hashlib.sha1()

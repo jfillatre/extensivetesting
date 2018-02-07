@@ -121,8 +121,10 @@ class SeleniumServer(GenericTool.Tool):
     """
     Selenium tool agent
     """
-    def __init__(self, controllerIp, controllerPort, toolName, toolDesc, defaultTool, supportProxy=0, 
-                        proxyIp=None, proxyPort=None, sslSupport=True, seleniumIp="127.0.0.1", seleniumPort=4444):
+    def __init__(self, controllerIp, controllerPort, toolName, 
+                       toolDesc, defaultTool, supportProxy=0, 
+                       proxyIp=None, proxyPort=None, sslSupport=True, 
+                       seleniumIp="127.0.0.1", seleniumPort=4444):
         """
         Selenium tool constructor
         """
@@ -403,12 +405,14 @@ class SeleniumServer(GenericTool.Tool):
                 a = self.context()[request['uuid']][request['source-adapter']]
                 a.putItem( lambda: self.execAction(request) )
             else:
-                self.error("Adapter context does not exists ScriptId=%s AdapterId=%s" % (request['uuid'], request['source-adapter'] ) )
+                self.error("Adapter context does not exists ScriptId=%s AdapterId=%s" % (request['uuid'], 
+                                                                                         request['source-adapter'] ) )
         else:
             self.error("Test context does not exits ScriptId=%s" % request['uuid'])
         self.__mutex__.release()
         
-    def onFinalizeScreenshot(self, request, commandName, commandId, adapterId, testcaseName, replayId, screenshot, thumbnail):
+    def onFinalizeScreenshot(self, request, commandName, commandId, adapterId, 
+                             testcaseName, replayId, screenshot, thumbnail):
         """
         On finalize screenshot procedure
         """
@@ -425,9 +429,11 @@ class SeleniumServer(GenericTool.Tool):
 
         # send through notify only a thumbnail
         try:
-            self.sendData(request=request, data={ 'data': thumbnail, 'filename': '%s_%s.%s' % (commandName, commandId, extension),
-                                                    'command-name': commandName, 'command-id': "%s" % commandId, 
-                                                    'adapter-id': "%s" % adapterId  } )
+            self.sendData(request=request, data={ 'data': thumbnail, 
+                                                  'filename': '%s_%s.%s' % (commandName, commandId, extension),
+                                                  'command-name': commandName, 
+                                                  'command-id': "%s" % commandId, 
+                                                  'adapter-id': "%s" % adapterId  } )
         except Exception as e:
             self.error("unable to send notify through notify: %s" % e)
             
@@ -442,9 +448,11 @@ class SeleniumServer(GenericTool.Tool):
         """
         self.trace("taking screenshot")
         if sys.platform == "win32" :
-            self.onTakeScreenshot(request, commandName, str(commandId), str(adapterId), testcaseName, int(replayId) )
+            self.onTakeScreenshot(request, commandName, str(commandId), 
+                                  str(adapterId), testcaseName, int(replayId) )
         elif sys.platform == "linux2" and not self.getFromCmd() :
-            self.onTakeScreenshot(request, commandName, str(commandId), str(adapterId), testcaseName, int(replayId) )
+            self.onTakeScreenshot(request, commandName, str(commandId), 
+                                  str(adapterId), testcaseName, int(replayId) )
         else:
             self.error( 'take screenshot not supported on system=%s from cmd=%s' %  (sys.platform,self.getFromCmd()) )
             
@@ -470,19 +478,28 @@ class SeleniumServer(GenericTool.Tool):
             else:
                 sessionId = None
                 
-            if "wait-until" in request['data']: waitUntil = request['data']["wait-until"]
-            if "wait-until-timeout" in request['data']: waitUntil_Timeout = request['data']["wait-until-timeout"]
-            if "wait-until-pool" in request['data']: waitUntil_Pool = request['data']["wait-until-pool"]
-            if "wait-until-value" in request['data']: waitUntil_Value = request['data']["wait-until-value"]
+            if "wait-until" in request['data']: 
+                waitUntil = request['data']["wait-until"]
+            if "wait-until-timeout" in request['data']: 
+                waitUntil_Timeout = request['data']["wait-until-timeout"]
+            if "wait-until-pool" in request['data']: 
+                waitUntil_Pool = request['data']["wait-until-pool"]
+            if "wait-until-value" in request['data']: 
+                waitUntil_Value = request['data']["wait-until-value"]
         except Exception as e:
             self.error('unable to extract request from server: %s' % e )
             return
             
         # prepare id   
         try:
-            globalId = "%s_%s_%s" % (request['script_id'], request['source-adapter'], request['data']['command-id'] )
-            self.onToolLogWarningCalled( "<< %s #%s [%s %s %s]" % (request['data']['command-name'], globalId, 
-                                                                    waitUntil, waitUntil_Timeout, waitUntil_Value) )
+            globalId = "%s_%s_%s" % (request['script_id'], 
+                                     request['source-adapter'], 
+                                     request['data']['command-id'] )
+            self.onToolLogWarningCalled( "<< %s #%s [%s %s %s]" % (request['data']['command-name'], 
+                                                                   globalId, 
+                                                                   waitUntil, 
+                                                                   waitUntil_Timeout, 
+                                                                   waitUntil_Value) )
         except Exception as e:
             self.error('unable to read request: %s' % e )
             
@@ -491,7 +508,6 @@ class SeleniumServer(GenericTool.Tool):
             self.trace('preparing selenium driver')
             
             seleniumDriver = webdriver.Remote(  command_executor='http://%s:%s/wd/hub' % (self.seleniumIp, self.seleniumPort), 
-                                                                                                                                   
                                                 start_session=False, session_id=sessionId,
                                                 handle_error=False, unwrap_value=False)
             seleniumDriver.capabilities = driver_capabilities
@@ -532,18 +548,22 @@ class SeleniumServer(GenericTool.Tool):
                 # timeout raised
                 if timeout_raised:
                     self.sendNotify( request=request, data={ 'command-name': request['data']['command-name'],
-                                                    'command-id': request['data']['command-id'],
-                                                    'command-value': {"status": 1000, 'value': None} }  )
-                    self.takeScreenshot( request=request, commandName=request['data']['command-name'],
-                                         commandId=request['data']['command-id'], adapterId=request['source-adapter'],
-                                         testcaseName=request['testcase-name'], replayId=request['test-replay-id'] )
+                                                             'command-id': request['data']['command-id'],
+                                                             'command-value': {"status": 1000, 'value': None} }  )
+                    self.takeScreenshot( request=request, 
+                                         commandName=request['data']['command-name'],
+                                         commandId=request['data']['command-id'], 
+                                         adapterId=request['source-adapter'],
+                                         testcaseName=request['testcase-name'], 
+                                         replayId=request['test-replay-id'] )
               
 
             else:
 
                     
                     self.trace('executing the selenium command %s with params %s' % (driver_command, driver_params) )
-                    response = seleniumDriver.execute(driver_command=driver_command, params=driver_params)
+                    response = seleniumDriver.execute(driver_command=driver_command, 
+                                                      params=driver_params)
                     self.onToolLogWarningCalled( ">> Action #%s terminated" % globalId )
                     
                     # remove image on error response
@@ -558,7 +578,7 @@ class SeleniumServer(GenericTool.Tool):
                                 response['value'] = "%s%s" % (begin, left)
                                 
                     # notify user
-                    self.sendNotify( request=request, data={ 'command-name': request['data']['command-name'],
+                    self.sendNotify( request=request, data={'command-name': request['data']['command-name'],
                                                             'command-id': request['data']['command-id'],
                                                             'command-value': response }  )  
 
@@ -567,10 +587,12 @@ class SeleniumServer(GenericTool.Tool):
                     if driver_command == "screenshot":
                         self.onToolLogWarningCalled( "<< Uploading screenshot...")
                         extension = Settings.get( 'Screenshot', 'extension' )
-                        fileName = "%s_%s_ADP%s_step%s_%s.%s" % (request['testcase-name'], request['test-replay-id'], 
-                                                                request['source-adapter'], 
-                                                                request['data']['command-id'], 
-                                                                request['data']['command-name'], extension.lower())
+                        fileName = "%s_%s_ADP%s_step%s_%s.%s" % (request['testcase-name'], 
+                                                                 request['test-replay-id'], 
+                                                                 request['source-adapter'], 
+                                                                 request['data']['command-id'], 
+                                                                 request['data']['command-name'], 
+                                                                 extension.lower())
                         screenshot = base64.b64decode(response['value'].encode('ascii'))
                         self.uploadData(fileName=fileName,  resultPath=request['result-path'], data=screenshot) 
                         
@@ -579,9 +601,12 @@ class SeleniumServer(GenericTool.Tool):
                                                                                     
                             
                                                           
-                        self.takeScreenshot( request=request, commandName=request['data']['command-name'],
-                                             commandId=request['data']['command-id'], adapterId=request['source-adapter'],
-                                             testcaseName=request['testcase-name'], replayId=request['test-replay-id'] )
+                        self.takeScreenshot( request=request, 
+                                             commandName=request['data']['command-name'],
+                                             commandId=request['data']['command-id'], 
+                                             adapterId=request['source-adapter'],
+                                             testcaseName=request['testcase-name'], 
+                                             replayId=request['test-replay-id'] )
 
                     self.trace('executing the selenium command - terminated - notify sent')
         except Exception as e:

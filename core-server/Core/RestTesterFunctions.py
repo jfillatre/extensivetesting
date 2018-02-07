@@ -5176,7 +5176,7 @@ class TestsBasicListing(Handler):
         if not projectAuthorized:
             raise HTTP_403('Access denied to this project')
         
-        listing = RepoTests.instance().getBasicListing(projectId=prjId)  
+        listing = RepoTests.instance().getBasicListing(projectId=projectId)  
         
         return { "cmd": self.request.path, "listing": listing, "project-id": projectId }
 

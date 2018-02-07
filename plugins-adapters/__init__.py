@@ -25,16 +25,19 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 
 Generic = None
-TestAdapterLib.setVersion("v1120")
+TestAdapterLib.setVersion("v1200")
 TestLibraryLib.setVersion("v800")
 
-__RN__ = """Date: xx/02/2018
+__RN__ = """Date: 10/02/2018
 What's new
 	1. (minor) New curl wrapper adapter
 	2. (minor) New dig wrapper adapter
 	3. (minor) New nmap wrapper adapter
+	4. (minor) System: add cp850 decoding for windows cmd response
+	5. (major) Selenium: no more check platform parameter to support selenium server 3.9.0
+	6. (major) Selenium: support w3c browser like firefox 58
 Issues fixed
-	1. (medium) xxx
+	1. none
 """
 
 __DESCRIPTION__ = """This library contains all adapters available to test your SUT (System Under Test).

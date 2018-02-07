@@ -237,7 +237,7 @@ class Dig(TestAdapter.Adapter):
 		if expected is None:
 			raise Exception( 'has received response: expected template cannot be empty' )
 
-		tpl_expected = TestTemplatesLib.TemplateMessage()
+		tpl_expected = TestTemplates.TemplateMessage()
 		layer_dig = TestTemplates.TemplateLayer('DIG')
 		layer_dig.addKey(name='output', data=expected)
 		tpl_expected.addLayer( layer_dig )

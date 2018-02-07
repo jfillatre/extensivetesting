@@ -20,4 +20,4 @@
 		5. (minor) initialize recorder rather to avoid issue on plugins loading
 		6. (minor) fix duplicate function name in document viewer
 		7. (minor) server explorer - plugin repositories: bad tree widget reset in deletion
-		8. (minor) fix bad english in automation assistant
+		8. (minor) fix bad english usage in automation assistant
