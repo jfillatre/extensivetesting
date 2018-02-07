@@ -111,7 +111,8 @@ class WebDriver(object):
 
     def __init__(self, command_executor='http://127.0.0.1:4444/wd/hub',
                  desired_capabilities=None, browser_profile=None, proxy=None,
-                 keep_alive=False, file_detector=None, options=None):
+                 keep_alive=False, file_detector=None, options=None,
+                 start_session=True, session_id=None, handle_error=True, unwrap_value=True):
         """
         Create a new driver that will issue commands using the wire protocol.
 
@@ -130,10 +131,10 @@ class WebDriver(object):
              then default LocalFileDetector() will be used.
          - options - instance of a driver options.Options class
         """
-        if desired_capabilities is None:
-            raise WebDriverException("Desired Capabilities can't be None")
-        if not isinstance(desired_capabilities, dict):
-            raise WebDriverException("Desired Capabilities must be a dictionary")
+        # if desired_capabilities is None:
+            # raise WebDriverException("Desired Capabilities can't be None")
+        # if not isinstance(desired_capabilities, dict):
+            # raise WebDriverException("Desired Capabilities must be a dictionary")
         if proxy is not None:
             warnings.warn("Please use FirefoxOptions to set proxy",
                           DeprecationWarning)
@@ -144,14 +145,19 @@ class WebDriver(object):
         if type(self.command_executor) is bytes or isinstance(self.command_executor, str):
             self.command_executor = RemoteConnection(command_executor, keep_alive=keep_alive)
         self._is_remote = True
-        self.session_id = None
+        self.session_id = session_id
         self.capabilities = {}
         self.error_handler = ErrorHandler()
         self.start_client()
         if browser_profile is not None:
             warnings.warn("Please use FirefoxOptions to set browser profile",
                           DeprecationWarning)
-        self.start_session(desired_capabilities, browser_profile)
+
+        self.handle_error = handle_error
+        self.unwrap_value = unwrap_value
+        if start_session:
+            self.start_session(desired_capabilities, browser_profile)
+
         self._switch_to = SwitchTo(self)
         self._mobile = Mobile(self)
         self.file_detector = file_detector or LocalFileDetector()
@@ -309,9 +315,10 @@ class WebDriver(object):
         params = self._wrap_value(params)
         response = self.command_executor.execute(driver_command, params)
         if response:
-            self.error_handler.check_response(response)
-            response['value'] = self._unwrap_value(
-                response.get('value', None))
+            if self.handle_error:
+                self.error_handler.check_response(response)
+            if self.unwrap_value:
+                response['value'] = self._unwrap_value(response.get('value', None))
             return response
         # If the server doesn't send a response, assume the command was
         # a success
