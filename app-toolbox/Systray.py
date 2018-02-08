@@ -80,7 +80,7 @@ __BEGIN__ = "2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="07/02/2018 19:24:56"
+__BUILDTIME__="08/02/2018 21:03:03"
 # Redirect stdout and stderr to log file only on production
 REDIRECT_STD=True
 

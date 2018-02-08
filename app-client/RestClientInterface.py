@@ -2157,7 +2157,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         On logout
         """
-        pass
+        self.authenticated = False
         
     def onLogin(self, details):
         """

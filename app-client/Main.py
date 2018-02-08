@@ -46,7 +46,7 @@ __BEGIN__="2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="07/02/2018 19:06:15"
+__BUILDTIME__="08/02/2018 19:55:29"
 # Redirect stdout and stderr to log file only on production
 REDIRECT_STD=True
 # disable warning from qt framework on production 
@@ -186,8 +186,9 @@ import ReleaseNotes as RN
 import Workspace.Repositories as Repositories
 
 # set locale to english
-newLocale = QLocale(QLocale().English)
-QLocale().setDefault(newLocale)
+if QtHelper.IS_QT5:
+    newLocale = QLocale(QLocale().English)
+    QLocale().setDefault(newLocale)
 
 class MessageHandler(object):
     """
@@ -2200,11 +2201,11 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
                                         QMessageBox.Yes | QMessageBox.No 
                                         )
             if reply == QMessageBox.Yes:
-                if UCI.instance() is not None:
-                    UCI.instance().closeConnection()
+                if UCI.instance() is not None: UCI.instance().closeConnection()
+            else:
+                 WWorkspace.WDocumentViewer.instance().updateConnectLink(connected=True)
         else:
-            if UCI.instance() is not None:
-                UCI.instance().closeConnection()
+            if UCI.instance() is not None: UCI.instance().closeConnection()
         
     def setCursorBusy(self):
         """
@@ -2753,20 +2754,11 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         self.gotoHomepageAction.setEnabled(True)
         WWorkspace.WDocumentViewer.instance().updateConnectLink(connected=True)
         WWorkspace.WDocumentViewer.instance().updateMacroLink()
-        
-        # if UCI.RIGHTS_MANAGER in RCI.instance().userRights:
-            # self.mainTab.setTabEnabled( self.TAB_WORKSPACE, False )
-            # self.mainTab.setCurrentIndex( self.TAB_SERVER )
-            # self.openMenu.setEnabled(False)
 
         WServerExplorer.instance().onConnection(data = data)
         WWorkspace.WRepositories.instance().onLoadRemote(data = data)
-        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
-                # or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
         WWorkspace.WHelper.instance().onLoad(data=data)
 
-        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights \
-                # or UCI.RIGHTS_DEVELOPER in RCI.instance().userRights :
         self.mainTab.setTabEnabled( self.TAB_WORKSPACE, True )
         self.mainTab.setCurrentIndex( self.TAB_WORKSPACE )
         WWorkspace.WDocumentViewer.instance().enableWorkspace()
@@ -2785,7 +2777,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
             self.openAllRecentFilesAction.setEnabled(True)
             self.emptyRecentFilesListAction.setEnabled(True)
 
-        # if UCI.RIGHTS_TESTER in RCI.instance().userRights or UCI.RIGHTS_ADMIN in RCI.instance().userRights :
         WWorkspace.Repositories.instance().initLocalRepo()
         WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
         if not WWorkspace.WDocumentViewer.instance().isEmpty():
@@ -2846,17 +2837,6 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         self.networkCaptureMenu.setEnabled(True)
         if UCI.RIGHTS_MONITOR in RCI.instance().userRights :
             self.networkCaptureMenu.setEnabled(False)
-            
-        # if UCI.RIGHTS_ADMIN in RCI.instance().userRights :
-            # WWorkspace.WDocumentViewer.instance().runSeveralAction.setEnabled(True)
-            # WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
-            # WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
-            # WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
-
-        # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-            # WWorkspace.WDocumentViewer.instance().newAdapterAction.setEnabled(True)
-            # WWorkspace.WDocumentViewer.instance().newLibraryAction.setEnabled(True)
-            # WWorkspace.WDocumentViewer.instance().newTxtAction.setEnabled(True)
 
     def onDisconnection (self):
         """

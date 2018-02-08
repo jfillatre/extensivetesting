@@ -661,8 +661,6 @@ class WelcomePage(QWidget):
             self.connectLink.setTextDescription("Disconnection from the test center")
             self.connectLink.setIcon(QPixmap(":/disconnect.png") )
             self.captureFrame.setEnabled(True)
-            # if UCI.RIGHTS_DEVELOPER in RCI.instance().userRights:
-                # self.devFrame.setEnabled(True)
         else:
             self.filesFrame.setEnabled(False)
             self.captureFrame.setEnabled(False)

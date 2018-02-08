@@ -132,13 +132,14 @@ class InnoScript(object):
         
         d.append( r"[Files]" )
         for f in os.listdir(self.path):
-            if f not in [ 'cryptography-2.1.3-py3.6.egg-info', 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
+            #if f not in [ 'cryptography-2.1.3-py3.6.egg-info', 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
+            if f not in [ 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
                             'Plugins', 'small_installer.bmp', self.scriptName ]:
                 d.append( r'Source: "%s"; DestDir: "{app}\"; Flags: ignoreversion; Permissions: users-modify; Components: main' % f )
 
         d.extend( self.listdir( self.path, "/PyQt5/") )
         d.extend( self.listdir( self.path, "/selenium/") )
-        d.extend( self.listdir( self.path, "/cryptography-2.1.3-py3.6.egg-info/") )
+        # d.extend( self.listdir( self.path, "/cryptography-2.1.3-py3.6.egg-info/") )
         
         # adding java 8
         for f in os.listdir("%s/Bin/Java8" % self.path):

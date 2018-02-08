@@ -12,6 +12,7 @@
 		8. (minor) no more display database statistics in misc server explorer page
 		9. (medium) online helper: no more generate all packages button in toolbar
 		10. (medium) windows XP platform no more supported because of QT5.9 support
+		11. (medium) Default behaviour changed: no more show test properties tabulation on file opening
 	Issues Fixed
 		1. (minor) unable to print test xml verdict to pdf, missing QTextDocument import
 		2. (minor) fix some undefined variable after static code analysis

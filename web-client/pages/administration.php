@@ -283,7 +283,12 @@
 				// prepare body for each tabs
 				$tabsbody = array();
 
-				$sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+				// $sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+                
+                $sql_req = '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name="Common")';
+                $sql_req .= 'UNION ALL';
+                $sql_req .= '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name<>"Common" ORDER BY name)';
+                
 				$rlst_prjs = $db->query($sql_req);
 				if ( ! $rlst_prjs)
 					$tb = 'Unable to fetch projects'.$db->str_error();
@@ -574,7 +579,12 @@
 					$tb = 'Unable to fetch relations projects'.$db->str_error();
 				else
 				{	
-					$sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+					// $sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+                    
+                    $sql_req = '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name="Common")';
+                    $sql_req .= 'UNION ALL';
+                    $sql_req .= '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name<>"Common" ORDER BY name)';
+                    
 					$rlst_prjs = $db->query($sql_req);
 					if ( ! $rlst_prjs)
 						$tb = 'Unable to fetch projects'.$db->str_error();
@@ -606,7 +616,12 @@
 				$tb .= '<table id="projects" style="display:block"><tr><td></td><td><div class="line" /></div> </td></tr><tr><td  class="col1">'.lang('admin-projects').': </td><td>'.$projects .'</td></tr>';
 				//default project
 				$selected_prj = "";
-				$sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+				// $sql_req = 'SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` ORDER BY name';
+                
+                $sql_req = '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name="Common")';
+                $sql_req .= 'UNION ALL';
+                $sql_req .= '(SELECT * FROM `'.$__LWF_DB_PREFIX.'-projects` WHERE name<>"Common" ORDER BY name)';
+                
 				$rlst_prjs = $db->query($sql_req);
 				if ( ! $rlst_prjs)
 					$tb = 'Unable to fetch projects'.$db->str_error();
