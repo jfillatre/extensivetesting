@@ -1575,13 +1575,13 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             # force to open the file
             if reply == QMessageBox.Yes:
                 RCI.instance().openFileTests(projectId=int(projectId), 
-                                             filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
+                                             filePath="%s/%s.%s" % (filePath, fileName, fileExtension), 
                                              ignoreLock=True, 
                                              readOnly=False)
             # force as read only
             if reply == QMessageBox.No: 
                 RCI.instance().openFileTests(projectId=int(projectId), 
-                                             filePath="%s/%s.%s" % (path_file, name_file, ext_file), 
+                                             filePath="%s/%s.%s" % (filePath, fileName, fileExtension), 
                                              ignoreLock=True, 
                                              readOnly=True)
             # cancel the opening

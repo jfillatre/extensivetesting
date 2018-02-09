@@ -131,46 +131,51 @@ class InnoScript(object):
         d.append( r'Name: "adb"; Description: "Android Debug Bridge %s"; Types: full;' % VERSION_ADB )
         
         d.append( r"[Files]" )
-        for f in os.listdir(self.path):
-            #if f not in [ 'cryptography-2.1.3-py3.6.egg-info', 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
-            if f not in [ 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
-                            'Plugins', 'small_installer.bmp', self.scriptName ]:
-                d.append( r'Source: "%s"; DestDir: "{app}\"; Flags: ignoreversion; Permissions: users-modify; Components: main' % f )
+        
+        d.extend( self.listdir( self.path, "") )
+        
+        # for f in os.listdir(self.path):
+            # if f.startswith("cryptography-"):
+                # continue
+                
+            # if f not in [ 'certifi', 'PyQt5', 'selenium', 'imageformats', 'Bin', 'Logs', 'Tmp', 
+                            # 'Plugins', 'small_installer.bmp', self.scriptName ]:
+                # d.append( r'Source: "%s"; DestDir: "{app}\"; Flags: ignoreversion; Permissions: users-modify; Components: main' % f )
 
-        d.extend( self.listdir( self.path, "/PyQt5/") )
-        d.extend( self.listdir( self.path, "/selenium/") )
-        # d.extend( self.listdir( self.path, "/cryptography-2.1.3-py3.6.egg-info/") )
+        # d.extend( self.listdir( self.path, "/PyQt5/") )
+        # d.extend( self.listdir( self.path, "/selenium/") )
+        # d.extend( self.listdir( self.path, "/certifi/") )
         
         # adding java 8
         for f in os.listdir("%s/Bin/Java8" % self.path):
             if os.path.isfile( "%s/Bin/Java8/%s" % (self.path, f) ):
                 Java8_Bin = f
-                d.append( r'Source: "Bin/Java8/%s"; DestDir: "{app}\Bin\Java8\"; Flags: ignoreversion; Permissions: users-modify; Components: java8' % f )
+                # d.append( r'Source: "Bin/Java8/%s"; DestDir: "{app}\Bin\Java8\"; Flags: ignoreversion; Permissions: users-modify; Components: java8' % f )
         if Java8_Bin is None: raise Exception("no java8 binary")
         
         # adding adb files
-        for f in os.listdir("%s/Bin/Adb" % self.path):
-            if os.path.isfile( "%s/Bin/Adb/%s" % (self.path, f) ):
-                d.append( r'Source: "Bin/Adb/%s"; DestDir: "{app}\Bin\Adb\"; Flags: ignoreversion; Permissions: users-modify; Components: adb' % f)
+        # for f in os.listdir("%s/Bin/Adb" % self.path):
+            # if os.path.isfile( "%s/Bin/Adb/%s" % (self.path, f) ):
+                # d.append( r'Source: "Bin/Adb/%s"; DestDir: "{app}\Bin\Adb\"; Flags: ignoreversion; Permissions: users-modify; Components: adb' % f)
 
         # adding selenium files
-        for f in os.listdir("%s/Bin/Selenium3" % self.path):
-            if os.path.isfile( "%s/Bin/Selenium3/%s" % (self.path, f) ):
-                d.append( r'Source: "Bin/Selenium3/%s"; DestDir: "{app}\Bin\Selenium3\"; Flags: ignoreversion; Permissions: users-modify; Components: selenium3' % f)
+        # for f in os.listdir("%s/Bin/Selenium3" % self.path):
+            # if os.path.isfile( "%s/Bin/Selenium3/%s" % (self.path, f) ):
+                # d.append( r'Source: "Bin/Selenium3/%s"; DestDir: "{app}\Bin\Selenium3\"; Flags: ignoreversion; Permissions: users-modify; Components: selenium3' % f)
         
         # adding selenium2 files
-        for f in os.listdir("%s/Bin/Selenium2" % self.path):
-            if os.path.isfile( "%s/Bin/Selenium2/%s" % (self.path, f) ):
-                d.append( r'Source: "Bin/Selenium2/%s"; DestDir: "{app}\Bin\Selenium2\"; Flags: ignoreversion; Permissions: users-modify; Components: selenium2' % f)
+        # for f in os.listdir("%s/Bin/Selenium2" % self.path):
+            # if os.path.isfile( "%s/Bin/Selenium2/%s" % (self.path, f) ):
+                # d.append( r'Source: "Bin/Selenium2/%s"; DestDir: "{app}\Bin\Selenium2\"; Flags: ignoreversion; Permissions: users-modify; Components: selenium2' % f)
                 
         # adding sikuli files
-        for f in os.listdir("%s/Bin/Sikuli" % self.path):
-            if os.path.isfile( "%s/Bin/Sikuli/%s" % (self.path, f) ):
-                d.append( r'Source: "Bin/Sikuli/%s"; DestDir: "{app}\Bin\Sikuli\"; Flags: ignoreversion; Permissions: users-modify; Components: sikulix' % f )
+        # for f in os.listdir("%s/Bin/Sikuli" % self.path):
+            # if os.path.isfile( "%s/Bin/Sikuli/%s" % (self.path, f) ):
+                # d.append( r'Source: "Bin/Sikuli/%s"; DestDir: "{app}\Bin\Sikuli\"; Flags: ignoreversion; Permissions: users-modify; Components: sikulix' % f )
 
         # other files
-        for f in os.listdir("%s/imageformats/" % self.path):
-            d.append( r'Source: "imageformats/%s"; DestDir: "{app}\imageformats\"; Flags: ignoreversion; Permissions: users-modify; Components: main' % f )
+        # for f in os.listdir("%s/imageformats/" % self.path):
+            # d.append( r'Source: "imageformats/%s"; DestDir: "{app}\imageformats\"; Flags: ignoreversion; Permissions: users-modify; Components: main' % f )
         d.append( "" )
         
         d.append( r"[Tasks]" )
