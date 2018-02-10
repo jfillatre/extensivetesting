@@ -46,7 +46,7 @@ __BEGIN__="2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="09/02/2018 15:38:10"
+__BUILDTIME__="10/02/2018 10:04:08"
 # Redirect stdout and stderr to log file only on production
 REDIRECT_STD=True
 # disable warning from qt framework on production 

@@ -26,7 +26,7 @@ import TestExecutorLib.TestLibraryLib as TestLibraryLib
 Generic = None
 TestLibraryLib.setVersion("v810")
 
-__RN__ = """Date: xx/02/2018
+__RN__ = """Date: 11/02/2018
 What's new
 	1. (medium) Nmap libraries moved to adapters
 Issues fixed

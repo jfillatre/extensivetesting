@@ -788,7 +788,10 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         self.whitespaceVisible = QtHelper.str2bool( Settings.instance().readValue( key = 'Editor/ws-visible' ) )
         self.linesNumbering = QtHelper.str2bool( Settings.instance().readValue( key = 'Editor/lines-numbering' ) )
 
-        self.runsDialog = RunsDialog.RunsDialog( self, iRepo=self.iRepo, lRepo=self.lRepo, rRepo=self.rRepo )
+        self.runsDialog = RunsDialog.RunsDialog(self, 
+                                                iRepo=self.iRepo, 
+                                                lRepo=self.lRepo, 
+                                                rRepo=self.rRepo )
 
         self.createWidgets()
         self.createActions()
@@ -1283,7 +1286,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         Run several tests
         """
         self.runsDialog.initProjects( projects= Settings.instance().serverContext['projects'],
-                            defaultProject=Settings.instance().serverContext['default-project'] )
+                                      defaultProject=Settings.instance().serverContext['default-project'] )
         if self.runsDialog.exec_() == QDialog.Accepted:
             tests, runLater, runAt, runSimultaneous = self.runsDialog.getTests()
 
@@ -4632,7 +4635,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             if runType > UCI.SCHED_IN:
                 recursive = True
             self.runDocument( background = True, runAt = runAt, runType=runType, runNb=runNb, 
-                                withoutProbes=withoutProbes, keepTr=keepTr, 
+                                withoutProbes=withoutProbes, keepTr=not keepTr, 
                                withoutNotif=withoutNotifs, fromTime=runFrom, toTime=runTo)
         
     def runDocumentNoKeepTr(self):
@@ -4702,9 +4705,11 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
         currentDocument = self.tab.widget(tabId)
         return currentDocument
 
-    def runDocument (self, background = False, runAt = (0,0,0,0,0,0) , runType=None, runNb=-1, withoutProbes=False, debugActivated=False, 
-                           withoutNotif=False, keepTr=True, fromTime=(0,0,0,0,0,0), toTime=(0,0,0,0,0,0), hideApplication=False,
-                           reduceApplication=False, stepByStep=False, breakpoint=False):
+    def runDocument (self, background = False, runAt = (0,0,0,0,0,0) , 
+                     runType=None, runNb=-1, withoutProbes=False, debugActivated=False, 
+                     withoutNotif=False, keepTr=True, fromTime=(0,0,0,0,0,0), 
+                     toTime=(0,0,0,0,0,0), hideApplication=False,
+                     reduceApplication=False, stepByStep=False, breakpoint=False):
         """
         Run document
     
@@ -4740,6 +4745,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             schedType = UCI.SCHED_NOW
         else:
             schedType = runType
+        print(schedType)
         currentDocument = self.tab.widget(tabId)
         testId = TestResults.instance().getTestId()
 

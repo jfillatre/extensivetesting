@@ -71,63 +71,43 @@ EXT_TESTPLAN = "tpx"
 EXT_TESTGLOBAL = "tgx"
 EXT_TESTABSTRACT = "tax"
 
-# TESTPLAN_REPO_FROM_OTHER                = 'other'
-# TESTPLAN_REPO_FROM_LOCAL                = 'local'
-# TESTPLAN_REPO_FROM_REMOTE               = 'remote'
-# TESTPLAN_REPO_FROM_HDD                  = 'hdd'
-# TESTPLAN_REPO_FROM_LOCAL_REPO_OLD       = 'local repository'
-
-############## NETWORK ERROR ##############
-# errors on channel tcp
-
-# - Connection refused: [Errno 10061] No connection could be made because the target machine actively refused it
-# - Resolved hostname failed: [Errno 11004] getaddrinfo failed
-# - Network problem server to slow to respond
-# - Connection timeout
-
-# TIMEOUT_CONNECT_XMLRPC      = 10.0
 
 ############## RESPONSE CODE ##############
 
-CODE_ERROR                  = 500
-CODE_DISABLED               = 405
-CODE_ALLREADY_EXISTS        = 420
-CODE_NOT_FOUND              = 404
-CODE_LOCKED                 = 421
-CODE_ALLREADY_CONNECTED     = 416
-CODE_FORBIDDEN              = 403
-CODE_FAILED                 = 400
-CODE_OK                     = 200
+# CODE_ERROR                  = 500
+# CODE_DISABLED               = 405
+# CODE_ALLREADY_EXISTS        = 420
+# CODE_NOT_FOUND              = 404
+# CODE_LOCKED                 = 421
+# CODE_ALLREADY_CONNECTED     = 416
+# CODE_FORBIDDEN              = 403
+# CODE_FAILED                 = 400
+# CODE_OK                     = 200
 
 ############## USERS TYPE ##############
 RIGHTS_ADMIN                =   "Administrator"
 RIGHTS_TESTER               =   "Tester"
-# RIGHTS_DEVELOPER            =   "Developer"
 RIGHTS_MONITOR              =   "Monitor"
-# RIGHTS_LEADER               =   RIGHTS_MANAGER
-# RIGHTS_TESTER               =   RIGHTS_USER
 
 RIGHTS_USER_LIST            =  [ 
                                     RIGHTS_ADMIN, 
                                     RIGHTS_MONITOR,
-                                    RIGHTS_TESTER,
-                                    # RIGHTS_DEVELOPER
+                                    RIGHTS_TESTER
                                 ]
 
 ############## SCHEDULATION TYPE ##############
-SCHED_NOW                   =   -1      # one run 
-SCHED_AT                    =   0       # run postponed
-SCHED_IN                    =   1       # run postponed
-SCHED_EVERY_SEC             =   2
-SCHED_EVERY_MIN             =   3
-SCHED_HOURLY                =   4
-SCHED_DAILY                 =   5
-SCHED_EVERY_X               =   6
-SCHED_WEEKLY                =   7
-SCHED_NOW_MORE              =   8
-
-SCHED_QUEUE                 =   9      # run enqueued
-SCHED_QUEUE_AT              =   10     # run enqueued at
+SCHED_NOW                   =   0      # one run 
+SCHED_AT                    =   1       # run postponed
+SCHED_IN                    =   2       # run postponed
+SCHED_EVERY_SEC             =   3
+SCHED_EVERY_MIN             =   4
+SCHED_HOURLY                =   5
+SCHED_DAILY                 =   6
+SCHED_EVERY_X               =   7
+SCHED_WEEKLY                =   8
+SCHED_NOW_MORE              =   9
+SCHED_QUEUE                 =   10      # run enqueued
+SCHED_QUEUE_AT              =   11     # run enqueued at
 
 
 SCHED_DAYS_DICT =   {

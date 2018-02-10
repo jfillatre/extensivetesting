@@ -487,10 +487,13 @@
 				$tb .= '<tr><td  class="col1">'.lang('password').': </td><td><input '.$req_pwd.' id="req_pwd" type="password" value="'.$val_pwd.'"></td></tr>';
 				
                 $val_apikey = '';
-                $val_apiid = $cur_usr['apikey_id'];
-                $val_apisecret = $cur_usr['apikey_secret'];
-                if ( $val_apiid != null and $val_apisecret != null) {
-                  $val_apikey = base64_encode( $val_apiid.":".$val_apisecret);
+                
+                if ($c_called == "edit") {
+                    $val_apiid = $cur_usr['apikey_id'];
+                    $val_apisecret = $cur_usr['apikey_secret'];
+                    if ( $val_apiid != null and $val_apisecret != null) {
+                      $val_apikey = base64_encode( $val_apiid.":".$val_apisecret);
+                    }
                 }
                 $tb .= '<tr><td  class="col1">'.lang('api-key').': </td><td><label>'.$val_apikey.'</label></td></tr>';
                 

@@ -107,21 +107,21 @@ STATE_UPDATING          = 'UPDATING'
 
 SIGNAL_KILL=9
 
-SCHED_TYPE_UNDEFINED    =   -2
-SCHED_EVERY_X           =   6
-SCHED_WEEKLY            =   7
-SCHED_NOW_MORE          =   8
-SCHED_QUEUE             =   9
-SCHED_QUEUE_AT          =   10
+SCHED_TYPE_UNDEFINED    =   -1
+SCHED_EVERY_X           =   7
+SCHED_WEEKLY            =   8
+SCHED_NOW_MORE          =   9
+SCHED_QUEUE             =   10
+SCHED_QUEUE_AT          =   11
 
 SCHEDULE_TYPES    = {
-                        "daily": 5,
-                        "hourly": 4,
-                        "weekly": 7,
-                        "every": 6,
-                        "at": 0,
-                        "in": 1,
-                        "now": -1
+                        "daily": 6,
+                        "hourly": 5,
+                        "weekly": 8,
+                        "every": 7,
+                        "at": 1,
+                        "in": 2,
+                        "now": 0
                     }
 
 MONDAY                  =   0
@@ -3006,11 +3006,11 @@ class TaskManager(Scheduler.SchedulerThread, Logger.ClassLogger):
                                                                                                             runNb, 
                                                                                                             testName, 
                                                                                                             testUser) )
-        self.trace( "Registering task. [InBackground=%s] [Run-Enabled=%s] [Probes=%s] [Debug=%s] [Notif=%s]" % (testBackground, 
-                                                                                                               runEnabled, 
-                                                                                                               withoutProbes, 
-                                                                                                               debugActivated, 
-                                                                                                               withoutNotif) )
+        self.trace( "Registering task. [InBackground=%s] [Run-Enabled=%s] [Debug=%s] " % (testBackground, 
+                                                                                           runEnabled, 
+                                                                                           debugActivated) )
+        self.trace( "Registering task. [Probes-Disabled=%s] [Notif-Disabled=%s]" % ( withoutProbes, 
+                                                                                   withoutNotif) )
         self.trace( "Registering task.. [NoKeepTr=%s] [UserId=%s] [ProjectId=%s] [Run-From=%s]" % ( noKeepTr, 
                                                                                                     testUserId, 
                                                                                                     testProjectId, 

@@ -80,7 +80,7 @@ __BEGIN__ = "2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="09/02/2018 15:39:14"
+__BUILDTIME__="09/02/2018 18:13:18"
 # Redirect stdout and stderr to log file only on production
 REDIRECT_STD=True
 
@@ -273,7 +273,9 @@ class PluginProcess(QProcess):
         # send command
         datagram = json.dumps( msg ) 
         datagramEncoded = base64.b64encode( bytes(datagram, "utf8")  )
-        self.write( str(datagramEncoded, "utf8") + "\n\n" )
+        
+        self.write( datagramEncoded + b"\n\n" )
+        # self.write( str(datagramEncoded, "utf8") + "\n\n" )
 
 class QListItemEnhanced(QListWidgetItem):
     """

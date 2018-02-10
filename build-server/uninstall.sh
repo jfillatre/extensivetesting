@@ -126,6 +126,9 @@ else
 		fi
 	fi
 fi
+
+/usr/sbin/"$PRODUCT_SVC_CTRL" stop 1>> $LOG_FILE 2>&1
+
 echo_success; echo
 
 echo -n "* Stopping $HTTPD_SERVICE_NAME"

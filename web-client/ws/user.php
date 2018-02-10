@@ -410,13 +410,13 @@
 
 
         // set default values
-        if ( !strbool2int($admin) and !strbool2int($leader) and !strbool2int($tester) and !strbool2int($developer) ) {
+        if ( !strbool2int($admin) and !strbool2int($monitor) and !strbool2int($tester) ) {
             $tester = "true";
         }
-        if ( !strbool2int($cli) and !strbool2int($gui) and !strbool2int($web) ) {
-            $gui = "true";
-            $web = "true";
-        }
+        // if ( !strbool2int($cli) and !strbool2int($gui) and !strbool2int($web) ) {
+            // $gui = "true";
+            // $web = "true";
+        // }
 
 		// notifications
 		$regex = '/^(((true)|(false));){7}/'; 
@@ -438,7 +438,9 @@
         $web = 1;
 		$pwd_sha = sha1($__LWF_CFG['misc-salt'].sha1($password));
 
-		$sql_req = 'INSERT INTO `'.$__LWF_DB_PREFIX.'-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`) VALUES(\''.mysql_real_escape_string($login).'\',\''.$pwd_sha.'\',\''.strbool2int($admin).'\',\''.strbool2int($monitor).'\',\''.strbool2int($tester).'\',\''.$developer.'\',\''.$system.'\',\''.mysql_real_escape_string($email).'\',\''.$lang.'\',\''.$style.'\',\''.$active.'\',\''.$default.'\',\''.$online.'\',\''.$notifications.'\',\''.$defaultproject.'\',\''.$cli.'\',\''.$gui.'\',\''.$web.'\');';
+        $apikey_secret = bin2hex(openssl_random_pseudo_bytes(20));
+
+		$sql_req = 'INSERT INTO `'.$__LWF_DB_PREFIX.'-users`(`login`, `password`, `administrator`, `leader`, `tester`, `developer`, `system`, `email`, `lang`, `style`, `active`, `default`, `online`, `notifications`, `defaultproject`, `cli`, `gui`, `web`, `apikey_id`, `apikey_secret`) VALUES(\''.mysql_real_escape_string($login).'\',\''.$pwd_sha.'\',\''.strbool2int($admin).'\',\''.strbool2int($monitor).'\',\''.strbool2int($tester).'\',\''.$developer.'\',\''.$system.'\',\''.mysql_real_escape_string($email).'\',\''.$lang.'\',\''.$style.'\',\''.$active.'\',\''.$default.'\',\''.$online.'\',\''.$notifications.'\',\''.$defaultproject.'\',\''.$cli.'\',\''.$gui.'\',\''.$web.'\',\''.mysql_real_escape_string($login).'\',\''.$apikey_secret.'\');';
 
 		$rslt = $db->query( $sql_req );
 		if ( !$rslt ) 

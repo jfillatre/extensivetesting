@@ -227,7 +227,7 @@
 			// body
 			$tabsbody = array();
             
-            $tb .= '<br /><b>'.lang('online').'</b><br />';
+            $tb = '<br /><b>'.lang('online').'</b><br />';
             $tb .= '<ul>';
             $tb .= '<li class="docslist"><a href="http://documentations.extensivetesting.org/docs" target="_blank">ExtensiveTesting.ORG</a></li>';
             $tb .= '</ul>';

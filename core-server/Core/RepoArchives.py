@@ -163,13 +163,13 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         """
         nb = Settings.getInt( 'WebServices', 'nb-archives' )
         if nb == -1: nb=None
-        if nb == 0: return (0, 0, [])
+        if nb == 0: return (0, 0, [], {})
 
         if fullTree: nb=None
             
         success = os.path.exists( "%s/%s" % (self.testsPath, project) )
         if not success:
-            return (0, 0, [])
+            return (0, 0, [], {})
         else:
             return self.getListingFilesV2(path="%s/%s" % (self.testsPath, project),
                                           nbDirs=nb, project=project, archiveMode=True)

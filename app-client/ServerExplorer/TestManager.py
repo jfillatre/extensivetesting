@@ -196,14 +196,19 @@ class TaskWaitingItem(QTreeWidgetItem, Logger.ClassLogger):
         @type parent:
         """
         QTreeWidgetItem.__init__(self, parent)
-        eventid, eventtype, eventargs, eventtime, eventname, author, realruntime, duration, result, eventnb, \
-        eventnbcur, eventenabled, withoutprobes, withoutnotif, nokeeptr, userid, projectid, eventfrom, eventto, groupid  = task
+        
+        eventid, eventtype, eventargs, eventtime, eventname, \
+        author, realruntime, duration, result, eventnb, \
+        eventnbcur, eventenabled, withoutprobes, withoutnotif, \
+        nokeeptr, userid, projectid, eventfrom, eventto, groupid  = task
+        
         self.taskId = eventid
         try:
             self.taskEventArgs = eval(eventargs)
         except Exception as e:
             self.error( "unable to eval event args (%s): %s" % (str(eventargs), str(e)) )
             self.taskEventArgs = (0,0,0,0,0,0)
+
         self.taskEventType = eventtype
         self.taskEventTime = eventtime
         self.taskEventName = eventname

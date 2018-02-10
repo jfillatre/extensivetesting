@@ -45,8 +45,8 @@
 	// define users constant
 	define('ADMINISTRATOR',		$__LWF_CFG['server-level-admin']	);
 	define('TESTER',			$__LWF_CFG['server-level-tester']	);
-	define('LEADER',			$__LWF_CFG['server-level-leader']	); 
-	define('DEVELOPER',			$__LWF_CFG['server-level-developer']	);
+	// define('LEADER',			$__LWF_CFG['server-level-leader']	); 
+	// define('DEVELOPER',			$__LWF_CFG['server-level-developer']	);
 	define('SYSTEM',			$__LWF_CFG['server-level-system']	);
 
 	define('COMPLETE',		"COMPLETE");

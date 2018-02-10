@@ -431,9 +431,8 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         @type title:
         """
         self.error( "%s: %s" % (title,err) )
-        # ServerExplorer.instance().rest().unsetWsCookie()
         ServerExplorer.instance().stopWorking()
-        # self.CloseConnection.emit()
+        
         self.CriticalMsg.emit( title, err)
             
     def onAuthenticationFailed(self, err, title="Error"):

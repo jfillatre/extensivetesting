@@ -1,6 +1,6 @@
 
 13.0.0
-	Date: xx/02/2018
+	Date: 11/02/2018
 	What's new		
 		1. (minor) code cleanup after static analysis
 		2. (minor) build: python package update for selenium 3.9.0

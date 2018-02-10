@@ -1,6 +1,6 @@
 
 18.0.0
-	Date: xx/02/2018
+	Date: 11/02/2018
 	What's new
 		1. (minor) test library: change open source project url in test report header
 		2. (major) toolboxes windows and linux no more embedded in the package
@@ -30,10 +30,11 @@
 		26. (minor) New tests samples
 		27. (minor) test library: support float with comma in test properties
 		28. (minor) New set of sut librairies 8.1.0
+		29. (major) Scheduler - modification of id for all run type 
 	Issues Fixed
-		1. (minor) test library: undefined variable in virtualRun function #issue1
+		1. (minor) test library: undefined variable in virtualRun function - #issue 1
 		2. (minor) unable to reset libraries and adapters repositories
 		3. (minor) unable to import test abstract, extension not authorized
 		4. (minor) test library: fix bad test basic report with test abstract in testplan
 		5. (minor) test library: fix encoding in info messages in test report
-		6. (medium) web server: unable to link project to user
+		6. (medium) web server: unable to link project to user - #issue 4
