@@ -620,8 +620,8 @@ if [ "$INSTALL_EMBEDDED_PKGS" = "Yes" ]; then
 	rm -rf $APP_PATH/$PYCRYPTO/ 1>> "$LOG_FILE" 2>&1
     
 	echo -ne "* Installing pyasn                 \r"
-    rm -rf /usr/lib/python2.6/site-packages/pyasn1-0.1.9-py2.6.egg 1>> "$LOG_FILE" 2>&1
-    rm -rf /usr/lib/python2.7/site-packages/pyasn1-0.1.9-py2.7.egg 1>> "$LOG_FILE" 2>&1
+    rm -rf /usr/lib/python2.6/site-packages/pyasn1* 1>> "$LOG_FILE" 2>&1
+    rm -rf /usr/lib/python2.7/site-packages/pyasn1* 1>> "$LOG_FILE" 2>&1
 	$TAR_BIN xvf $PKG_PATH/$PYASN.tar.gz  1>> "$LOG_FILE" 2>&1
     cd $APP_PATH/$PYASN/
     $PYBIN setup.py install 1>> "$LOG_FILE" 2>&1
@@ -1216,7 +1216,7 @@ if [ "$WEB_CONFIG" = "Yes" ]; then
 		echo -n "* Detecting selinux"
 		selinuxenabled
 		if [ $? -ne 0 ]; then
-			$PERL_BIN -i -pe "s/SELINUX=disabled/SELINUX=enforcing/g" $SELINUX_CONF
+			$PERL_BIN -i -pe "s/SELINUX=disabled/SELINUX=enforcing/g" $SELINUX_CONF 1>> "$LOG_FILE" 2>&1
 		fi
 		echo_success; echo
 		echo -n "* Updating selinux"
@@ -1236,7 +1236,7 @@ if [ "$WEB_CONFIG" = "Yes" ]; then
 		echo_success; echo
 	else
 		setenforce 0 1>> "$LOG_FILE" 2>&1
-		$PERL_BIN -i -pe "s/SELINUX=enforcing/SELINUX=disabled/g" $SELINUX_CONF
+		$PERL_BIN -i -pe "s/SELINUX=enforcing/SELINUX=disabled/g" $SELINUX_CONF 1>> "$LOG_FILE" 2>&1
 	fi
 
 	echo -n "* Updating $HTTPD_SERVICE_NAME configuration"
@@ -1281,93 +1281,95 @@ fi
 # Restart all services
 #
 #######################################
-if [ "$WEB_CONFIG" = "Yes" -o "$PHP_CONFIG" = "Yes" ] ; then
-	echo -n "* Restarting $HTTPD_SERVICE_NAME"
-	if [ "$OS_RELEASE" == "7" ]; then
-		systemctl restart $HTTPD_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
-		if [ $? -ne 0 ]; then
-			echo_failure; echo
-			echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
-			exit_on_error
-		fi
-	else
-		service $HTTPD_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
-		if [ $? -ne 0 ]; then
-			echo_failure; echo
-			echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
-			exit_on_error
-		fi
-	fi
-	echo_success; echo
+
+if [ "$SILENT" == "custom" -o  "$SILENT" == "install" ]; then
+    if [ "$WEB_CONFIG" = "Yes" -o "$PHP_CONFIG" = "Yes" ] ; then
+        echo -n "* Restarting $HTTPD_SERVICE_NAME"
+        if [ "$OS_RELEASE" == "7" ]; then
+            systemctl restart $HTTPD_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                echo_failure; echo
+                echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
+                exit_on_error
+            fi
+        else
+            service $HTTPD_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                echo_failure; echo
+                echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
+                exit_on_error
+            fi
+        fi
+        echo_success; echo
+    fi
+
+    if [ "$FW_CONFIG" = "Yes" ]; then
+        echo -n "* Restarting firewall"
+        if [ "$OS_RELEASE" == "7" ]; then
+            systemctl restart firewalld.service 1>> "$LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                echo_failure; echo
+                echo "Unable to restart firewalld" >> "$LOG_FILE"
+                exit_on_error
+            fi
+        else
+            service $IPTABLE_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                echo_failure; echo
+                echo "Unable to restart $IPTABLE_SERVICE_NAME" >> "$LOG_FILE"
+                exit_on_error
+            fi
+        fi
+        echo_success; echo
+    else
+        if [ "$OS_RELEASE" == "7" ]; then
+            systemctl stop firewalld.service 1>> "$LOG_FILE" 2>&1
+            systemctl disable firewalld.service 1>> "$LOG_FILE" 2>&1
+            systemctl stop $IPTABLE_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+            systemctl disable $IPTABLE_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+        else
+            service $IPTABLE_SERVICE_NAME stop 1>> "$LOG_FILE" 2>&1
+            chkconfig $IPTABLE_SERVICE_NAME off 1>> "$LOG_FILE" 2>&1
+        fi
+    fi
+
+    echo -n "* Restarting postfix"
+    if [ "$OS_RELEASE" == "7" ]; then
+        systemctl restart $POSTFIX_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to restart $POSTFIX_SERVICE_NAME" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    else
+        service $POSTFIX_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to restart $POSTFIX_SERVICE_NAME" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    fi
+    echo_success; echo
+    
+    echo -n "* Restarting MySQL/MariaDB"
+    if [ "$OS_RELEASE" == "7" ]; then
+        systemctl restart $MARIADB_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to restart $MARIADB_SERVICE_NAME" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    else
+        service $MYSQL_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to restart $MYSQL_SERVICE_NAME" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    fi
+    echo_success; echo
 fi
 
-if [ "$FW_CONFIG" = "Yes" ]; then
-	echo -n "* Restarting firewall"
-	if [ "$OS_RELEASE" == "7" ]; then
-		systemctl restart firewalld.service 1>> "$LOG_FILE" 2>&1
-		if [ $? -ne 0 ]; then
-			echo_failure; echo
-			echo "Unable to restart firewalld" >> "$LOG_FILE"
-			exit_on_error
-		fi
-	else
-		service $IPTABLE_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
-		if [ $? -ne 0 ]; then
-			echo_failure; echo
-			echo "Unable to restart $IPTABLE_SERVICE_NAME" >> "$LOG_FILE"
-			exit_on_error
-		fi
-	fi
-	echo_success; echo
-else
-	if [ "$OS_RELEASE" == "7" ]; then
-		systemctl stop firewalld.service 1>> "$LOG_FILE" 2>&1
-		systemctl disable firewalld.service 1>> "$LOG_FILE" 2>&1
-		systemctl stop $IPTABLE_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
-		systemctl disable $IPTABLE_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
-	else
-		service $IPTABLE_SERVICE_NAME stop 1>> "$LOG_FILE" 2>&1
-		chkconfig $IPTABLE_SERVICE_NAME off 1>> "$LOG_FILE" 2>&1
-	fi
-fi
-
-echo -n "* Restarting MySQL/MariaDB"
-if [ "$OS_RELEASE" == "7" ]; then
-	systemctl restart $MARIADB_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to restart $MARIADB_SERVICE_NAME" >> "$LOG_FILE"
-		exit_on_error
-	fi
-else
-	service $MYSQL_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to restart $MYSQL_SERVICE_NAME" >> "$LOG_FILE"
-		exit_on_error
-	fi
-fi
-echo_success; echo
-
-echo -n "* Restarting postfix"
-if [ "$OS_RELEASE" == "7" ]; then
-	systemctl restart $POSTFIX_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to restart $POSTFIX_SERVICE_NAME" >> "$LOG_FILE"
-		exit_on_error
-	fi
-else
-	service $POSTFIX_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to restart $POSTFIX_SERVICE_NAME" >> "$LOG_FILE"
-		exit_on_error
-	fi
-fi
-echo_success; echo
-
-echo "===> Database installation" >> "$LOG_FILE"
 echo -n "* Adding the $APP_NAME database"
 cd "$INSTALL_PATH"/current/Scripts/
 $PWD_BIN 1>> "$LOG_FILE" 2>&1
@@ -1381,23 +1383,25 @@ if [ $? -ne 0 ]; then
 fi
 echo_success; echo
 
-echo -n "* Starting $APP_NAME $PRODUCT_VERSION"
-if [ "$OS_RELEASE" == "7" ]; then
-	systemctl start $PRODUCT_SVC_NAME.service 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to start the server" >> "$LOG_FILE"
-		exit_on_error
-	fi
-else
-	service $PRODUCT_SVC_NAME start 1>> "$LOG_FILE" 2>&1
-	if [ $? -ne 0 ]; then
-		echo_failure; echo
-		echo "Unable to start the server" >> "$LOG_FILE"
-		exit_on_error
-	fi
+if [ "$SILENT" == "custom" -o  "$SILENT" == "install" ]; then
+    echo -n "* Starting $APP_NAME $PRODUCT_VERSION"
+    if [ "$OS_RELEASE" == "7" ]; then
+        systemctl start $PRODUCT_SVC_NAME.service 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to start the server" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    else
+        service $PRODUCT_SVC_NAME start 1>> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo_failure; echo
+            echo "Unable to start the server" >> "$LOG_FILE"
+            exit_on_error
+        fi
+    fi
+    echo_success; echo
 fi
-echo_success; echo
 
 rm -rf "$APP_PATH"/default.cfg.tmp 1>> "$LOG_FILE" 2>&1
 

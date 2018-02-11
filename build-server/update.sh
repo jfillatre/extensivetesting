@@ -237,7 +237,6 @@ fi
 # Stop the product server
 #
 #######################################
-echo -n "* Stopping the new version $PRODUCT_VERSION"
 if [ "$OS_RELEASE" == "7" ]; then
 	systemctl stop $PRODUCT_SVC_NAME.service 1>> "$LOG_FILE" 2>&1
 	if [ $? -ne 0 ]; then
@@ -253,7 +252,8 @@ else
 		exit_on_error
 	fi
 fi
-echo_success; echo
+
+/usr/sbin/"$PRODUCT_SVC_CTRL" stop 1>> $LOG_FILE 2>&1
 
 
 #######################################
@@ -316,10 +316,28 @@ echo_success; echo
 
 #######################################
 #
-# Restarting server
+# Restarting services
 #
 #######################################
-echo -n "* Restarting the new version $PRODUCT_VERSION"
+echo -n "* Restarting $HTTPD_SERVICE_NAME"
+if [ "$OS_RELEASE" == "7" ]; then
+    systemctl restart $HTTPD_SERVICE_NAME.service 1>> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        echo_failure; echo
+        echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
+        exit_on_error
+    fi
+else
+    service $HTTPD_SERVICE_NAME restart 1>> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        echo_failure; echo
+        echo "Unable to restart $HTTPD_SERVICE_NAME" >> "$LOG_FILE"
+        exit_on_error
+    fi
+fi
+echo_success; echo
+    
+echo -n "* Starting the new version $PRODUCT_VERSION"
 if [ "$OS_RELEASE" == "7" ]; then
 	systemctl start $PRODUCT_SVC_NAME.service 1>> "$LOG_FILE" 2>&1
 	if [ $? -ne 0 ]; then

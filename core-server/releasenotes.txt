@@ -38,3 +38,4 @@
 		4. (minor) test library: fix bad test basic report with test abstract in testplan
 		5. (minor) test library: fix encoding in info messages in test report
 		6. (medium) web server: unable to link project to user - #issue 4
+		7. (major) fix pysnmp error import 'module' object has no attribute 'noValue'
