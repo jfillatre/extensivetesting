@@ -38,11 +38,14 @@ import threading
 try:
 	import hashlib
 	sha1_constructor = hashlib.sha1
-except ImportError, e: # support python 2.4
+except ImportError as e: # support python 2.4
 	import sha
 	sha1_constructor = sha.new
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 WEBSOCKET_VERSION			= 13
 
@@ -210,7 +213,7 @@ class Codec(object):
 				# I = 4 octets
 				fixed_hdr= struct.unpack('!2B', buffer[:hdrs_len])
 				remaining = buffer[hdrs_len:]
-			except struct.error, e:
+			except struct.error as e:
 				left = buffer # need more data
 				needMore = True
 				self.debug( "ws need more data in header" )
@@ -231,7 +234,7 @@ class Codec(object):
 						hdrs_extended_len = 2
 						size = buffer[hdrs_len:hdrs_len+hdrs_extended_len]
 						ext_lenght_hdr= struct.unpack('!H', buffer[hdrs_len:hdrs_len+hdrs_extended_len])
-					except struct.error, e:
+					except struct.error as  e:
 						left = buffer # need more data
 						needMore = True
 						self.debug( "ws need more data in data" )
@@ -346,4 +349,4 @@ class Codec(object):
 #		@param data: data to encode in pong response
 #		@type data: string
 #		"""
-		return self.encodeWsData(data=data, opcode=WEBSOCKET_OPCODE_PONG) 
+#		return self.encodeWsData(data=data, opcode=WEBSOCKET_OPCODE_PONG) 

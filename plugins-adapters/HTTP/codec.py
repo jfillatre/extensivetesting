@@ -28,7 +28,10 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 import sys
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 DECODING_OK_CONTINUE = 3
 DECODING_NOTHING_TODO = 2

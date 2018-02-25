@@ -40,8 +40,12 @@ LibraryCodecs = sys.modules['SutLibraries.%s.Codecs' % TestLibraryLib.getVersion
 LibrarySDP = sys.modules['SutLibraries.%s.Media' % TestLibraryLib.getVersion()]
 
 
-import client as SIP
-import templates
+try:
+	import client as SIP
+	import templates
+except ImportError: # python3 support
+	from . import client as SIP
+	from . import templates
 
 __NAME__                         = """SIP PHONE"""
 

@@ -1012,7 +1012,7 @@ class Task(Logger.ClassLogger):
                                                             self.testName, 
                                                             self.userName, 
                                                             self.getTestID()  )
-        f = open( fileName ,  'w')
+        f = open( fileName ,  'wb')
         f.write(te)
         f.close()
 
@@ -1077,6 +1077,8 @@ class Task(Logger.ClassLogger):
                                                 testLocation=self.getTestLocation(),
                                                 parametersShared=self.ctx.instance().getTestEnvironment(user=self.userName)
                                             )
+                    if sys.version_info > (3,):
+                        te = te.decode("utf8")
                 except Exception as e:
                     cleanupTmp = False
                     self.error( 'Parse test design: unable to create te: %s' % str(e) )
@@ -1288,6 +1290,8 @@ class Task(Logger.ClassLogger):
                                                     runningProbes=ProbesManager.instance().getRunning(),
                                                     taskUuid=self.taskUuid
                                                     )
+                if sys.version_info > (3,):
+                    te = te.decode("utf8")
             except Exception as e:
                 self.error( "parse test - unable to prepare te: %s" % str(e) )
                 self.wrongParseToFile( te=te)
@@ -1296,6 +1300,10 @@ class Task(Logger.ClassLogger):
                 self.trace( "compile all sub test executable" ) 
                 for i in xrange(len(sub_tes)):
                     issub_tu, issub_ta, subtest_name, subtest_val = sub_tes[i]
+                    
+                    if sys.version_info > (3,):
+                        subtest_val = subtest_val.decode("utf8")
+                        
                     # find startline of the test
                     if issub_tu or issub_ta:
                         beginTe, leftTe = subtest_val.split('class TESTCASE(TestCase):')
@@ -1786,7 +1794,10 @@ class Task(Logger.ClassLogger):
             else:
                 f = open( '%s.%s' % (fileName, RepoManager.TEST_RESULT_DESIGN_EXT) , 'r'  )
             designs = f.read()
-            designs = designs.decode('utf8')
+            if sys.version_info > (3,):
+                pass
+            else:
+                designs = designs.decode('utf8')
             f.close()
         except Exception as e:
             self.error( "open test result design failed: %s" % str(e) )
@@ -1817,7 +1828,10 @@ class Task(Logger.ClassLogger):
                     reportExt = RepoManager.TEST_RESULT_BASIC_REPORT_EXT
                 f = open( '%s.%s' % (fileName, reportExt) , 'r'  )
             reports = f.read()
-            reports = reports.decode('utf8')
+            if sys.version_info > (3,):
+                pass
+            else:
+                reports = reports.decode('utf8')
             f.close()
         except Exception as e:
             self.error( "open test result report failed: %s" % str(e) )
@@ -1843,7 +1857,10 @@ class Task(Logger.ClassLogger):
             else:
                 f = open( '%s.%s' % (fileName, RepoManager.TEST_RESULT_VERDICT_EXT) , 'r'  )
             verdict = f.read()
-            verdict = verdict.decode('utf8')
+            if sys.version_info > (3,):
+                pass
+            else:
+                verdict = verdict.decode('utf8')
             f.close()
         except Exception as e:
             self.error( "open test result verdict failed: %s" % str(e) )
@@ -1952,9 +1969,10 @@ class Task(Logger.ClassLogger):
                                         RepoManager.TEST_RESULT_EXT ) 
         f = open( filenameTrx, 'wb')
         raw_data = dataModel.toXml()
-        if sys.version_info > (3,): # python3 support
-            raw_data = bytes(raw_data, "utf8")
-        f.write( zlib.compress( raw_data ) )
+        if raw_data is not None:
+            if sys.version_info > (3,): # python3 support
+                raw_data = bytes(raw_data, "utf8")
+            f.write( zlib.compress( raw_data ) )
         f.close()
         
         # optimization remove log file in v12

@@ -43,12 +43,17 @@ except ImportError:
 import threading
 import select
 import socket
-import Queue
-
+try:
+	import Queue
+except ImportError: # python3 support
+	import queue as Queue
 import io
 
-import templates
-
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+	
 __NAME__="""SSHv2"""
 
 AGENT_INITIALIZED = "AGENT_INITIALIZED"

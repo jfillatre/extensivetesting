@@ -35,8 +35,12 @@ import sys
 # # of bytes:	   1    1      2              4           variable       1
 
 import struct
-import templates
 
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+	
 # VN = Version
 # CD = Command
 # DSTPORT = Destination port

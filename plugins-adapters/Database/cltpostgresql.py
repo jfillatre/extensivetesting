@@ -34,7 +34,12 @@ try:
 	import psycopg2
 except Exception as e:
 	raise Exception("Postgresql extension not installed")
-import templates
+
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+
 import datetime
 
 __NAME__="""POSTGRESQL"""

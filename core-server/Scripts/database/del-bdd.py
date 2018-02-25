@@ -24,7 +24,11 @@
 import sys
 sys.path.insert(0, '../' )
 
-import MySQLdb
+try:
+    import MySQLdb
+except ImportError: # python3 support
+    import pymysql as MySQLdb
+
 from  Libs import Settings
 
 Settings.initialize(path="../../")

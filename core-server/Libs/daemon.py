@@ -6,6 +6,22 @@ import time
 import atexit
 import signal
 
+def log_exception(*args):
+    """
+    Log exception
+    """
+    timestamp = time.time()
+    c,e,traceback = args
+
+    # extract number line, function name and file
+    lineno = traceback.tb_lineno
+    frame = traceback.tb_frame
+    name = frame.f_code.co_name
+    filename = frame.f_code.co_filename
+
+    sys.stderr.write('%s Traceback Num=%s Function=%s File=%s' % (timestamp, lineno, name, filename))
+    sys.stderr.write('%s')
+    
 # a simple unix/linux daemon in Python by Sander Marechal
 # adaptation for this project
 
@@ -89,6 +105,7 @@ class Daemon(object):
             # 1 to select line buffering (only usable in text mode)
             sys.stdout = open( self.stdout ,"a+", 1) 
             sys.stderr = open( self.stderr ,"a+", 1)
+            sys.excepthook = log_exception
             
         # write pidfile
         atexit.register(self.delpid)

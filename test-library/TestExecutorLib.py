@@ -21,19 +21,33 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-import TestLoggerXml as TLX
-import TestDataStorage as TDS
-import TestTemplatesLib
-import TestPropertiesLib
-import TestValidatorsLib
-import TestOperatorsLib
-import TestAdapterLib
-import TestLibraryLib
-import TestManipulatorsLib
-import TestClientInterface as TCI
-import Libs.NetLayerLib.Messages as Messages
-import TestSettings
-
+try:
+    import TestLoggerXml as TLX
+    import TestDataStorage as TDS
+    import TestTemplatesLib
+    import TestPropertiesLib
+    import TestValidatorsLib
+    import TestOperatorsLib
+    import TestAdapterLib
+    import TestLibraryLib
+    import TestManipulatorsLib
+    import TestClientInterface as TCI
+    import Libs.NetLayerLib.Messages as Messages
+    import TestSettings
+except ImportError:
+    from . import TestLoggerXml as TLX
+    from . import TestDataStorage as TDS
+    from . import TestTemplatesLib
+    from . import TestPropertiesLib
+    from . import TestValidatorsLib
+    from . import TestOperatorsLib
+    from . import TestAdapterLib
+    from . import TestLibraryLib
+    from . import TestManipulatorsLib
+    from . import TestClientInterface as TCI
+    from Libs.NetLayerLib import Messages
+    from . import TestSettings
+    
 import time
 import threading
 import sys
@@ -44,7 +58,6 @@ import base64
 import codecs
 import json
 import re
-
 import wrapt
 
 @wrapt.decorator
@@ -2189,7 +2202,7 @@ class Public(object):
         @type folder: string
         """
         try:
-            os.mkdir("%s/%s" % (self.getPath(), folder), 0755 )
+            os.mkdir("%s/%s" % (self.getPath(), folder), 0o755 )
         except OSError as e:
             raise PrivateException("os error on add public folder: %s" % e)
     @doc_public
@@ -2276,7 +2289,7 @@ class Private(object):
         @type folder: string
         """
         try:
-            os.mkdir("%s/%s" % (self.getPath(), folder), 0755 )
+            os.mkdir("%s/%s" % (self.getPath(), folder), 0o755 )
         except OSError as e:
             raise PrivateException("os error on add folder: %s" % e)
     @doc_public
@@ -3317,7 +3330,7 @@ class TestCase(object):
             tcDirName = "/%s/TC-%s-#%s/" % (pathData , tc, self.__id) 
             try: 
                 if not os.path.exists( tcDirName ):
-                    os.mkdir( tcDirName, 0755 )
+                    os.mkdir( tcDirName, 0o755 )
             except Exception as e:
                 self.error( "unable to init storage testcase: %s" % str(e) )
 

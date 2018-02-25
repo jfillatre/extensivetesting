@@ -21,10 +21,15 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-from templates import *
-from phone import *
-
+try:
+	from client import *
+	from templates import *
+	from phone import *
+except ImportError: # python3 support
+	from .client import *
+	from .templates import *
+	from .phone import *
+	
 __DESCRIPTION__ = """This adapter enable to use the SIP protocol.
 
 The Session Initiation Protocol (SIP) is an application-layer control protocol for creating, modifying, and terminating sessions such as Internet multimedia conferences, Internet telephone calls, and multimedia distribution.

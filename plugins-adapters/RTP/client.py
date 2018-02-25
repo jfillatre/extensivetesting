@@ -36,11 +36,17 @@ AdapterUDP = sys.modules['SutAdapters.%s.UDP' % TestAdapterLib.getVersion()]
 SutLibraries = sys.modules['SutLibraries.%s' % TestLibraryLib.getVersion()]
 MediaTools = sys.modules['SutLibraries.%s.Media' % TestLibraryLib.getVersion()]
 
-import codec
-import templates
-import streamer 
-import defaultpayloads
-
+try:
+	import codec
+	import templates
+	import streamer 
+	import defaultpayloads
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
+	from . import streamer 
+	from . import defaultpayloads
+	
 import os
 import threading
 import time

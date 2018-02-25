@@ -276,7 +276,8 @@ class AgentServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         Trace message
         """
-        Logger.ClassLogger.trace(self, txt="ASI - %s" % txt)
+        if Settings.get( 'Trace', 'debug-level') == 'VERBOSE':
+            Logger.ClassLogger.trace(self, txt="ASI - %s" % txt)
 
 ASI = None
 def instance ():

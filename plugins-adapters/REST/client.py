@@ -41,7 +41,10 @@ AdapterHTTP = sys.modules['SutAdapters.%s.HTTP' % TestAdapter.getVersion()]
 
 LibraryCodecs = sys.modules['SutLibraries.%s.Codecs' % TestLibrary.getVersion()]
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""REST"""
 

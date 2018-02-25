@@ -21,11 +21,17 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-from templates import *
-from server import *
-from curl import *
-
+try:
+	from client import *
+	from templates import *
+	from server import *
+	from curl import *
+except ImportError: # python3 support
+	from .client import *
+	from .templates import *
+	from .server import *
+	from .curl import *
+	
 __DESCRIPTION__ = """This adapter enable to use the HTTP protocol.
 
 More informations in the RFC2616."""

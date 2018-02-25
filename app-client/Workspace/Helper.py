@@ -102,14 +102,14 @@ class Item(QTreeWidgetItem):
         self.setMetadata()
 
         if isGeneric and isDefault and self.itemData['type'] in [ 'libraries', 'adapters' ]:
-            self.setText(0, "%s (default)" % self.itemData['name'])
+            self.setText(0, "%s (extra)" % self.itemData['name'])
             self.setExpanded(True)
         else:  
             if isGeneric and self.itemData['type'] in [ 'libraries', 'adapters' ] :
                 self.setText(0, "%s (generic)" % self.itemData['name'])
                 self.setExpanded(True)
             elif isDefault and self.itemData['type'] in [ 'libraries', 'adapters' ] :
-                self.setText(0, "%s (default)" % self.itemData['name'])
+                self.setText(0, "%s (extra)" % self.itemData['name'])
                 self.setExpanded(True)
             else:
                 self.setText(0, self.itemData['name'])
@@ -222,6 +222,15 @@ class Item(QTreeWidgetItem):
                     elif self.parent.itemData['realname'].startswith("SutLibraries."):
                         __name = self.parent.itemData['realname'].split("SutLibraries.")[1]
                         self.metadata = [ '@obj = SutLibraries.Generic.%s.%s(%s)' % (__name, className,methodArgs) , '']
+                    else:
+                        self.metadata = [ '@obj = %s.%s(%s)' % (self.parent.itemData['realname'], className,methodArgs) , '']
+                if not self.isGeneric and self.isDefault:
+                    if self.parent.itemData['realname'].startswith("SutAdapters."):
+                        __name = self.parent.itemData['realname'].split("SutAdapters.")[1]
+                        self.metadata = [ '@obj = SutAdapters.Extra.%s.%s(%s)' % (__name, className,methodArgs) , '']
+                    elif self.parent.itemData['realname'].startswith("SutLibraries."):
+                        __name = self.parent.itemData['realname'].split("SutLibraries.")[1]
+                        self.metadata = [ '@obj = SutLibraries.Extra.%s.%s(%s)' % (__name, className,methodArgs) , '']
                     else:
                         self.metadata = [ '@obj = %s.%s(%s)' % (self.parent.itemData['realname'], className,methodArgs) , '']
                 else:

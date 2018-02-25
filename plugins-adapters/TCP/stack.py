@@ -29,9 +29,14 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import codec
-import sniffer as SnifferTCP
-import templates
+try:
+	import codec
+	import sniffer as SnifferTCP
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import sniffer as SnifferTCP
+	from . import templates
 
 import random
 

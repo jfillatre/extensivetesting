@@ -21,12 +21,19 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sniffer import *
-from templates import *
-from codec4 import *
-from codec6 import *
-from common import *
-
+try:
+	from sniffer import *
+	from templates import *
+	from codec4 import *
+	from codec6 import *
+	from common import *
+except ImportError: # python3 support
+	from .sniffer import *
+	from .templates import *
+	from .codec4 import *
+	from .codec6 import *
+	from .common import *
+	
 # RFC2460
 __DESCRIPTION__ = """
 This adapter enable to send/received IP datagram. 

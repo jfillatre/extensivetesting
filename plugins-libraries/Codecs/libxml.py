@@ -30,7 +30,12 @@ from Libs.PyXmlDict import Xml2Dict
 import xml.etree.ElementTree as ET
 import lxml                                                                     
 from lxml import etree 
-import StringIO
+
+try:
+  import StringIO
+except ImportError: # support python 3
+  import io as StringIO
+
 import copy
 import sys
 

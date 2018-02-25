@@ -38,8 +38,12 @@ AdapterTelnet = sys.modules['SutAdapters.%s.Telnet' % TestAdapter.getVersion()]
 
 __NAME__="""Catalyst"""
 
-import templates_catalyst
-import codec_catalyst
+try:
+	import templates_catalyst
+	import codec_catalyst
+except ImportError: # python3 support
+	from . import templates_catalyst
+	from . import codec_catalyst
 
 import copy
 

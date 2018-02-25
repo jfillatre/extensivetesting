@@ -4745,7 +4745,7 @@ class WDocumentViewer(QWidget, Logger.ClassLogger):
             schedType = UCI.SCHED_NOW
         else:
             schedType = runType
-        print(schedType)
+
         currentDocument = self.tab.widget(tabId)
         testId = TestResults.instance().getTestId()
 

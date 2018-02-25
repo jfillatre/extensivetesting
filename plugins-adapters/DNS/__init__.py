@@ -21,8 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-from templates import *
-from dig import *
-
+try:
+	from client import *
+	from templates import *
+	from dig import *
+except ImportError: # python3 support
+	from .client import *
+	from .templates import *
+	from .dig import *
+	
 __DESCRIPTION__ = """This adapter enables to make dns resolution."""

@@ -29,8 +29,12 @@ import sys
 
 import struct
 
-import templates
-from oui import OUI
+try:
+	import templates
+	from oui import OUI
+except ImportError: # python3 support
+	from . import templates
+	from .oui import OUI
 
 ALL     = "ALL"
 

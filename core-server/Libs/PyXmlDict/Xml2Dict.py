@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2017 Denis Machard
+# Copyright (c) 2010-2018 Denis Machard
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -26,8 +26,22 @@ try:
 except Exception as e:
     import cElementTree as ET
 from lxml import etree
+import sys
 
+def bytes2str(val):
+    """
+    bytes 2 str conversion, only for python3
+    """
+    if isinstance(val, bytes):
+        return str(val, "utf8")
+    else:
+        return val
+        
+        
 class Xml2Dict(object):
+    """
+    Xml to Dict
+    """
     def __init__ (self, coding = 'UTF-8'):
         """
         Convert xml string to python dict
@@ -68,11 +82,11 @@ class Xml2Dict(object):
         @rtype: dict
         """
         ret = {}
+        if sys.version_info > (3,):
+            nodeValue = bytes2str(nodeValue)
         ret[nodeName] = nodeValue
-        #if len(nodeAttrib) > 0: 
         ret["@%s" % nodeName] = nodeAttrib
         return ret
-
 
     def __makeList (self, dico, nodeName, nodeAttrib, nodeValue):
         """
@@ -90,6 +104,9 @@ class Xml2Dict(object):
         @param nodeValue: node value
         @type nodeValue: string
         """
+        if sys.version_info > (3,):
+            nodeValue = bytes2str(nodeValue)
+            
         if not isinstance( dico[nodeName], list):
             dico[nodeName] = [ dico[nodeName] ]
         rslt = self.__makeDict( nodeName = nodeName, nodeAttrib = nodeAttrib, 
@@ -154,7 +171,7 @@ class Xml2Dict(object):
         ret = None
         parser = etree.XMLParser(huge_tree=huge_tree)
         root = etree.fromstring(xml, parser)
-        #root = ET.fromstring(xml)
+        
         nbChild = self.__getNbChildren( node = root )
         if nbChild > 0:
             ret = self.__makeDict( nodeName = root.tag, nodeAttrib = dict(root.attrib),

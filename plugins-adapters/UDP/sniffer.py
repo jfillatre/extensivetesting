@@ -34,9 +34,14 @@ AdapterEthernet = sys.modules['SutAdapters.%s.Ethernet' % TestAdapterLib.getVers
 AdapterIP = sys.modules['SutAdapters.%s.IP' % TestAdapterLib.getVersion()]
 AdapterICMP = sys.modules['SutAdapters.%s.ICMP' % TestAdapterLib.getVersion()]
 
-import client
-import codec
-import templates
+try:
+	import client
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import client
+	from . import codec
+	from . import templates
 
 import struct
 import time

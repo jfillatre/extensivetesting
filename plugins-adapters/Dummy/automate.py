@@ -50,7 +50,10 @@ STATE_STANDBY         = "standby"
 STATE_PAUSING        = "pausing"
 STATE_OFF                = "off"
 
-import adapter
+try:
+	import adapter
+except ImportError: # python3 support
+	from . import adapter
 
 class Automate(TestAdapter.Adapter):
 	@doc_public

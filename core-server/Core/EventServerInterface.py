@@ -281,7 +281,8 @@ class EventServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         Trace message
         """
-        Logger.ClassLogger.trace(self, txt="ESI - %s" % txt)
+        if Settings.get( 'Trace', 'debug-level') == 'VERBOSE':
+            Logger.ClassLogger.trace(self, txt="ESI - %s" % txt)
 
 ESI = None # singleton
 def instance ():

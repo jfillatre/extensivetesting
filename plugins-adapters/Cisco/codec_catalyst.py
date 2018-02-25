@@ -30,7 +30,10 @@ import sys
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import templates_catalyst
+try:
+	import templates_catalyst
+except ImportError: # python3 support
+	from . import templates_catalyst
 
 DECODING_NOTHING_TODO = 2
 DECODING_NEED_MORE_DATA = 1

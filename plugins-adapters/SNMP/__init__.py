@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from trapreceiver import *
-
+try:
+	from trapreceiver import *
+except ImportError: # python3 support
+	from .trapreceiver import *
+	
 __DESCRIPTION__ = "This adapter enable to use the SNMP protocol."

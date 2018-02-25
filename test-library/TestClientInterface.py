@@ -21,9 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-import Libs.NetLayerLib.ClientAgent as NetLayerLib
-import TestSettings
-
+try:
+    import Libs.NetLayerLib.ClientAgent as NetLayerLib
+    import TestSettings
+except ImportError: # python3 support
+    from Libs.NetLayerLib import ClientAgent as NetLayerLib
+    from . import TestSettings
+    
 import time
 
 class TestClientInterface(NetLayerLib.ClientAgent):
@@ -40,12 +44,13 @@ class TestClientInterface(NetLayerLib.ClientAgent):
         @param name:
         @type name: 
         """
-        NetLayerLib.ClientAgent.__init__(self, typeAgent = NetLayerLib.TYPE_AGENT_USER, agentName = 'TEST', startAuto = True, forceClose=False,
-                                                keepAliveInterval=TestSettings.getInt( 'Network', 'keepalive-interval' ), 
-                                                inactivityTimeout=TestSettings.getInt( 'Network', 'inactivity-timeout' ),
-                                                timeoutTcpConnect=TestSettings.getInt( 'Network', 'tcp-connect-timeout' ),
-                                                responseTimeout=TestSettings.getInt( 'Network', 'response-timeout' )
-                                            )
+        NetLayerLib.ClientAgent.__init__(self, typeAgent = NetLayerLib.TYPE_AGENT_USER, 
+                                        agentName = 'TEST', startAuto = True, forceClose=False,
+                                        keepAliveInterval=TestSettings.getInt( 'Network', 'keepalive-interval' ), 
+                                        inactivityTimeout=TestSettings.getInt( 'Network', 'inactivity-timeout' ),
+                                        timeoutTcpConnect=TestSettings.getInt( 'Network', 'tcp-connect-timeout' ),
+                                        responseTimeout=TestSettings.getInt( 'Network', 'response-timeout' )
+                                     )
         _ip, _port = address
         self.setServerAddress( ip = _ip, port = _port)
         self.__test_name = name
@@ -67,9 +72,6 @@ class TestClientInterface(NetLayerLib.ClientAgent):
             timestamp =  time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())) \
                 + ".%3.3d" % int((time.time() * 1000) % 1000)
             print("%s | [%s] %s" % (timestamp, self.__class__.__name__, unicode(txt).encode('utf-8')))
-
-######################################################
-######################################################
 
 TCI = None
 

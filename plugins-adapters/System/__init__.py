@@ -21,11 +21,19 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from windows import *
-from linux import *
-from file import *
-from nmap import *
-from ncat import *
-from openssl import *
-
+try:
+	from windows import *
+	from linux import *
+	from file import *
+	from nmap import *
+	from ncat import *
+	from openssl import *
+except ImportError: # python3 support
+	from .windows import *
+	from .linux import *
+	from .file import *
+	from .nmap import *
+	from .ncat import *
+	from .openssl import *
+	
 __DESCRIPTION__ = "This adapter enables to execute system commands on windows or linux."

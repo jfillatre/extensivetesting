@@ -404,12 +404,18 @@ class RepoManager(Logger.ClassLogger):
                                 newFolderName = f.read().strip()
                                 if len(newFolderName): 
                                     folderNameList = entry.name.split(".")
-                                    folderNameList[2] = base64.b64encode(newFolderName.encode("utf8"))
+                                    b64_folder_name = base64.b64encode(newFolderName.encode("utf8"))
+                                    
+                                    if sys.version_info > (3,):
+                                        b64_folder_name = b64_folder_name.decode("utf8")
+                                        
+                                    folderNameList[2] = b64_folder_name
                                     virtualFolderName = ".".join(folderNameList)
                                     del folderNameList
                                 del newFolderName
                                 f.close()
                             except Exception as e:
+                                self.error("virtual folder name: %s" % e)
                                 continue  
 
                     d_nbFolders, d_nbFiles, d_content, d_statistics = self.getListingFilesV2( entry.path, extensionsSupported, 
@@ -531,8 +537,18 @@ class RepoManager(Logger.ClassLogger):
             # prepare lock file path
             is_locked = False
             locked_by = ''
-            lockPath = "%s/%s/%s/.%s.%s.lock" % (self.testsPath, project, path_file, name_file, ext_file)
+            lockPath = "%s/%s/%s/.%s.%s.lock" % (self.testsPath, 
+                                                 project, 
+                                                 path_file, 
+                                                 name_file, 
+                                                 ext_file)
             
+            if sys.version_info > (3,):
+                b64login = base64.b64encode( bytes(login, "utf8") )
+                b64login = b64login.decode("utf8")
+            else:
+                b64login = base64.b64encode(login)
+
             if not forceOpen:
                 if os.path.exists( lockPath ): 
                     is_locked=True
@@ -541,12 +557,12 @@ class RepoManager(Logger.ClassLogger):
                     fd_lock.close()
                     
                     # cancel lock when login
-                    if base64.b64encode(login) ==  locked_by:
+                    if b64login ==  locked_by:
                         is_locked = False
                         locked_by = ''
             
             if is_locked and not forceOpen and addLock and not readOnly:
-                return (self.context.CODE_OK,) +  ret +  (base64.b64encode(""), is_locked, locked_by)
+                return (self.context.CODE_OK,) +  ret +  (base64.b64encode(b""), is_locked, locked_by)
                 
             # open the file in binary mode ? yes by default
             if binaryMode:
@@ -563,15 +579,19 @@ class RepoManager(Logger.ClassLogger):
                 if ext_file.lower() not in [PNG_EXT, ZIP_EXT, CAP_EXT, PDF_EXT]:
                     self.trace("creating lock file for FilePath=%s" % pathFile)
                     fd_lock = open(lockPath, 'w')
-                    fd_lock.write(base64.b64encode(login))
+                    fd_lock.write(b64login)
                     fd_lock.close()
-            
-            return (self.context.CODE_OK,) + ret + (base64.b64encode(data_read), is_locked, locked_by)
+
+            b64file = base64.b64encode(data_read)
+            if sys.version_info > (3,):
+                b64file = b64file.decode("utf8")
+                
+            return (self.context.CODE_OK,) + ret + (b64file, is_locked, locked_by)
         except IOError as e:
-            self.error( e )
+            self.error( "io: %s" % e )
             return (self.context.CODE_FORBIDDEN,) + ret + ( '', False,'')
         except Exception as e:
-            self.error( e )
+            self.error( "general: %s" % e )
             return (self.context.CODE_NOT_FOUND,)+ ret + ( '', False,'')
 
     def getBackup(self, pathFile, binaryMode=True, project=''):
@@ -645,8 +665,14 @@ class RepoManager(Logger.ClassLogger):
                     lockedBy = fd_lock.read()
                     fd_lock.close()
                     
+                    if sys.version_info > (3,):
+                        b64login = base64.b64encode( bytes(login, "utf8") )
+                        b64login = b64login.decode("utf8")
+                    else:
+                        b64login = base64.b64encode(login)
+                    
                     # cancel lock when login
-                    if base64.b64encode(login) != lockedBy:
+                    if b64login != lockedBy:
                         return (self.context.CODE_OK,) + ret + (is_locked, lockedBy,)
                                 
             # create missing directory
@@ -661,6 +687,7 @@ class RepoManager(Logger.ClassLogger):
                     return (self.context.CODE_ALLREADY_EXISTS,) + ret + (is_locked, lockedBy,)
             
             # write the file
+            self.trace("TYPE: %s" % type(contentFile) )
             content_decoded = base64.b64decode(contentFile)
             if binaryMode:
                 f = open( complete_path, 'wb')
@@ -714,7 +741,13 @@ class RepoManager(Logger.ClassLogger):
                 fd_lock = open(completepath, 'r')
                 locked_by = fd_lock.read()
                 fd_lock.close()
-                if base64.b64encode(login) == locked_by:
+                
+                if sys.version_info > (3,):
+                    b64login = base64.b64encode( bytes(login, "utf8") )
+                    b64login = b64login.decode("utf8")
+                else:
+                    b64login = base64.b64encode(login)
+                if b64login == locked_by:
                     os.remove( completepath )
                     self.trace( "unlocked file=%s" % completepath )
         except Exception as e:

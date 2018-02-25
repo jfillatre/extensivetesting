@@ -37,7 +37,10 @@ import socket
 import select
 import time
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""UDP"""
 
@@ -239,7 +242,7 @@ class Server(TestAdapterLib.Adapter):
 			
 			# start thread
 			self.setRunning()
-		except socket.error, e:
+		except socket.error as e:
 			self.onStartListeningFailed(e)
 		except Exception as e:
 			self.error( "start listen error: %s" % str(e) )
@@ -270,7 +273,7 @@ class Server(TestAdapterLib.Adapter):
 									else:
 										self.clients[addr] = { 'buffer': data, 'id': self.getId() }
 									self.onClientIncomingData(clientAddress=addr)		
-		except socket.error, e:
+		except socket.error as e:
 			self.onSocketError(e)					
 		except Exception as e:
 			self.error( "on run %s" % str(e) )

@@ -39,10 +39,15 @@ import stat
 
 import copy
 
-import codec_ssh
-import templates
-import client
-
+try:
+	import codec_ssh
+	import templates
+	import client
+except ImportError: # python3 support
+	from . import codec_ssh
+	from . import templates
+	from . import client
+	
 client = sys.modules['SutAdapters.%s.SSH' % TestAdapter.getVersion()]
 AdapterIP = sys.modules['SutAdapters.%s.IP' % TestAdapter.getVersion()]
 

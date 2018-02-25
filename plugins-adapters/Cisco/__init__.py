@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from catalyst import *
+try:
+	from catalyst import *
+except ImportError: # python3 support
+	from .catalyst import *
 
 __DESCRIPTION__ = "Adapters for Cisco Equipments"

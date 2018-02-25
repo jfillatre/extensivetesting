@@ -75,7 +75,10 @@ class HelperManager(Logger.ClassLogger):
                 self.error( "Helper (err): %s" % err )
             if p.returncode == 1:
                 self.error('Unable to generate help cache')
-                details = err
+                if sys.version_info > (3,):
+                    details = err.decode("utf8")
+                else:
+                    details = err
             else:
                 self.info('Documentation cache successfully generated')
                 ret = True

@@ -34,7 +34,12 @@ try:
 	import pymssql
 except Exception as e:
 	raise Exception("Microsoft extension not installed")
-import templates
+	
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+
 import datetime
 
 __NAME__="""MSSQL"""

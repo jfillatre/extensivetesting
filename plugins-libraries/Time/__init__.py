@@ -21,7 +21,10 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from timestamp import Timestamp
+try:
+	from timestamp import Timestamp
+except ImportError: # python3 support
+	from .timestamp import Timestamp
 
 __DESCRIPTION__ = """Time tools
 """

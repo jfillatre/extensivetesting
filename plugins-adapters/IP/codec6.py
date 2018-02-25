@@ -26,10 +26,14 @@ import TestExecutorLib.TestTemplatesLib as TestTemplatesLib
 import TestExecutorLib.TestOperatorsLib as TestOperatorsLib
 import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
-import sys
 
+import sys
 import struct
-import common
+
+try:
+	import common
+except ImportError: # python3 support
+	from . import common
 
 # http://www.ietf.org/rfc/rfc2460.txt
 

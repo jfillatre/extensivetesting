@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from libgzip import GZIP
-
+try:
+	from libgzip import GZIP
+except ImportError: # support python 3
+	from .libgzip import GZIP
+	
 __DESCRIPTION__ = "Compression implementation"

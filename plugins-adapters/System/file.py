@@ -35,7 +35,10 @@ from Libs.PyXmlDict import Dict2Xml
 
 LibraryUnits= sys.modules['SutLibraries.%s.Units' % TestLibrary.getVersion()]
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""FILE"""
 

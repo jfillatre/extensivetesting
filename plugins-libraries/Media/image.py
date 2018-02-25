@@ -25,7 +25,11 @@ import TestExecutorLib.TestLibraryLib as TestLibraryLib
 from TestExecutorLib.TestExecutorLib import doc_public
 
 import PIL.Image as ImagePIL
-from StringIO import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError: # support python 3
+    from io import StringIO
 
 __NAME__="""IMAGE"""
 

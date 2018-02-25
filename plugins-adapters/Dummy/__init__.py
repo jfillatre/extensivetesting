@@ -21,8 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from adapter import *
-from agent import *
-from automate import *
+try:
+	from adapter import *
+	from agent import *
+	from automate import *
+except ImportError: # python3 support
+	from .adapter import *
+	from .agent import *
+	from .automate import *
 
 __DESCRIPTION__ = "Dummy parts"

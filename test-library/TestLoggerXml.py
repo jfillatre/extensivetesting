@@ -23,7 +23,10 @@
 
 import time 
 import traceback
-import StringIO
+try:
+    import StringIO
+except ImportError: # support python 3
+    import io as StringIO
 import sys
 import re
 import uuid
@@ -39,9 +42,13 @@ except ImportError: # support python 3
     import pickle as cPickle
 PICKLE_VERSION=2
 
-import TestClientInterface as TCI
-import TestSettings
-
+try:
+    import TestClientInterface as TCI
+    import TestSettings
+except ImportError: # python3 support
+    from . import TestClientInterface as TCI
+    from . import TestSettings
+    
 EVENT_SCRIPT_STARTED = 'script-started'
 EVENT_SCRIPT_STOPPED = 'script-stopped'
 
@@ -69,7 +76,8 @@ class TestLoggerXml:
     """
     Test logger xml
     """
-    def __init__ (self, task_uuid, path, name, user_,testname_, id_, replay_id_, task_id_, userid_, channelid_):
+    def __init__ (self, task_uuid, path, name, user_,testname_, id_, 
+                  replay_id_, task_id_, userid_, channelid_):
         """
         Constructor for the test logger xml
 
@@ -257,8 +265,12 @@ class TestLoggerXml:
         """
         Return the test info
         """
-        return { 'from': self.__user, 'task-id': self.taskId, 'test-id': self.__id, 
-                'script_name': self.testname, 'script_id': self.scriptId, 'uuid': self.testUuid,
+        return { 'from': self.__user, 
+                'task-id': self.taskId, 
+                'test-id': self.__id, 
+                'script_name': self.testname, 
+                'script_id': self.scriptId, 
+                'uuid': self.testUuid,
                 'channel-id': self.__channelid, 
                 'test-replay-id': self.__replayid,
                 'task-uuid': self.taskUuid }
@@ -298,14 +310,20 @@ class TestLoggerXml:
                 self.trace( "event sent: %s" % value )
 
             # open the file and append notification
-            f = open('%s/%s' % (self.__path, self.__filename), 'a', 0)
+            if sys.version_info > (3,):
+                f = open('%s/%s' % (self.__path, self.__filename), 'a+', 1)
+            else:
+                f = open('%s/%s' % (self.__path, self.__filename), 'a', 0)
 
             # pickle the notif and encode in base64
             pickled = cPickle.dumps(value, protocol=PICKLE_VERSION)
             encoded = base64.b64encode(pickled) 
             
             # write and close it
-            f.write( encoded + '\n' )
+            if sys.version_info > (3,):
+                f.write( encoded.decode("utf8") + '\n' )
+            else:
+                f.write( encoded + '\n' )
             f.close()
             TCI.instance().notify( data = value)
         except Exception as e:
@@ -315,13 +333,19 @@ class TestLoggerXml:
         """
         """
         try:
-            f = open('%s/%s' % (self.__path, self.__filename_hdr), 'a', 0)
+            if sys.version_info > (3,):
+                f = open('%s/%s' % (self.__path, self.__filename_hdr), 'a+', 1)
+            else:
+                f = open('%s/%s' % (self.__path, self.__filename_hdr), 'a', 0)
             
             pickled = cPickle.dumps(value, protocol=PICKLE_VERSION)
             encoded = base64.b64encode(pickled)
-            
+
             # write and close it
-            f.write( encoded + '\n' )
+            if sys.version_info > (3,):
+                f.write( encoded.decode("utf8") + '\n' )
+            else:
+                f.write( encoded + '\n' )
             f.close()
         except Exception as e:
             self.error( "[to_header] %s" % str(e) )
@@ -331,7 +355,7 @@ class TestLoggerXml:
         Set the final verdict
         """
         try:
-            f = open('%s/VERDICT_%s' % (self.__path, verdict), 'w', 0)
+            f = open('%s/VERDICT_%s' % (self.__path, verdict), 'w')
             f.close()
         except Exception as e:
             self.error( "[set_final_verdict] %s" % str(e) )
@@ -350,17 +374,26 @@ class TestLoggerXml:
         """
         Log script started event
         """
-        self.to_notif( { 'event': EVENT_SCRIPT_STARTED, 'timestamp': self.get_timestamp(),
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid }, testInfo=testInfo )
+        self.to_notif( { 'event': EVENT_SCRIPT_STARTED, 
+                         'timestamp': self.get_timestamp(),
+                         'from-level': fromlevel, 
+                         'to-level': tolevel, 
+                         'test-internal-id': tid }, testInfo=testInfo )
 
-    def log_script_stopped (self, duration=0, finalverdict='UNDEFINED', prjId=0, fromlevel='', tolevel='', testInfo={}):
+    def log_script_stopped (self, duration=0, finalverdict='UNDEFINED', 
+                            prjId=0, fromlevel='', tolevel='', testInfo={}):
         """
         Log script stopped event
         """
         self.set_final_verdict(verdict=finalverdict)
         self.to_notif( { 
-                        'event': EVENT_SCRIPT_STOPPED,  'timestamp': self.get_timestamp(), 'duration': str(duration),
-                         'user-id': self.__userid, 'prj-id': prjId, 'from-level': fromlevel, 'to-level': tolevel 
+                        'event': EVENT_SCRIPT_STOPPED,  
+                        'timestamp': self.get_timestamp(), 
+                        'duration': str(duration),
+                        'user-id': self.__userid, 
+                        'prj-id': prjId, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel 
                      }, testInfo=testInfo )
 
     ############### Test global events
@@ -368,18 +401,30 @@ class TestLoggerXml:
         """
         Log testglobal started event
         """
-        self.to_notif({ 'event': EVENT_TESTGLOBAL_STARTED, 'timestamp': self.get_timestamp(),
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid }, testInfo=testInfo)
+        self.to_notif({ 'event': EVENT_TESTGLOBAL_STARTED, 
+                        'timestamp': self.get_timestamp(),
+                        'from-level': fromlevel, 
+                        'to-level': tolevel, 
+                        'test-internal-id': tid }, testInfo=testInfo)
 
-    def log_testglobal_stopped(self, result, duration=0, nbTs=0, nbTu=0, nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={}):
+    def log_testglobal_stopped(self, result, duration=0, nbTs=0, nbTu=0,
+                               nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={}):
         """
         Log testglobal stopped event
         """
         self.setResult(result)
         self.to_notif( { 
-                           'event': EVENT_TESTGLOBAL_STOPPED,  'timestamp': self.get_timestamp(), 'result': str(result), 'duration': str(duration), 
-                          'nb-ts': nbTs, 'nb-tu': nbTu, 'nb-tc': nbTc, 'user-id': self.__userid, 'prj-id': prjId, 
-                          'from-level': fromlevel, 'to-level': tolevel 
+                           'event': EVENT_TESTGLOBAL_STOPPED,  
+                           'timestamp': self.get_timestamp(),
+                           'result': str(result), 
+                           'duration': str(duration), 
+                           'nb-ts': nbTs, 
+                           'nb-tu': nbTu, 
+                           'nb-tc': nbTc, 
+                           'user-id': self.__userid, 
+                           'prj-id': prjId, 
+                           'from-level': fromlevel, 
+                           'to-level': tolevel 
                       }, testInfo=testInfo)
 
     def log_testglobal_info(self, message, component, color = None, font="normal", bold = False, italic=False,
@@ -406,10 +451,21 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testglobal',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'color': self.INFO_TG, 'color-text': self.INFO_TG_TEXT,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel,
-                'flag-end': flagEnd, 'flag-begin': flagBegin
+                'event': 'testglobal',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'color': self.INFO_TG, 
+                'color-text': self.INFO_TG_TEXT,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -439,9 +495,17 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testglobal',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'from-level': fromlevel, 'to-level': tolevel,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                'event': 'testglobal',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline
              } 
         if color is not None:
             tpl.update({'color': color})
@@ -468,9 +532,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testglobal',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'warning', 'color': self.WARNING_TG, 'color-text': self.WARNING_TG_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testglobal',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'warning', 
+                        'color': self.WARNING_TG, 
+                        'color-text': self.WARNING_TG_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
 
     def log_testglobal_error(self, message, component, font="normal", bold = False, italic=False,
@@ -494,9 +568,20 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testglobal',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'error', 'color': self.ERROR_TG, 'color-text': self.ERROR_TG_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testglobal',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'error', 
+                        'color': self.ERROR_TG, 
+                        'color-text': 
+                        self.ERROR_TG_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
 
     def log_testglobal_internal(self, message, component, font="normal", bold = False, italic=False,
@@ -526,10 +611,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testglobal', 'level': 'section', 'from-component': component, 
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT,
-                        'font': font, 'italic': italic , 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testglobal', 
+                        'level': 'section', 
+                        'from-component': component, 
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT,
+                        'font': font, 
+                        'italic': italic , 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
 
 
@@ -572,8 +666,11 @@ class TestLoggerXml:
         """
         Log testplan started event
         """
-        self.to_notif({ 'event': EVENT_TESTPLAN_STARTED, 'timestamp': self.get_timestamp(),
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid }, testInfo=testInfo)
+        self.to_notif({ 'event': EVENT_TESTPLAN_STARTED, 
+                        'timestamp': self.get_timestamp(),
+                        'from-level': fromlevel, 
+                        'to-level': tolevel, 
+                        'test-internal-id': tid }, testInfo=testInfo)
 
     def log_testplan_stopped(self, result, duration=0, nbTs=0, nbTu=0, nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={} ):
         """
@@ -581,9 +678,17 @@ class TestLoggerXml:
         """
         self.setResult(result)
         self.to_notif( { 
-                          'event': EVENT_TESTPLAN_STOPPED,  'timestamp': self.get_timestamp(), 'result': str(result), 'duration': str(duration),
-                          'nb-ts': nbTs, 'nb-tu': nbTu, 'nb-tc': nbTc, 'user-id': self.__userid,
-                          'prj-id': prjId, 'from-level': fromlevel, 'to-level': tolevel
+                          'event': EVENT_TESTPLAN_STOPPED,  
+                          'timestamp': self.get_timestamp(), 
+                          'result': str(result), 
+                          'duration': str(duration),
+                          'nb-ts': nbTs, 
+                          'nb-tu': nbTu, 
+                          'nb-tc': nbTc, 
+                          'user-id': self.__userid,
+                          'prj-id': prjId, 
+                          'from-level': fromlevel, 
+                          'to-level': tolevel
                       }, testInfo=testInfo )
 
     def log_testplan_info(self, message, component, color = None, font="normal", bold = False, italic=False,
@@ -610,10 +715,21 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = {
-                'event': 'testplan',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'color': self.INFO_TP, 'color-text': self.INFO_TP_TEXT,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel,
-                'flag-end': flagEnd, 'flag-begin': flagBegin
+                'event': 'testplan',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'color': self.INFO_TP, 
+                'color-text': self.INFO_TP_TEXT,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -643,9 +759,17 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testplan',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'from-level': fromlevel, 'to-level': tolevel,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+                'event': 'testplan',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline 
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -672,9 +796,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testplan',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'warning', 'color': self.WARNING_TP, 'color-text': self.WARNING_TP_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testplan',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'warning', 
+                        'color': self.WARNING_TP, 
+                        'color-text': self.WARNING_TP_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     def log_testplan_error(self, message, component, font="normal", bold = False, italic=False,
@@ -698,9 +832,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testplan',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'error', 'color': self.ERROR_TP, 'color-text': self.ERROR_TP_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testplan',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'error', 
+                        'color': self.ERROR_TP, 
+                        'color-text': self.ERROR_TP_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     def log_testplan_internal(self, message, component, font="normal", bold = False, italic=False,
@@ -730,10 +874,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testplan', 'level': 'section', 'from-component': component, 
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT,
-                        'font': font, 'italic': italic , 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testplan', 
+                        'level': 'section', 
+                        'from-component': component, 
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT,
+                        'font': font, 
+                        'italic': italic , 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
     
     ############### Test abstract events
@@ -742,8 +895,11 @@ class TestLoggerXml:
         """
         Log testabstract started event
         """
-        self.to_notif({ 'event': EVENT_TESTABSTRACT_STARTED, 'timestamp': self.get_timestamp(), 
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid,
+        self.to_notif({ 'event': EVENT_TESTABSTRACT_STARTED, 
+                        'timestamp': self.get_timestamp(), 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel, 
+                        'test-internal-id': tid,
                         'alias': alias }, testInfo=testInfo)
 
     def log_testabstract_stopped(self, result, duration=0, nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={} ):
@@ -752,10 +908,15 @@ class TestLoggerXml:
         """
         self.setResult(result)
         self.to_notif( { 
-                        'event': EVENT_TESTABSTRACT_STOPPED,  'timestamp': self.get_timestamp(), 
-                        'result': str(result), 'duration': str(duration),
-                        'nb-tc': nbTc, 'user-id': self.__userid, 'prj-id': prjId, 
-                        'from-level': fromlevel, 'to-level': tolevel
+                        'event': EVENT_TESTABSTRACT_STOPPED,  
+                        'timestamp': self.get_timestamp(), 
+                        'result': str(result), 
+                        'duration': str(duration),
+                        'nb-tc': nbTc, 
+                        'user-id': self.__userid, 
+                        'prj-id': prjId, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
     
     def log_testabstract_info(self, message, component, color = None, font="normal", bold = False, italic=False,
@@ -782,10 +943,21 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testabstract',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'color': self.INFO_TS, 'color-text': self.INFO_TS_TEXT,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel,
-                'flag-end': flagEnd, 'flag-begin': flagBegin
+                'event': 'testabstract',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'color': self.INFO_TS, 
+                'color-text': self.INFO_TS_TEXT,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin
                } 
         if color is not None:
             tpl.update({'color': color})
@@ -815,9 +987,17 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testabstract',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info',  'from-level': fromlevel, 'to-level': tolevel,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                'event': 'testabstract',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info',  
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -844,9 +1024,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testabstract',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'warning', 'color': self.WARNING_TC, 'color-text': self.WARNING_TC_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'msg-multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testabstract',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'warning', 
+                        'color': self.WARNING_TC, 
+                        'color-text': self.WARNING_TC_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'msg-multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
 
     def log_testabstract_error(self, message, component, font="normal", bold = False, italic=False,
@@ -870,9 +1060,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testabstract',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'error', 'color': self.ERROR_TS, 'color-text': self.ERROR_TS_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testabstract',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'error', 
+                        'color': self.ERROR_TS, 
+                        'color-text': self.ERROR_TS_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     def log_testabstract_internal(self, message, component, font="normal", bold = False, italic=False,
@@ -902,10 +1102,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testabstract', 'level': 'section', 'from-component': component, 
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT,
-                        'font': font, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testabstract', 
+                        'level': 'section', 
+                        'from-component': component, 
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT,
+                        'font': font, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     ############### Test unit events
@@ -914,8 +1123,11 @@ class TestLoggerXml:
         """
         Log testsuite started event
         """
-        self.to_notif({ 'event': EVENT_TESTUNIT_STARTED, 'timestamp': self.get_timestamp(), 
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid,
+        self.to_notif({ 'event': EVENT_TESTUNIT_STARTED, 
+                        'timestamp': self.get_timestamp(), 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel, 
+                        'test-internal-id': tid,
                         'alias': alias }, testInfo=testInfo)
 
     def log_testunit_stopped(self, result, duration=0, nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={} ):
@@ -924,10 +1136,15 @@ class TestLoggerXml:
         """
         self.setResult(result)
         self.to_notif( { 
-                        'event': EVENT_TESTUNIT_STOPPED,  'timestamp': self.get_timestamp(), 
-                        'result': str(result), 'duration': str(duration),
-                        'nb-tc': nbTc, 'user-id': self.__userid, 'prj-id': prjId, 
-                        'from-level': fromlevel, 'to-level': tolevel
+                        'event': EVENT_TESTUNIT_STOPPED,  
+                        'timestamp': self.get_timestamp(), 
+                        'result': str(result), 
+                        'duration': str(duration),
+                        'nb-tc': nbTc, 
+                        'user-id': self.__userid, 
+                        'prj-id': prjId, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
     
     def log_testunit_info(self, message, component, color = None, font="normal", bold = False, italic=False,
@@ -954,10 +1171,21 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testunit',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'color': self.INFO_TS, 'color-text': self.INFO_TS_TEXT,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel,
-                'flag-end': flagEnd, 'flag-begin': flagBegin
+                'event': 'testunit',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'color': self.INFO_TS, 
+                'color-text': self.INFO_TS_TEXT,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin
                } 
         if color is not None:
             tpl.update({'color': color})
@@ -987,9 +1215,17 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testunit',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info',  'from-level': fromlevel, 'to-level': tolevel,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                'event': 'testunit',  
+                'timestamp': self.get_timestamp(),
+                'short-msg': str(message), 
+                'from-component': component,
+                'level': 'info',  
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -1016,9 +1252,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testunit',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'warning', 'color': self.WARNING_TC, 'color-text': self.WARNING_TC_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'msg-multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testunit',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'warning', 
+                        'color': self.WARNING_TC, 
+                        'color-text': self.WARNING_TC_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'msg-multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                      }, testInfo=testInfo )
 
     def log_testunit_error(self, message, component, font="normal", bold = False, italic=False,
@@ -1042,9 +1288,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testunit',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'error', 'color': self.ERROR_TS, 'color-text': self.ERROR_TS_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testunit',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'error', 
+                        'color': self.ERROR_TS, 
+                        'color-text': self.ERROR_TS_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     def log_testunit_internal(self, message, component, font="normal", bold = False, italic=False,
@@ -1074,10 +1330,19 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testunit', 'level': 'section', 'from-component': component, 
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT,
-                        'font': font, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testunit', 
+                        'level': 'section', 
+                        'from-component': component, 
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT,
+                        'font': font, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                       }, testInfo=testInfo )
 
     ############### Test suite events
@@ -1086,8 +1351,11 @@ class TestLoggerXml:
         """
         Log testsuite started event
         """
-        self.to_notif({ 'event': EVENT_TESTSUITE_STARTED, 'timestamp': self.get_timestamp(),
-                        'from-level': fromlevel, 'to-level': tolevel, 'test-internal-id': tid,
+        self.to_notif({ 'event': EVENT_TESTSUITE_STARTED, 
+                        'timestamp': self.get_timestamp(),
+                        'from-level': fromlevel, 
+                        'to-level': tolevel, 
+                        'test-internal-id': tid,
                         'alias': alias }, testInfo=testInfo)
 
     def log_testsuite_stopped(self, result, duration=0, nbTc=0, prjId=0, fromlevel='', tolevel='', testInfo={} ):
@@ -1096,9 +1364,15 @@ class TestLoggerXml:
         """
         self.setResult(result)
         self.to_notif( { 
-                        'event': EVENT_TESTSUITE_STOPPED,  'timestamp': self.get_timestamp(), 'result': str(result),
-                         'duration': str(duration), 'nb-tc': nbTc, 'user-id': self.__userid, 'prj-id': prjId,
-                         'from-level': fromlevel, 'to-level': tolevel
+                        'event': EVENT_TESTSUITE_STOPPED,  
+                        'timestamp': self.get_timestamp(), 
+                        'result': str(result),
+                        'duration': str(duration), 
+                        'nb-tc': nbTc, 
+                        'user-id': self.__userid, 
+                        'prj-id': prjId,
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                        }, testInfo=testInfo)
     
     def log_testsuite_info(self, message, component, color = None, font="normal", bold = False, italic=False,
@@ -1125,10 +1399,21 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testsuite',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'color': self.INFO_TS, 'color-text': self.INFO_TS_TEXT,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel,
-                'flag-end': flagEnd, 'flag-begin': flagBegin
+                'event': 'testsuite',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'color': self.INFO_TS, 
+                'color-text': self.INFO_TS_TEXT,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -1158,9 +1443,17 @@ class TestLoggerXml:
         @type italic:
         """
         tpl = { 
-                'event': 'testsuite',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                'from-component': component, 'level': 'info', 'from-level': fromlevel, 'to-level': tolevel,
-                'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+                'event': 'testsuite',  
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'from-component': component, 
+                'level': 'info', 
+                'from-level': fromlevel, 
+                'to-level': tolevel,
+                'font': font, 
+                'bold': bold, 
+                'italic': italic, 
+                'multiline': multiline 
               } 
         if color is not None:
             tpl.update({'color': color})
@@ -1187,10 +1480,20 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testsuite',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'warning', 'color': self.WARNING_TC, 'color-text': self.WARNING_TC_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'msg-multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
-        }, testInfo=testInfo )
+                        'event': 'testsuite',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'warning', 
+                        'color': self.WARNING_TC, 
+                        'color-text': self.WARNING_TC_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'msg-multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
+                        }, testInfo=testInfo )
 
     def log_testsuite_error(self, message, component, font="normal", bold = False, italic=False, 
                                 multiline=False, fromlevel='', tolevel='', testInfo={} ):
@@ -1213,10 +1516,20 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( { 
-                        'event': 'testsuite',  'timestamp': self.get_timestamp(), 'short-msg': str(message), 
-                        'from-component': component, 'level': 'error', 'color': self.ERROR_TS, 'color-text': self.ERROR_TS_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
-        }, testInfo=testInfo )
+                        'event': 'testsuite',  
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'from-component': component, 
+                        'level': 'error', 
+                        'color': self.ERROR_TS, 
+                        'color-text': self.ERROR_TS_TEXT,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
+                        }, testInfo=testInfo )
 
     def log_testsuite_internal(self, message, component, font="normal", bold = False, italic=False,
                                     multiline=False, fromlevel='', tolevel='', testInfo={} ):
@@ -1245,11 +1558,20 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testsuite', 'level': 'section','from-component': component, 
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT,
-                        'font': font, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
-        }, testInfo=testInfo )
+                        'event': 'testsuite', 
+                        'level': 'section',
+                        'from-component': component, 
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT,
+                        'font': font, 
+                        'italic': italic, 
+                        'multiline': multiline, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
+                        }, testInfo=testInfo )
 
     ############### Test case events
     def log_testcase_started(self, id_, name, fromlevel='', tolevel='', testInfo={} ):
@@ -1263,9 +1585,13 @@ class TestLoggerXml:
         @type name:
         """
         self.to_notif({  
-                            'event': EVENT_TESTCASE_STARTED, 'timestamp': self.get_timestamp(),
-                            'tc_id': id_ , 'name': name, 'from-level': fromlevel, 'to-level': tolevel
-        }, testInfo=testInfo)
+                            'event': EVENT_TESTCASE_STARTED, 
+                            'timestamp': self.get_timestamp(),
+                            'tc_id': id_ , 
+                            'name': name, 
+                            'from-level': fromlevel, 
+                            'to-level': tolevel
+                    }, testInfo=testInfo)
 
     def log_testcase_stopped(self, id_, result, duration=0, prjId=0, fromlevel='', tolevel='', testInfo={} ):
         """
@@ -1282,10 +1608,16 @@ class TestLoggerXml:
         """
         self.setResult(result)
         self.to_notif( { 
-                        'event': EVENT_TESTCASE_STOPPED,  'timestamp': self.get_timestamp(),
-                        'tc_id': id_, 'result': str(result), 'duration': str(duration),
-                        'user-id': self.__userid, 'prj-id': prjId, 'from-level': fromlevel, 'to-level': tolevel
-        }, testInfo=testInfo)
+                        'event': EVENT_TESTCASE_STOPPED,  
+                        'timestamp': self.get_timestamp(),
+                        'tc_id': id_, 
+                        'result': str(result), 
+                        'duration': str(duration),
+                        'user-id': self.__userid, 
+                        'prj-id': prjId, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
+                    }, testInfo=testInfo)
     
     def log_testcase_info(self, message, component, tcid, type_ = None, color_ = None, font="normal", 
                             bold = False, italic=False, multiline=False, typeMsg='', fromlevel='', tolevel='',
@@ -1320,10 +1652,22 @@ class TestLoggerXml:
         @param italic:
         @type italic:
         """
-        tpl = { 'event': 'testcase', 'level': 'info', 'from-component': component, 'type-msg': typeMsg,
-                'timestamp': self.get_timestamp(), 'short-msg': str(message), 'tc_id': tcid, 'color': self.INFO_TC, 
-                'bold': bold , 'font': font, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 
-                'to-level': tolevel, 'flag-end': flagEnd, 'flag-begin': flagBegin }
+        tpl = { 'event': 'testcase', 
+                'level': 'info', 
+                'from-component': component, 
+                'type-msg': typeMsg,
+                'timestamp': self.get_timestamp(), 
+                'short-msg': str(message), 
+                'tc_id': tcid, 
+                'color': self.INFO_TC, 
+                'bold': bold , 
+                'font': font, 
+                'italic': italic, 
+                'multiline': multiline, 
+                'from-level': fromlevel, 
+                'to-level': tolevel, 
+                'flag-end': flagEnd, 
+                'flag-begin': flagBegin }
         if type_ is not None:
             tpl.update( {'type':type_} )
         if color_ is not None:
@@ -1357,12 +1701,23 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'error','from-component': component, 'type': type_,
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message), 'type-msg': typeMsg,
-                        'color': self.ERROR_TC, 'color-text': self.ERROR_TC_TEXT, 'tc_id': tcid, 
-                        'bold': bold, 'font': font, 'italic': italic, 'multiline': multiline,
-                        'from-level': fromlevel, 'to-level': tolevel 
-        }, testInfo=testInfo )
+                        'event': 'testcase', 
+                        'level': 'error',
+                        'from-component': component, 
+                        'type': type_,
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'type-msg': typeMsg,
+                        'color': self.ERROR_TC, 
+                        'color-text': self.ERROR_TC_TEXT, 
+                        'tc_id': tcid, 
+                        'bold': bold, 
+                        'font': font, 
+                        'italic': italic, 
+                        'multiline': multiline,
+                        'from-level': fromlevel, 
+                        'to-level': tolevel 
+                    }, testInfo=testInfo )
 
     def log_testcase_warning(self, message, component, tcid, type_ = None, font="normal", bold = False, italic=False,
                                     multiline=False, typeMsg='', fromlevel='', tolevel='', testInfo={}  ):
@@ -1391,12 +1746,23 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'warning','from-component': component, 'type': type_,
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message), 'type-msg': typeMsg,
-                        'bold': bold, 'color': self.WARNING_TC, 'color-text': self.WARNING_TC_TEXT,
-                        'tc_id': tcid, 'font': font, 'italic': italic, 'multiline': multiline,
-                        'from-level': fromlevel, 'to-level': tolevel 
-        }, testInfo=testInfo )
+                        'event': 'testcase', 
+                        'level': 'warning',
+                        'from-component': component, 
+                        'type': type_,
+                        'timestamp': self.get_timestamp(),
+                        'short-msg': str(message), 
+                        'type-msg': typeMsg,
+                        'bold': bold, 
+                        'color': self.WARNING_TC, 
+                        'color-text': self.WARNING_TC_TEXT,
+                        'tc_id': tcid, 
+                        'font': font, 
+                        'italic': italic, 
+                        'multiline': multiline,
+                        'from-level': fromlevel, 
+                        'to-level': tolevel 
+                    }, testInfo=testInfo )
 
     def log_testcase_trace(self, message, component, tcid, type_ = None, font="normal", bold = False, italic=False,
                                 multiline=False, typeMsg='', fromlevel='', tolevel='', testInfo={}  ):
@@ -1425,13 +1791,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'debug','from-component': component, 'type': type_,
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message), 'type-msg': typeMsg,
-                        'bold': bold, 'tc_id': tcid, 'font': font, 'italic': italic, 'multiline': multiline,
-                        'from-level': fromlevel, 'to-level': tolevel 
-        }, testInfo=testInfo )
+                        'event': 'testcase',
+                        'level': 'debug',
+                        'from-component': component, 
+                        'type': type_,
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message), 
+                        'type-msg': typeMsg,
+                        'bold': bold, 
+                        'tc_id': tcid, 
+                        'font': font, 
+                        'italic': italic,
+                        'multiline': multiline,
+                        'from-level': fromlevel,
+                        'to-level': tolevel 
+                        }, testInfo=testInfo )
 
-    ####
     def log_testcase_internal(self, message, component, tcid, type_ = None, font="normal", bold = False,
                                     italic=False, multiline=False, fromlevel='', tolevel='', testInfo={} ):
         """
@@ -1459,10 +1834,21 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'section', 'from-component': component, 'type': type_,
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.INTERNAL, 'color-text': self.INTERNAL_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-                        'tc_id': tcid, 'font': font, 'italic': italic, 'multiline': multiline 
+                        'event': 'testcase', 
+                        'level': 'section', 
+                        'from-component': component, 
+                        'type': type_,
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.INTERNAL, 
+                        'color-text': self.INTERNAL_TEXT, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel,
+                        'tc_id': tcid, 
+                        'font': font, 
+                        'italic': italic,
+                        'multiline': multiline 
         }, testInfo=testInfo )
 
     ############### State events
@@ -1493,10 +1879,21 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'state', 'from-component': component, 'type-msg': 'state',
-                        'timestamp': self.get_timestamp(), 'short-msg': str(message),
-                        'bold': bold, 'color': self.STATE, 'color-text': self.STATE_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-                        'tc_id': tcid, 'font': font, 'italic': italic, 'multiline': multiline 
+                        'event': 'testcase',
+                        'level': 'state',
+                        'from-component': component, 
+                        'type-msg': 'state',
+                        'timestamp': self.get_timestamp(), 
+                        'short-msg': str(message),
+                        'bold': bold, 
+                        'color': self.STATE, 
+                        'color-text': self.STATE_TEXT,
+                        'from-level': fromlevel,
+                        'to-level': tolevel,
+                        'tc_id': tcid, 
+                        'font': font,
+                        'italic': italic,
+                        'multiline': multiline 
         }, testInfo=testInfo )
 
     ############### rcv/snd events
@@ -1530,11 +1927,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                    'event': 'testcase', 'level': 'received', 'short-msg': shortMsg, 
-                    'from-component': fromComponent, 'timestamp': self.get_timestamp(),
-                    'data-msg': dataMsg, 'type-msg': typeMsg, 'tc_id': tcid,
-                    'color': self.PAYLOAD, 'color-text': self.PAYLOAD_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-                    'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+                    'event': 'testcase', 
+                    'level': 'received',
+                    'short-msg': shortMsg, 
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(),
+                    'data-msg': dataMsg,
+                    'type-msg': typeMsg, 
+                    'tc_id': tcid,
+                    'color': self.PAYLOAD,
+                    'color-text': self.PAYLOAD_TEXT,
+                    'from-level': fromlevel, 
+                    'to-level': tolevel,
+                    'font': font, 
+                    'bold': bold, 
+                    'italic': italic,
+                    'multiline': multiline 
         }, testInfo=testInfo)
     
     def log_snd (self, shortMsg, dataMsg, typeMsg, fromComponent, tcid, font="normal", bold = False, italic=False, 
@@ -1567,10 +1975,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                        'event': 'testcase', 'level': 'send', 'from-component': fromComponent, 'short-msg': shortMsg, 
-                        'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': typeMsg,  'tc_id': tcid,
-                        'color': self.PAYLOAD, 'color-text': self.PAYLOAD_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+                        'event': 'testcase', 
+                        'level': 'send', 
+                        'from-component': fromComponent,
+                        'short-msg': shortMsg, 
+                        'timestamp': self.get_timestamp(),
+                        'data-msg': dataMsg, 
+                        'type-msg': typeMsg,
+                        'tc_id': tcid,
+                        'color': self.PAYLOAD,
+                        'color-text': self.PAYLOAD_TEXT, 
+                        'from-level': fromlevel, 
+                        'to-level': tolevel,
+                        'font': font, 
+                        'bold': bold, 
+                        'italic': italic,
+                        'multiline': multiline 
         }, testInfo=testInfo )
     
     ############### Steps events
@@ -1601,10 +2021,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                    'event': 'testcase', 'level': 'step-started', 'from-component': fromComponent,
-                    'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'step', 'from-level': fromlevel, 'to-level': tolevel,
-                    'short-msg': shortMsg, 'tc_id': tcid, 'color': self.STEP_STARTED, 'color-text': self.STEP_STARTED_TEXT,
-                    'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+                    'event': 'testcase', 
+                    'level': 'step-started',
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(),
+                    'data-msg': dataMsg,
+                    'type-msg': 'step',
+                    'from-level': fromlevel,
+                    'to-level': tolevel,
+                    'short-msg': shortMsg,
+                    'tc_id': tcid, 
+                    'color': self.STEP_STARTED,
+                    'color-text': self.STEP_STARTED_TEXT,
+                    'font': font,
+                    'bold': bold, 
+                    'italic': italic,
+                    'multiline': multiline 
         }, testInfo=testInfo )
 
     def log_step_failed (self, fromComponent, dataMsg, shortMsg, tcid, font="normal", bold = False, italic=False,
@@ -1634,10 +2066,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                    'event': 'testcase', 'level': 'step-failed', 'from-component': fromComponent,
-                    'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'step', 'from-level': fromlevel, 'to-level': tolevel,
-                    'short-msg': shortMsg, 'tc_id': tcid, 'color': self.STEP_FAILED, 'color-text': self.STEP_FAILED_TEXT,
-                    'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                    'event': 'testcase',
+                    'level': 'step-failed',
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(), 
+                    'data-msg': dataMsg,
+                    'type-msg': 'step',
+                    'from-level': fromlevel,
+                    'to-level': tolevel,
+                    'short-msg': shortMsg,
+                    'tc_id': tcid, 
+                    'color': self.STEP_FAILED,
+                    'color-text': self.STEP_FAILED_TEXT,
+                    'font': font, 
+                    'bold': bold,
+                    'italic': italic,
+                    'multiline': multiline
         }, testInfo=testInfo )
 
     def log_step_passed (self, fromComponent, dataMsg, shortMsg, tcid, font="normal", bold = False, italic=False,
@@ -1667,10 +2111,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-                    'event': 'testcase', 'level': 'step-passed', 'from-component': fromComponent,
-                    'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'step', 'from-level': fromlevel, 'to-level': tolevel,
-                    'short-msg': shortMsg, 'tc_id': tcid, 'color': self.STEP_PASSED, 'color-text': self.STEP_PASSED_TEXT, 
-                    'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                    'event': 'testcase',
+                    'level': 'step-passed',
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(),
+                    'data-msg': dataMsg, 
+                    'type-msg': 'step',
+                    'from-level': fromlevel,
+                    'to-level': tolevel,
+                    'short-msg': shortMsg,
+                    'tc_id': tcid, 
+                    'color': self.STEP_PASSED,
+                    'color-text': self.STEP_PASSED_TEXT, 
+                    'font': font, 
+                    'bold': bold, 
+                    'italic': italic,
+                    'multiline': multiline
         }, testInfo=testInfo )
 
     ############### Timers events
@@ -1709,10 +2165,22 @@ class TestLoggerXml:
 
         shortmsg ="Timer started, expires in %s %s" % (expire,sec)
         self.to_notif( {
-                    'event': 'testcase', 'level': 'timer-started', 'from-component': fromComponent,
-                    'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'timer', 'from-level': fromlevel, 'to-level': tolevel,
-                    'short-msg': shortmsg, 'tc_id': tcid, 'color': self.TIMER, 'color-text': self.TIMER_TEXT,
-                    'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+                    'event': 'testcase',
+                    'level': 'timer-started',
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(),
+                    'data-msg': dataMsg,
+                    'type-msg': 'timer',
+                    'from-level': fromlevel,
+                    'to-level': tolevel,
+                    'short-msg': shortmsg,
+                    'tc_id': tcid, 
+                    'color': self.TIMER,
+                    'color-text': self.TIMER_TEXT,
+                    'font': font, 
+                    'bold': bold,
+                    'italic': italic,
+                    'multiline': multiline
         }, testInfo=testInfo )
 
     def log_timer_restarted (self, fromComponent, dataMsg, tcid, expire, font="normal", bold = False, italic=False,
@@ -1750,10 +2218,22 @@ class TestLoggerXml:
 
         shortmsg ="Timer re-started, expires in %s %s" % (expire,sec)
         self.to_notif( {
-                    'event': 'testcase', 'level': 'timer-started', 'from-component': fromComponent,
-                    'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'timer', 'from-level': fromlevel, 'to-level': tolevel,
-                    'short-msg': shortmsg, 'tc_id': tcid, 'color': self.TIMER, 'color-text': self.TIMER_TEXT,
-                    'font': font, 'bold': bold, 'italic': italic , 'multiline': multiline
+                    'event': 'testcase',
+                    'level': 'timer-started', 
+                    'from-component': fromComponent,
+                    'timestamp': self.get_timestamp(), 
+                    'data-msg': dataMsg, 
+                    'type-msg': 'timer',
+                    'from-level': fromlevel, 
+                    'to-level': tolevel,
+                    'short-msg': shortmsg,
+                    'tc_id': tcid, 
+                    'color': self.TIMER,
+                    'color-text': self.TIMER_TEXT,
+                    'font': font, 
+                    'bold': bold,
+                    'italic': italic ,
+                    'multiline': multiline
         }, testInfo=testInfo )
 
     def log_timer_exceeded (self, fromComponent, dataMsg, tcid, font="normal", bold = False, italic=False, 
@@ -1777,10 +2257,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'timer-exceeded', 'from-component': fromComponent, 
-            'timestamp': self.get_timestamp(), 'short-msg': 'Timer exceeded', 'data-msg': dataMsg, 'type-msg': 'timer',
-            'tc_id': tcid, 'color': self.TIMER, 'color-text': self.TIMER_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+            'event': 'testcase', 
+            'level': 'timer-exceeded',
+            'from-component': fromComponent, 
+            'timestamp': self.get_timestamp(), 
+            'short-msg': 'Timer exceeded',
+            'data-msg': dataMsg,
+            'type-msg': 'timer',
+            'tc_id': tcid, 
+            'color': self.TIMER,
+            'color-text': self.TIMER_TEXT,
+            'from-level': fromlevel,
+            'to-level': tolevel,
+            'font': font,
+            'bold': bold,
+            'italic': italic,
+            'multiline': multiline 
         }, testInfo=testInfo )
 
     def log_timer_stopped (self, fromComponent, dataMsg, tcid, font="normal", bold = False, italic=False,
@@ -1807,10 +2299,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'timer-stopped', 'from-component': fromComponent,  'type-msg': 'timer',
-            'timestamp': self.get_timestamp(), 'short-msg': 'Timer stopped', 'data-msg': dataMsg, 'tc_id': tcid,
-            'color': self.TIMER, 'color-text': self.TIMER_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+            'event': 'testcase',
+            'level': 'timer-stopped',
+            'from-component': fromComponent,
+            'type-msg': 'timer',
+            'timestamp': self.get_timestamp(),
+            'short-msg': 'Timer stopped',
+            'data-msg': dataMsg,
+            'tc_id': tcid,
+            'color': self.TIMER,
+            'color-text': self.TIMER_TEXT,
+            'from-level': fromlevel,
+            'to-level': tolevel,
+            'font': font,
+            'bold': bold,
+            'italic': italic,
+            'multiline': multiline
         }, testInfo=testInfo)
 
     def log_timer_info(self, fromComponent, dataMsg, tcid, font="normal", bold = False, italic=False,
@@ -1837,10 +2341,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'timer-info', 'from-component': fromComponent,  'type-msg': 'timer',
-            'timestamp': self.get_timestamp(), 'short-msg': 'Timer info', 'data-msg': dataMsg, 'tc_id': tcid,
-            'color': self.TIMER, 'color-text': self.TIMER_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+            'event': 'testcase', 
+            'level': 'timer-info', 
+            'from-component': fromComponent, 
+            'type-msg': 'timer',
+            'timestamp': self.get_timestamp(), 
+            'short-msg': 'Timer info', 
+            'data-msg': dataMsg, 
+            'tc_id': tcid,
+            'color': self.TIMER,
+            'color-text': self.TIMER_TEXT, 
+            'from-level': fromlevel,
+            'to-level': tolevel,
+            'font': font,
+            'bold': bold, 
+            'italic': italic, 
+            'multiline': multiline
         }, testInfo=testInfo)
 
     ############### Match events
@@ -1880,10 +2396,22 @@ class TestLoggerXml:
         #shortmsg = 'Timer started, expires in %s %s' % (expire,sec)
         shortmsg ="Wait the expected template(%s) for %s %s" % (index, expire,sec)
         self.to_notif( {
-                        'event': 'testcase', 'level': 'match-started', 'from-component': fromComponent,
-                        'timestamp': self.get_timestamp(), 'data-msg': dataMsg, 'type-msg': 'match',
-                        'short-msg': shortmsg, 'tc_id': tcid, 'color': self.MATCH, 'color-text': self.MATCH_TEXT,
-                        'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline, 'from-level': fromlevel, 'to-level': tolevel
+                        'event': 'testcase',
+                        'level': 'match-started',
+                        'from-component': fromComponent,
+                        'timestamp': self.get_timestamp(),
+                        'data-msg': dataMsg,
+                        'type-msg': 'match',
+                        'short-msg': shortmsg,
+                        'tc_id': tcid,
+                        'color': self.MATCH,
+                        'color-text': self.MATCH_TEXT,
+                        'font': font,
+                        'bold': bold,
+                        'italic': italic,
+                        'multiline': multiline,
+                        'from-level': fromlevel, 
+                        'to-level': tolevel
                         }, testInfo=testInfo )
 
     def log_match_exceeded (self, fromComponent, tcid, font="normal", bold = False, italic=False,
@@ -1907,10 +2435,21 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'match-exceeded', 'from-component': fromComponent, 
-            'timestamp': self.get_timestamp(), 'short-msg': 'Waiting time exceeded', 'type-msg': 'match',
-            'tc_id': tcid, 'color': self.MATCH, 'color-text': self.MATCH_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline 
+            'event': 'testcase', 
+            'level': 'match-exceeded', 
+            'from-component': fromComponent, 
+            'timestamp': self.get_timestamp(),
+            'short-msg': 'Waiting time exceeded', 
+            'type-msg': 'match',
+            'tc_id': tcid,
+            'color': self.MATCH,
+            'color-text': self.MATCH_TEXT,
+            'from-level': fromlevel, 
+            'to-level': tolevel,
+            'font': font, 
+            'bold': bold, 
+            'italic': italic, 
+            'multiline': multiline 
         }, testInfo=testInfo )
 
     def log_match_stopped (self, fromComponent, dataMsg, tcid, font="normal", bold = False, italic=False, index=0,
@@ -1937,10 +2476,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'match-stopped', 'from-component': fromComponent,  'type-msg': 'match-received',
-            'timestamp': self.get_timestamp(), 'short-msg': 'Template(%s) match' % index, 'data-msg': dataMsg, 'tc_id': tcid,
-            'color': self.MATCH, 'color-text': self.MATCH_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+            'event': 'testcase', 
+            'level': 'match-stopped',
+            'from-component': fromComponent, 
+            'type-msg': 'match-received',
+            'timestamp': self.get_timestamp(),
+            'short-msg': 'Template(%s) match' % index, 
+            'data-msg': dataMsg, 
+            'tc_id': tcid,
+            'color': self.MATCH, 
+            'color-text': self.MATCH_TEXT, 
+            'from-level': fromlevel, 
+            'to-level': tolevel,
+            'font': font,
+            'bold': bold, 
+            'italic': italic,
+            'multiline': multiline
         }, testInfo=testInfo)
 
     def log_match_info(self, fromComponent, dataMsg, tcid, font="normal", bold = False, italic=False, index=0, 
@@ -1967,10 +2518,22 @@ class TestLoggerXml:
         @type italic:
         """
         self.to_notif( {
-            'event': 'testcase', 'level': 'match-info', 'from-component': fromComponent,  'type-msg': 'match-received',
-            'timestamp': self.get_timestamp(), 'short-msg': 'Template(%s) mismatch, continues waiting' % index, 'data-msg': dataMsg, 'tc_id': tcid,
-            'color': self.MISMATCH, 'color-text': self.MISMATCH_TEXT, 'from-level': fromlevel, 'to-level': tolevel,
-            'font': font, 'bold': bold, 'italic': italic, 'multiline': multiline
+            'event': 'testcase', 
+            'level': 'match-info', 
+            'from-component': fromComponent, 
+            'type-msg': 'match-received',
+            'timestamp': self.get_timestamp(), 
+            'short-msg': 'Template(%s) mismatch, continues waiting' % index, 
+            'data-msg': dataMsg, 
+            'tc_id': tcid,
+            'color': self.MISMATCH,
+            'color-text': self.MISMATCH_TEXT,
+            'from-level': fromlevel,
+            'to-level': tolevel,
+            'font': font, 
+            'bold': bold, 
+            'italic': italic, 
+            'multiline': multiline
         }, testInfo=testInfo)
 
     def error (self, err):
@@ -1980,7 +2543,8 @@ class TestLoggerXml:
         @param err:
         @type err:
         """
-        timestamp = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + ".%4.4d" % int((time.time() * 10000) % 10000)
+        timestamp = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + \
+                                    ".%4.4d" % int((time.time() * 10000) % 10000)
         sys.stderr.write( "%s - ERROR - %s - %s\n" % ( timestamp, self.__class__.__name__, err) )
 
     def trace (self, msg):
@@ -1990,7 +2554,8 @@ class TestLoggerXml:
         @param err:
         @type err:
         """
-        timestamp = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + ".%4.4d" % int((time.time() * 10000) % 10000)
+        timestamp = time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime(time.time())) + \
+                                    ".%4.4d" % int((time.time() * 10000) % 10000)
         sys.stdout.write( "%s - TRACE - %s - %s\n" % ( timestamp, self.__class__.__name__, msg) )
 
 ###########################################################

@@ -25,19 +25,13 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 
 Generic = None
-TestAdapterLib.setVersion("v1200")
-TestLibraryLib.setVersion("v810")
+Default = None
+TestAdapterLib.setVersion("base_v1300")
+TestLibraryLib.setVersion("base_v900")
 
-__RN__ = """Date: 11/02/2018
+__RN__ = """Date: xx/xx/2018
 What's new
-	1. (minor) New curl wrapper in HTTP adapter
-	2. (minor) New dig wrapper in DNS adapter
-	3. (minor) New nmap wrapper in System adapters
-	4. (minor) System: add cp850 decoding for windows cmd response
-	5. (major) Selenium: no more check platform parameter to support selenium server 3.9.0
-	6. (major) Selenium: support w3c browser like firefox 58
-	7. (minor) New ncat wrapper in System adapters
-	8. (minor) New openssl wrapper in System adapters
+	1. (major) split between base and extra adapters
 Issues fixed
 	1. none
 """
@@ -47,37 +41,67 @@ __DESCRIPTION__ = """This library contains all adapters available to test your S
 %s
 """ % __RN__
 
-import IPLITE
-import Ethernet
-import ARP
-import IP
-import ICMP
-import DNS
-import UDP
-import SSL
-import SOCKS
-import TCP
-import HTTP
-import RTP
-import SSH
-import Telnet
-import Pinger
-import SOAP
-import GUI
-import Dummy
-import System
-import WebSocket
-import SNMP
-import REST
-import FTP
-import SIP
-import Cisco
-import SMS
-import SFTP
-import Database
-import NTP
-import LDAP
-
+try:
+	import IPLITE
+	import Ethernet
+	import ARP
+	import IP
+	import ICMP
+	import DNS
+	import UDP
+	import SSL
+	import SOCKS
+	import TCP
+	import HTTP
+	import RTP
+	import SSH
+	import Telnet
+	import Pinger
+	import SOAP
+	import GUI
+	import System
+	import WebSocket
+	import SNMP
+	import REST
+	import FTP
+	import SIP
+	import Cisco
+	import SMS
+	import SFTP
+	import Database
+	import NTP
+	import LDAP
+except ImportError: # python3 support
+	from . import IPLITE
+	from . import Ethernet
+	from . import ARP
+	from . import IP
+	from . import ICMP
+	from . import DNS
+	from . import UDP
+	from . import SSL
+	from . import SOCKS
+	from . import TCP
+	from . import HTTP
+	from . import RTP
+	from . import SSH
+	from . import Telnet
+	from . import Pinger
+	from . import SOAP
+	from . import GUI
+	from . import System
+	from . import WebSocket
+	from . import SNMP
+	from . import REST
+	from . import FTP
+	from . import SIP
+	from . import Cisco
+	from . import SMS
+	from . import SFTP
+	from . import Database
+	from . import NTP
+	from . import LDAP
+	
 __HELPER__ =	[ ]
 __HELPER__.append("Ethernet")
 __HELPER__.append("ARP")
@@ -93,7 +117,6 @@ __HELPER__.append("Telnet")
 __HELPER__.append("Pinger") 
 __HELPER__.append("SOAP") 
 __HELPER__.append("GUI") 
-__HELPER__.append("Dummy") 
 __HELPER__.append("System") 
 __HELPER__.append("WebSocket") 
 __HELPER__.append("SNMP") 

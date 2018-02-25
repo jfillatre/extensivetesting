@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from bytes import Bytes
-
+try:
+	from bytes import Bytes
+except ImportError: # python3 support
+	from .bytes import Bytes
+	
 __DESCRIPTION__ = """Units tools"""

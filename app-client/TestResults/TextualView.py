@@ -522,7 +522,6 @@ class TextualView2(QWidget):
         @param event:
         @type event: 
         """
-        # print(ihmId)
         event["ihm_id"] = ihmId
         
         # new in v11.2

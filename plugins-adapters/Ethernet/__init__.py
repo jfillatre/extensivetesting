@@ -21,10 +21,15 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sniffer import *
-from codec import *
-from templates import *
-
+try:
+	from sniffer import *
+	from codec import *
+	from templates import *
+except ImportError: # python3 support
+	from .sniffer import *
+	from .codec import *
+	from .templates import *
+	
 __DESCRIPTION__ = """This adapter enables to send/receive ethernet frame.
 
 Ethernet: IEEE 802.3 Local Area Network (LAN) protocol"""

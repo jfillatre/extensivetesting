@@ -33,8 +33,12 @@ import sys
 AdapterEthernet = sys.modules['SutAdapters.%s.Ethernet' % TestAdapterLib.getVersion()]
 AdapterIP = sys.modules['SutAdapters.%s.IP' % TestAdapterLib.getVersion()]
 
-import codec4
-import templates
+try:
+	import codec4
+	import templates
+except ImportError: # python3 support
+	from . import codec4
+	from . import templates
 
 __NAMEV4__="""ICMP4"""
 __NAMEV6__="""ICMP6"""

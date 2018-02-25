@@ -32,7 +32,11 @@ import struct
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+
 import time
 import datetime
 

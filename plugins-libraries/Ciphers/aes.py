@@ -23,8 +23,12 @@
 
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 from TestExecutorLib.TestExecutorLib import doc_public
-import common
 
+try:
+	import common
+except ImportError: # support python 3
+	from . import common
+	
 import base64
 from Crypto import Random
 import Crypto.Cipher.AES as AESCRYPTO

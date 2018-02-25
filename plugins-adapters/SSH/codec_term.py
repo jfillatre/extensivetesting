@@ -30,8 +30,11 @@ import sys
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import templates_term
-
+try:
+	import templates_term
+except ImportError: # python3 support
+	from . import templates_term
+	
 import re
 import time
 import codecs

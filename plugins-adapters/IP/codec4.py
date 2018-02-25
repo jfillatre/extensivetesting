@@ -33,8 +33,12 @@ LibraryHashing = sys.modules['SutLibraries.%s.Hashing' % TestLibraryLib.getVersi
 import struct
 import array
 
-import templates
-import common
+try:
+	import templates
+	import common
+except ImportError: # python3 support
+	from . import templates
+	from . import common
 
 # ip header size
 IPV4_LEN = 20 # 20 bytes

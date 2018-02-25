@@ -28,10 +28,12 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 import sys
 
-import templates
-import struct
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
-import TestExecutorLib.TestTemplatesLib as TestTemplatesLib
+import struct
 
 SE                  = 240    #End of subnegotiation parameters.
 NOP                 = 241    #No operation.

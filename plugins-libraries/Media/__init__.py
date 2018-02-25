@@ -21,40 +21,79 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from tones import DialTones
-from wav import WavContainer
-from noise import Noise
-from waves import Waves
-from sdp import SDP
+try:
+	from tones import DialTones
 
+	from wav import WavContainer
+	from noise import Noise
+	from waves import Waves
+	from sdp import SDP
 
-from sample import UNSIGNED_8BITS
-from sample import UNSIGNED_16BITS
-from sample import SIGNED_8BITS
-from sample import SIGNED_16BITS
+	from sample import UNSIGNED_8BITS
+	from sample import UNSIGNED_16BITS
+	from sample import SIGNED_8BITS
+	from sample import SIGNED_16BITS
+	
+	from tones import UE
+	from tones import US
+	from tones import UK
+	from tones import SIT_RO
+	from tones import SIT_RO2
+	from tones import SIT_VC
+	from tones import SIT_NC
+	from tones import SIT_NC2
+	from tones import SIT_IC
+	from tones import SIT_IO
+	from tones import SIT_FU
+	
+	from wav import WAVE_FORMAT_PCM
+	from wav import WAVE_FORMAT_PCMA
+	from wav import WAVE_FORMAT_PCMU
+	from wav import CHANNELS_MONO
+	from wav import CHANNELS_STEREO
+	from wav import WAV_UNSIGNED_8BITS
+	from wav import WAV_SIGNED_16BITS
+	
+	from image import Image
+	
+	from chartjs import ChartJS
+	
+except ImportError: # python3 support
+	from .tones import DialTones
 
-from tones import UE
-from tones import US
-from tones import UK
-from tones import SIT_RO
-from tones import SIT_RO2
-from tones import SIT_VC
-from tones import SIT_NC
-from tones import SIT_NC2
-from tones import SIT_IC
-from tones import SIT_IO
-from tones import SIT_FU
-
-from wav import WAVE_FORMAT_PCM
-from wav import WAVE_FORMAT_PCMA
-from wav import WAVE_FORMAT_PCMU
-from wav import CHANNELS_MONO
-from wav import CHANNELS_STEREO
-from wav import WAV_UNSIGNED_8BITS
-from wav import WAV_SIGNED_16BITS
-
-from image import Image
-
-from chartjs import ChartJS
-
+	from .wav import WavContainer
+	from .noise import Noise
+	from .waves import Waves
+	from .sdp import SDP
+	
+	
+	from .sample import UNSIGNED_8BITS
+	from .sample import UNSIGNED_16BITS
+	from .sample import SIGNED_8BITS
+	from .sample import SIGNED_16BITS
+	
+	from .tones import UE
+	from .tones import US
+	from .tones import UK
+	from .tones import SIT_RO
+	from .tones import SIT_RO2
+	from .tones import SIT_VC
+	from .tones import SIT_NC
+	from .tones import SIT_NC2
+	from .tones import SIT_IC
+	from .tones import SIT_IO
+	from .tones import SIT_FU
+	
+	from .wav import WAVE_FORMAT_PCM
+	from .wav import WAVE_FORMAT_PCMA
+	from .wav import WAVE_FORMAT_PCMU
+	from .wav import CHANNELS_MONO
+	from .wav import CHANNELS_STEREO
+	from .wav import WAV_UNSIGNED_8BITS
+	from .wav import WAV_SIGNED_16BITS
+	
+	from .image import Image
+	
+	from .chartjs import ChartJS
+	
 __DESCRIPTION__ = "Some tools for audio, image and video media. Dialtones, waves and noise generators"

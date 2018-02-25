@@ -31,8 +31,10 @@ import sys
 import binascii
 import struct
 
-import templates
-
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 A = "audio"
 V = "video"

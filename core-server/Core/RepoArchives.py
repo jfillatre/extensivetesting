@@ -21,6 +21,7 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
+import sys
 import scandir
 import os
 import base64
@@ -423,6 +424,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: 
         """
+        self.trace("add comment in test result")
         comments = False
         newArchivePath = False
         try:
@@ -454,13 +456,17 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
                                              user_post=archivePost, 
                                              post_timestamp=archiveTimestamp)
             if postAdded is None:
-                raise Exception( "failed to add comment in test result" )
+                raise Exception( "unable to add comment in test result" )
             dataModel.properties['properties']['comments'] = postAdded
             comments = postAdded['comment']
             
             self.trace("save test result")
             f = open( completePath, 'wb')
             raw_data = dataModel.toXml()
+            
+            if sys.version_info > (3,):
+                raw_data = bytes(raw_data, "utf8")
+                
             f.write( zlib.compress( raw_data ) )
             f.close()
 
@@ -470,7 +476,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             newArchivePath = "%s_%s.%s" % (leftover, str(nbComments), RepoManager.TEST_RESULT_EXT)
             os.rename( completePath, "%s/%s" % (self.testsPath,newArchivePath) ) 
         except Exception as e:
-            self.error( "[addComment] %s" % str(e) )
+            self.error( "exception %s" % str(e) )
             return ( self.context.CODE_ERROR, archivePath, newArchivePath, comments )
         return ( self.context.CODE_OK, archivePath, newArchivePath , comments )
 
@@ -484,6 +490,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         @return: 
         @rtype: 
         """
+        self.trace("remove all comments from test result")
         try:
             # prepare path
             completePath = "%s/%s" % (self.testsPath, archivePath) 
@@ -501,7 +508,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             dataModel = TestResult.DataModel()
             trLoaded = dataModel.load(absPath=completePath)
             if not trLoaded:
-                raise Exception( "failed to load test result" )
+                raise Exception( "unable to load test result" )
             
             # delete all comments in the model
             dataModel.delComments()
@@ -509,6 +516,10 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             # save test result
             f = open( completePath, 'wb')
             raw_data = dataModel.toXml()
+            
+            if sys.version_info > (3,):
+                raw_data = bytes(raw_data, "utf8")
+                
             f.write( zlib.compress( raw_data ) )
             f.close()
 
@@ -519,7 +530,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
             os.rename( completePath, "%s/%s" % (self.testsPath,newArchivePath) ) 
 
         except Exception as e:
-            self.error( "[delComments] %s" % str(e) )
+            self.error( "exception %s" % str(e) )
             return ( self.context.CODE_ERROR, archivePath )
         return ( self.context.CODE_OK, archivePath  )
 
@@ -875,6 +886,8 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
     def getTrResume(self, trPath, replayId=0):
         """
         """
+        self.trace("get resume from testresult")
+        
         resume = {}
         fullPath =  "%s/%s/" % (self.testsPath, trPath)
 
@@ -895,12 +908,15 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         # open the trx file
         tr = TestResult.DataModel()
         res = tr.load( absPath = "%s/%s" %  (fullPath, trxFile) )
-        if not res:  return (self.context.CODE_ERROR, resume)
+        if not res:
+            self.error("unable to load testresult")
+            return (self.context.CODE_ERROR, resume)
         
         # decode the file
         try:
             f = cStringIO.StringIO( tr.testresult )
         except Exception as e:
+            self.error("unable to convert testresult: %s" % e)
             return (self.context.CODE_ERROR, resume)
         
         try:
@@ -937,6 +953,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
                 del event
             del f
         except Exception as e:
+            self.error("unable to get resume: %s" % e)
             return (self.context.CODE_ERROR, resume)
         
         return (self.context.CODE_OK, resume)
@@ -944,6 +961,8 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
     def getTrComments(self, trPath, replayId=0):
         """
         """
+        self.trace("get comments from testresult")
+        
         comments = []
         fullPath =  "%s/%s/" % (self.testsPath, trPath)
 
@@ -965,7 +984,9 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
         # open the trx file
         tr = TestResult.DataModel()
         res = tr.load( absPath = "%s/%s" %  (fullPath, trxFile) )
-        if not res:  return (self.context.CODE_ERROR, comments)
+        if not res:
+            self.error("unable to load testresult")
+            return (self.context.CODE_ERROR, comments)
         
         # and get comments properties
         try:
@@ -976,6 +997,7 @@ class RepoArchives(RepoManager.RepoManager, Logger.ClassLogger):
                 else:
                     comments = [ comments['comment'] ]                  
         except Exception as e:
+            self.error("unable to get comments: %s" % e)
             return (self.context.CODE_ERROR, comments)
         
         return (self.context.CODE_OK, comments)  

@@ -38,8 +38,12 @@ AdapterSOCKS = sys.modules['SutAdapters.%s.SOCKS' % TestAdapterLib.getVersion()]
 
 LibraryAuth = sys.modules['SutLibraries.%s.Security' % TestLibraryLib.getVersion()]
 
-import codec
-import templates
+try:
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
 
 __NAME__="""HTTP"""
 

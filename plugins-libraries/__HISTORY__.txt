@@ -1,4 +1,11 @@
 
+--- Previous: 8.1.0 ---
+Date: 11/02/2018
+What's new
+	1. (medium) Nmap libraries moved to adapters
+Issues fixed
+	1. none
+
 --- Previous: 8.0.0 ---
 Date: 04/06/2017
 What's new

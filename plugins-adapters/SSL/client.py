@@ -30,12 +30,15 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 # SSL support 
 try:
     import ssl
-except ImportError, x:
+except ImportError as x:
     print("error: %s" % x)
 
 __NAME__="""SSL"""
@@ -304,14 +307,14 @@ class Client(TestAdapterLib.Adapter):
 			tpl = self.encapsule( tpl=tpl_r, ssl_event=templates.handshake_accepted(cipher=self.sslCipher,version=self.sslVersion,
 																bits=self.sslBits, certPEM=certPEM, cert=cert_svr_layer) )
 			self.logRecvEvent( shortEvt = "handshake accepted", tplEvt = tpl )
-		except ssl.SSLError, x:
+		except ssl.SSLError as x:
 			# log received event
 			tpl = self.encapsule( tpl=tpl_r, ssl_event=templates.handshake_failed(error=self.getSslError(str(x)) ) )
 			self.logRecvEvent( shortEvt = "handshake failed", tplEvt = tpl )	
 			
 			# raise failure to parent
 			raise HandshakeFailed()
-		except HostnameFailed,x:
+		except HostnameFailed as x:
 			# log received event
 			tpl = self.encapsule( tpl=tpl_r, ssl_event=templates.handshake_failed(error=self.getSslError(str(x)) ) )
 			self.logRecvEvent( shortEvt = "handshake failed", tplEvt = tpl )	

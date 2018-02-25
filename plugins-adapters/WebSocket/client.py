@@ -38,16 +38,23 @@ AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapterLib.getVersion()]
 AdapterSSL = sys.modules['SutAdapters.%s.SSL' % TestAdapterLib.getVersion()]
 AdapterHTTP = sys.modules['SutAdapters.%s.HTTP' % TestAdapterLib.getVersion()]
 
-import codec
+try:
+	import codec
+except ImportError: # python3 support
+	from . import codec
+
 try:
     import hashlib
     sha1_constructor = hashlib.sha1
-except ImportError, e: # support python 2.4
+except ImportError as e: # support python 2.4
     import sha
     sha1_constructor = sha.new
 import base64
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""WEBSOCKET"""
 

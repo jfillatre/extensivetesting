@@ -30,14 +30,21 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import StringIO
+try:
+	import StringIO
+except ImportError: # python3 support
+	import io as StringIO
+
 import csv
 import os 
 
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""LINUX"""
 

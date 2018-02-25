@@ -21,8 +21,12 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-from templates import *
-
+try:
+	from client import *
+	from templates import *
+except ImportError: # python3 support
+	from .client import *
+	from .templates import *
+	
 __DESCRIPTION__ = """This adapter enable to use the TELNET protocol.
 More informations in RFC 854."""

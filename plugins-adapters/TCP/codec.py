@@ -30,7 +30,10 @@ import sys
 
 LibraryHashing = sys.modules['SutLibraries.%s.Hashing' % TestLibraryLib.getVersion()]
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 import struct
 import array

@@ -30,8 +30,12 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import templates
-import codec
+try:
+	import templates
+	import codec
+except ImportError: # python3 support
+	from . import templates
+	from . import codec
 
 import threading
 import socket
@@ -373,7 +377,7 @@ class Sniffer(TestAdapterLib.Adapter):
 				# start thread
 				self.onStartSniffing()
 				self.setRunning()
-			except socket.error, e:
+			except socket.error as e:
 				self.onStartSniffingFailed(e)
 			except Exception as e:
 				self.error( "listen error: %s" % str(e) )	

@@ -40,8 +40,13 @@ AdapterSSL = sys.modules['SutAdapters.%s.SSL' % TestAdapterLib.getVersion()]
 
 LibrarySDP = sys.modules['SutLibraries.%s.Media' % TestLibraryLib.getVersion()]
 
-import codec
-import templates
+try:
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
+
 import random
 import copy
 

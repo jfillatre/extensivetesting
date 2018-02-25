@@ -21,8 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from cltmysql import MySQL
-from cltmssql import MsSQL
-from cltpostgresql import PostgreSQL
-
+try:
+	from cltmysql import MySQL
+	from cltmssql import MsSQL
+	from cltpostgresql import PostgreSQL
+except ImportError: # python3 support
+	from .cltmysql import MySQL
+	from .cltmssql import MsSQL
+	from .cltpostgresql import PostgreSQL
+	
 __DESCRIPTION__ = "This adapter enables to query MySQL and Microsoft SQL database."

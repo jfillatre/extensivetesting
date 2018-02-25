@@ -21,10 +21,15 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sniffer import *
-from codec import *
-from arping import *
-
+try:
+	from sniffer import *
+	from codec import *
+	from arping import *
+except ImportError: # python3 support
+	from .sniffer import *
+	from .codec import *
+	from .arping import *
+	
 __DESCRIPTION__ = """This adapter enables to send/receive ARP packet (request/reply or other).
 
 An Ethernet Address Resolution Protocol (ARP). More informations in the RFC826."""

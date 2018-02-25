@@ -34,11 +34,17 @@ def doc_public(wrapped, instance, args, kwargs):
     
 __DESCRIPTION__ = """This library enable to create template messages."""
 
-import TestOperatorsLib
-import TestLoggerXml as TLX
-import TestSettings
-import TestExecutorLib
-
+try:
+    import TestOperatorsLib
+    import TestLoggerXml as TLX
+    import TestSettings
+    import TestExecutorLib
+except ImportError: # python3 support
+    from . import TestOperatorsLib
+    from . import TestLoggerXml as TLX
+    from . import TestSettings
+    from . import TestExecutorLib
+ 
 import time
 import base64
 

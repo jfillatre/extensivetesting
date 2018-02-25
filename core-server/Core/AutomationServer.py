@@ -141,7 +141,7 @@ class AutomationServer(Logger.ClassLogger, daemon.Daemon):
             
             DbManager.initialize( )
             DbManager.instance().isUp()
-            self.info("DB Managerready")
+            self.info("Database manager ready")
             WebServer.isUp()
             self.info("Web server ready")
 

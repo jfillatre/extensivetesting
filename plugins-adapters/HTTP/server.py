@@ -30,7 +30,11 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 import time
-import Queue
+
+try:
+	import Queue
+except ImportError: # python3 support
+	import queue as Queue
 
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
@@ -40,9 +44,14 @@ AdapterTCP = sys.modules['SutAdapters.%s.TCP' % TestAdapter.getVersion()]
 AdapterSSL = sys.modules['SutAdapters.%s.SSL' % TestAdapter.getVersion()]
 AdapterSOCKS = sys.modules['SutAdapters.%s.SOCKS' % TestAdapter.getVersion()]
 
-import codec
 import copy
-import templates
+
+try:
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
 
 __NAME__="""HTTP_SERVER"""
 

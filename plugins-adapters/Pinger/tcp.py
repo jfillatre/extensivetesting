@@ -30,7 +30,10 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 import threading
 import subprocess

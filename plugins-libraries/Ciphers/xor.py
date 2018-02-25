@@ -23,7 +23,12 @@
 
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 from TestExecutorLib.TestExecutorLib import doc_public
-import common
+
+try:
+	import common
+except ImportError: # support python 3
+	from . import common
+
 import Crypto.Cipher.XOR as XORCRYPTO
 
 __NAME__="""XOR"""

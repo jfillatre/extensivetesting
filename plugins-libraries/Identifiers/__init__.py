@@ -21,7 +21,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sessionid import SessionID
-from uuids import UUIDS
+try:
+	from sessionid import SessionID
+	from uuids import UUIDS
+except ImportError: # support python 3
+	from .sessionid import SessionID
+	from .uuids import UUIDS
 
 __DESCRIPTION__ = "Identifiers tools"

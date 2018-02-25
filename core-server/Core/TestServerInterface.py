@@ -340,7 +340,8 @@ class TestServerInterface(Logger.ClassLogger, NetLayerLib.ServerAgent):
         """
         Trace message
         """
-        Logger.ClassLogger.trace(self, txt="TSI - %s" % txt)
+        if Settings.get( 'Trace', 'debug-level') == 'VERBOSE':
+            Logger.ClassLogger.trace(self, txt="TSI - %s" % txt)
 
 class Interact(object):
     def __init__(self, client, tid, bodyReq, timeout=0.0):

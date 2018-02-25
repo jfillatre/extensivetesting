@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from today import Today
+try:
+	from today import Today
+except ImportError: # support python 3
+	from .today import Today
 
 __DESCRIPTION__ = """Date tools"""

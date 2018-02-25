@@ -21,7 +21,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-import pickle
+try:
+    import cPickle
+except ImportError: # support python 3
+    import pickle as cPickle
+    
 import sys
 import os
 

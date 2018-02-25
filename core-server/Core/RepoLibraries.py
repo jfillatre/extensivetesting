@@ -284,6 +284,8 @@ class RepoLibraries(RepoManager.RepoManager, Logger.ClassLogger):
         """
         installed = []
         for f in os.listdir(self.testsPath):
+            if f == "__pycache__": continue
+            
             if os.path.isdir( "%s/%s" % (self.testsPath,f) ):
                 if withQuotes:
                     installed.append('"%s"' % f)

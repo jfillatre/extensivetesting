@@ -32,7 +32,7 @@ Main module
 from __future__ import print_function 
 
 # define the current version
-__VERSION__ = '18.0.0'
+__VERSION__ = '19.0.0'
 # name of the main developer
 __AUTHOR__ = 'Denis Machard'
 # email of the main developer

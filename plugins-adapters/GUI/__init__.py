@@ -21,8 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sikuli import *
-from selenium_rc import *
-from android_adb import *
-
+try:
+	from sikuli import *
+	from selenium_rc import *
+	from android_adb import *
+except ImportError: # python3 support
+	from .sikuli import *
+	from .selenium_rc import *
+	from .android_adb import *
+	
 __DESCRIPTION__ = "This adapter enable to use control user interface."

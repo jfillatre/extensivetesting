@@ -28,7 +28,11 @@ import hashlib
 from binascii import hexlify
 import os
 
-import MySQLdb
+try:
+    import MySQLdb
+except ImportError: # python3 support
+    import pymysql as MySQLdb
+
 from  Libs import Settings
 
 Settings.initialize(path="../../")

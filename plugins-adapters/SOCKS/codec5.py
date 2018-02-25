@@ -35,7 +35,11 @@ import sys
 #        +----+-----+-------+------+----------+----------+
 
 import struct
-import templates
+
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 # VN = Version
 # CD = Command

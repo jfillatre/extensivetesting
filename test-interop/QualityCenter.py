@@ -21,9 +21,13 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-import TestInteropLib
-from TestInteropLib import doc_public
-
+try:
+    import TestInteropLib
+    from TestInteropLib import doc_public
+except ImportError: # python3 support
+    from . import TestInteropLib
+    from TestInteropLib.TestInteropLib import doc_public
+    
 import requests
 import json
 import xml.etree.ElementTree as ET

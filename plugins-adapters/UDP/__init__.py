@@ -21,12 +21,19 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-from server import *
-from codec import *
-from sniffer import *
-from templates import *
-
+try:
+	from client import *
+	from server import *
+	from codec import *
+	from sniffer import *
+	from templates import *
+except ImportError: # python3 support
+	from .client import *
+	from .server import *
+	from .codec import *
+	from .sniffer import *
+	from .templates import *
+	
 __DESCRIPTION__ = """This adapter enables to send/receive data trought UDP transport protocol.
 
 The User Datagram Protocol (UDP) provides a simple transmission of datagrams to the application level between hosts over an Internet Protocol (IP) network.

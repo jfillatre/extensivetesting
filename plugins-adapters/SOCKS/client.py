@@ -35,9 +35,14 @@ from Libs.PyXmlDict import Dict2Xml
 
 __NAME__="""SOCKS"""
 
-import codec4
-import codec5
-import templates
+try:
+	import codec4
+	import codec5
+	import templates
+except ImportError: # python3 support
+	from . import codec4
+	from . import codec5
+	from . import templates
 
 PROXY_SOCKS4 = 'socks4'
 PROXY_SOCKS5 = 'socks5'

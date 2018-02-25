@@ -33,9 +33,14 @@ import sys
 AdapterEthernet = sys.modules['SutAdapters.%s.Ethernet' % TestAdapterLib.getVersion()]
 AdapterIP = sys.modules['SutAdapters.%s.IP' % TestAdapterLib.getVersion()]
 
-import client
-import codec
-import templates
+try:
+	import client
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import client
+	from . import codec
+	from . import templates
 
 import struct
 import time

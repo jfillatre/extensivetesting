@@ -2971,7 +2971,7 @@ class RestClientInterface(QObject, Logger.ClassLogger):
         """
         """
         self.trace("on session context all")
-  
+        
         self.Connected.emit( details )
         
     def onTestsFileMoved(self, details):

@@ -92,10 +92,10 @@ class Repository(RemoteRepository.Repository):
                                     icon = QIcon(":/adapters.png"), tip = 'Create new adapter' )
         self.checkAdaptersAction = QtHelper.createAction(self, "&Check", self.checkSyntaxAdapters, 
                                     icon = QIcon(":/adapters-check.png"), tip = 'Check syntax of all adapters' )
-        self.setAsDefaultAction = QtHelper.createAction(self, "&Set as default", self.setAdapterAsDefault, 
-                                    icon = None, tip = 'Set adapter as default' )
-        self.setAsGenericAction = QtHelper.createAction(self, "&Set as generic", self.setAdapterAsGeneric, 
-                                    icon = None, tip = 'Set adapter as generic' )
+        self.setAsDefaultAction = QtHelper.createAction(self, "&Set as Extra", self.setAdapterAsDefault, 
+                                    icon = None, tip = 'Set adapter as Extra' )
+        self.setAsGenericAction = QtHelper.createAction(self, "&Set as Generic", self.setAdapterAsGeneric, 
+                                    icon = None, tip = 'Set adapter as Generic' )
                                     
     def moreDefaultActions(self):
         """

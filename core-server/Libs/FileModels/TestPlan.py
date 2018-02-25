@@ -78,7 +78,8 @@ class DataModel(GenericModel.GenericModel):
     """
     Data model for test plan
     """
-    def __init__ (self, userName='unknown', defLibrary='', defAdapter='', isGlobal=False, timeout="10.0", inputs=[], outputs=[]):
+    def __init__ (self, userName='unknown', defLibrary='', defAdapter='', 
+                  isGlobal=False, timeout="10.0", inputs=[], outputs=[]):
         """
         Data model for test plan
 

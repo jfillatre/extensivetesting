@@ -35,10 +35,16 @@ from Libs.PyXmlDict import Dict2Xml
 
 import copy
 
-import codec_term
-import templates_term
-import templates
-import client
+try:
+	import codec_term
+	import templates_term
+	import templates
+	import client
+except ImportError: # python3 support
+	from . import codec_term
+	from . import templates_term
+	from . import templates
+	from . import client
 
 client = sys.modules['SutAdapters.%s.SSH' % TestAdapter.getVersion()]
 AdapterIP = sys.modules['SutAdapters.%s.IP' % TestAdapter.getVersion()]

@@ -34,16 +34,13 @@ def doc_public(wrapped, instance, args, kwargs):
     
 __DESCRIPTION__ = """The library provides some important functionalities to create library."""
 
-# __HELPER__ =  [ 
-                # ( "Library", [ "__init__","debug", "info", "error", "warning", "testcase", "onReset" ] ),
-                # ( "Version", [ "getDefault", "getGeneric" ] ),
-                # ( "getDefaultVersion", []),
-                # ( "getGenericVersion", []),
-            # ]
-
-import TestSettings
-import TestAdapterLib
-
+try:
+    import TestSettings
+    import TestAdapterLib
+except ImportError: # python3 support
+    from . import TestSettings
+    from . import TestAdapterLib
+    
 import re
 
 __version_libs = ''
@@ -194,7 +191,8 @@ class Library(TestAdapterLib.Adapter):
     Library
     """
     @doc_public
-    def __init__(self, parent, name, realname=None, debug=False, showEvts=True, showSentEvts=True, showRecvEvts=True, shared=False):
+    def __init__(self, parent, name, realname=None, debug=False, showEvts=True, 
+                 showSentEvts=True, showRecvEvts=True, shared=False):
         """
         All libraries must inherent from this class
 
@@ -245,7 +243,8 @@ class Library(TestAdapterLib.Adapter):
         @param raw: text is rendered as raw data, html otherwise (default=False)
         @type raw: boolean
         """ 
-        TestAdapterLib.Adapter.info(self, txt=txt, bold=bold, italic=italic, multiline=multiline, raw=raw)
+        TestAdapterLib.Adapter.info(self, txt=txt, bold=bold, italic=italic, 
+                                    multiline=multiline, raw=raw)
     @doc_public
     def error (self, txt, bold = False, italic=False, multiline=False, raw=False):
         """
@@ -263,7 +262,8 @@ class Library(TestAdapterLib.Adapter):
         @param raw: text is rendered as raw data, html otherwise (default=False)
         @type raw: boolean
         """ 
-        TestAdapterLib.Adapter.error(self, txt=txt, bold = bold, italic=italic, multiline=multiline, raw=raw)
+        TestAdapterLib.Adapter.error(self, txt=txt, bold = bold, italic=italic, 
+                                     multiline=multiline, raw=raw)
 
     def trace (self, txt, bold = False, italic=False, multiline=False, raw=False):
         """
@@ -282,7 +282,8 @@ class Library(TestAdapterLib.Adapter):
         @param raw: text is rendered as raw data, html otherwise (default=False)
         @type raw: boolean
         """ 
-        TestAdapterLib.Adapter.trace(self, txt=txt, bold = bold, italic=italic, multiline=multiline, raw=raw)
+        TestAdapterLib.Adapter.trace(self, txt=txt, bold = bold, italic=italic, 
+                                     multiline=multiline, raw=raw)
     @doc_public
     def warning (self, txt, bold = False, italic=False, multiline=False, raw=False):
         """
@@ -300,7 +301,8 @@ class Library(TestAdapterLib.Adapter):
         @param raw: text is rendered as raw data, html otherwise (default=False)
         @type raw: boolean
         """ 
-        TestAdapterLib.Adapter.warning(self, txt=txt, bold = bold, italic=italic, multiline=multiline, raw=raw)
+        TestAdapterLib.Adapter.warning(self, txt=txt, bold = bold, italic=italic, 
+                                       multiline=multiline, raw=raw)
     @doc_public
     def debug(self, txt, raw=True):
         """

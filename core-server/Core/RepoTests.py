@@ -39,6 +39,11 @@ import json
 # unicode = str with python3
 if sys.version_info > (3,):
     unicode = str
+
+try:
+    xrange
+except NameError: # support python3
+    xrange = range
     
 from Libs import Scheduler, Settings, Logger
 
@@ -850,6 +855,7 @@ class RepoTests(RepoManager.RepoManager, Logger.ClassLogger):
             return ret
             
         if ext_file in [ RepoManager.TEST_PLAN_EXT, RepoManager.TEST_GLOBAL_EXT]:
+            self.trace("get specific file of type %s" % ext_file )
             # checking if all links are good
             doc = TestPlan.DataModel()
             absPath =  "%s/%s/%s" % (self.testsPath, project, pathFile)

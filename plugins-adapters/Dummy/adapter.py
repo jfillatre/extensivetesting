@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
+import sys
+
+# import the test framework
 import TestExecutorLib.TestValidatorsLib as TestValidatorsLib
 import TestExecutorLib.TestTemplatesLib as TestTemplatesLib
 import TestExecutorLib.TestOperatorsLib as TestOperatorsLib
@@ -28,13 +31,17 @@ import TestExecutorLib.TestAdapterLib as TestAdapterLib
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 from TestExecutorLib.TestExecutorLib import doc_public
 
-import sys
-
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
+# Example to import adapter or library from the generic branch
+AdapterHTTP = sys.modules['SutAdapters.%s.HTTP' % TestAdapterLib.getVersionGeneric()]
+LibraryCodecs =  sys.modules['SutLibraries.%s.Codecs' % TestLibraryLib.getVersionGeneric()]
+
+# Name of the adapter
 __NAME__="""DUMMY"""
 
+# Adapter example inherent from adapter library
 class Adapter(TestAdapterLib.Adapter):
 	@doc_public
 	def __init__(self, parent, debug=False, name=None, shared=False, showEvts=True, showSentEvts=True, showRecvEvts=True):
@@ -60,6 +67,9 @@ class Adapter(TestAdapterLib.Adapter):
 		self.codecD2X = Dict2Xml.Dict2Xml(coding = None)
 		self.cfg = {}
 		self.__checkConfig()
+		
+		# try to init generic library and adapter
+		self.XML = LibraryCodecs.XML(parent=parent, debug=False, coding='UTF-8', name=None, shared=False)
 
 	def __checkConfig(self):	
 		"""
@@ -84,4 +94,15 @@ class Adapter(TestAdapterLib.Adapter):
 		if not isinstance(msg, str):
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "msg argument is not a string (%s)" % type(msg) )
 		
+		# log a message during the execution
 		self.info( msg )
+		
+		# prepare a template
+		tpl = TestTemplatesLib.TemplateMessage()
+		layer = TestTemplatesLib.TemplateLayer('EXAMPLE')
+		layer.addKey("hello", "world")
+		tpl.addLayer(layer= layer)
+			
+		self.logSentEvent(shortEvt=msg, tplEvt=tpl )
+		
+		self.logRecvEvent(shortEvt=msg, tplEvt=tpl )

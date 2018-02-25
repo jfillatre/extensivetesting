@@ -30,8 +30,16 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import MySQLdb
-import templates
+try:
+  import MySQLdb
+except ImportError: # python3 support
+  import pymysql as MySQLdb
+
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
+
 import datetime
 
 __NAME__="""MYSQL"""

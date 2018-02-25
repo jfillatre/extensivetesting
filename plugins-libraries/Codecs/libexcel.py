@@ -27,9 +27,12 @@ from TestExecutorLib.TestExecutorLib import doc_public
 #import openpyxl # support xlsx files
 import xlrd # support xls files for reading
 import xlwt # support xls files for writing
-
-import StringIO
-import io
+#
+#try:
+#   import StringIO
+#except ImportError: # support python 3
+#  import io as StringIO
+#import io
 from datetime import date,time,datetime
 
 __NAME__="""EXCEL"""

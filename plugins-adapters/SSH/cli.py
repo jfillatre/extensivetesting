@@ -30,7 +30,10 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import templates_cli as templates
+try:
+	import templates_cli as templates
+except ImportError: # python3 support
+	from . import templates_cli as templates
 
 from Libs import pexpect
 

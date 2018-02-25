@@ -31,13 +31,16 @@ from TestExecutorLib.TestExecutorLib import doc_public
 
 import sys
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 import tempfile
 # SSL support 
 try:
     import ssl
-except ImportError, x:
+except ImportError as x:
     print("error: %s" % x)
 
 __NAME__="""SSL"""

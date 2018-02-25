@@ -92,10 +92,10 @@ class Repository(RemoteRepository.Repository):
                                         icon = QIcon(":/libraries.png"), tip = 'Create new library' )
         self.checkLibrariesAction = QtHelper.createAction(self, "&Check", self.checkSyntaxLibraries, 
                                         icon = QIcon(":/libraries-check.png"), tip = 'Check syntax of all libraries' )
-        self.setAsDefaultAction = QtHelper.createAction(self, "&Set as default", self.setLibraryAsDefault, 
-                                        icon = None, tip = 'Set library as default' )
-        self.setAsGenericAction = QtHelper.createAction(self, "&Set as generic", self.setLibraryAsGeneric, 
-                                        icon = None, tip = 'Set library as generic' )
+        self.setAsDefaultAction = QtHelper.createAction(self, "&Set as Extra", self.setLibraryAsDefault, 
+                                        icon = None, tip = 'Set library as Extra' )
+        self.setAsGenericAction = QtHelper.createAction(self, "&Set as Generic", self.setLibraryAsGeneric, 
+                                        icon = None, tip = 'Set library as Generic' )
                                         
     def moreDefaultActions(self):
         """

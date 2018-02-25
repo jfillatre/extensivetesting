@@ -42,7 +42,10 @@ import time
 import re
 import os
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""FTP"""
 
@@ -1554,7 +1557,7 @@ class Client(TestAdapter.Adapter):
 						destFolder = "%s/%s" % (self.getDataStoragePath(), f_name)
 					else:
 						destFolder = "%s/%s" % (toPath, f_name)
-					os.mkdir( destFolder, 0755 )
+					os.mkdir( destFolder, 0o755 )
 				except OSError as e:
 					if e.errno == errno.EEXIST and not overwrite:
 						raise Exception("os error folder: %s" % e)

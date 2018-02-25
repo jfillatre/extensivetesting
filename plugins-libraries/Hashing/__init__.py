@@ -21,14 +21,25 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from checksum import Checksum
-from hash_md5 import MD5
-from hash_sha1 import SHA1
-from hash_sha256 import SHA256
-from hash_sha512 import SHA512
-from crc32 import CRC32
-from hmac_md5 import HMAC_MD5
-from hmac_sha1 import HMAC_SHA1
-from hmac_sha256 import HMAC_SHA256
-
+try:
+	from checksum import Checksum
+	from hash_md5 import MD5
+	from hash_sha1 import SHA1
+	from hash_sha256 import SHA256
+	from hash_sha512 import SHA512
+	from crc32 import CRC32
+	from hmac_md5 import HMAC_MD5
+	from hmac_sha1 import HMAC_SHA1
+	from hmac_sha256 import HMAC_SHA256
+except ImportError: # support python 3
+	from .checksum import Checksum
+	from .hash_md5 import MD5
+	from .hash_sha1 import SHA1
+	from .hash_sha256 import SHA256
+	from .hash_sha512 import SHA512
+	from .crc32 import CRC32
+	from .hmac_md5 import HMAC_MD5
+	from .hmac_sha1 import HMAC_SHA1
+	from .hmac_sha256 import HMAC_SHA256
+	
 __DESCRIPTION__ = "Hashing algorithms"

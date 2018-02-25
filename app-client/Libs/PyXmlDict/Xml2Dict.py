@@ -88,7 +88,6 @@ class Xml2Dict(object):
         ret["@%s" % nodeName] = nodeAttrib
         return ret
 
-
     def __makeList (self, dico, nodeName, nodeAttrib, nodeValue):
         """
         Contructs python list

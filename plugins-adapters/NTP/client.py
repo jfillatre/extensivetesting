@@ -33,8 +33,13 @@ import sys
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import codec
-import templates
+try:
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
+
 import time
 
 AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapter.getVersion()]

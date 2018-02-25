@@ -21,10 +21,15 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from sniffer import *
-from codec4 import *
-from ping import *
-
+try:
+	from sniffer import *
+	from codec4 import *
+	from ping import *
+except ImportError: # python3 support
+	from .sniffer import *
+	from .codec4 import *
+	from .ping import *
+	
 __DESCRIPTION__ = """This adapter enables to send/receive ICMP packet (request/reply or other).
 
 Internet Control Message Protocol (ICMP) messages are typically used for diagnostic or control.

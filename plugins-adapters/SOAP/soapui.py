@@ -33,7 +33,10 @@ import threading
 from Libs.PyXmlDict import Xml2Dict
 from Libs.PyXmlDict import Dict2Xml
 
-import templates_soapui as templates
+try:
+	import templates_soapui as templates
+except ImportError: # python3 support
+	from . import templates_soapui as templates
 
 __NAME__="""SOAPUI"""
 

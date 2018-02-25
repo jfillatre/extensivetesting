@@ -21,14 +21,25 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from g711a import G711A
-from g711u import G711U
-from libxml import XML
-from libjson import JSON
-from base64lib import BASE64
-from libexcel import EXCEL
-
-from g711a import A_G711A
-from g711u import A_G711U
-
+try:
+	from g711a import G711A
+	from g711u import G711U
+	from libxml import XML
+	from libjson import JSON
+	from base64lib import BASE64
+	from libexcel import EXCEL
+	
+	from g711a import A_G711A
+	from g711u import A_G711U
+except ImportError: # python3 support
+	from .g711a import G711A
+	from .g711u import G711U
+	from .libxml import XML
+	from .libjson import JSON
+	from .base64lib import BASE64
+	from .libexcel import EXCEL
+	
+	from .g711a import A_G711A
+	from .g711u import A_G711U
+	
 __DESCRIPTION__ = "Codecs (coder-decoder) audio, video and more"

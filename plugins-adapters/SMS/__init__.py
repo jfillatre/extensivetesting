@@ -21,7 +21,10 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from gateway import *
+try:
+	from gateway import *
+except ImportError: # python3 support
+	from .gateway import *
 
 __DESCRIPTION__ = """This adapter enable to send/received sms through a real device.
 Install the app SMS Gateway on your android mobile device to use it"""

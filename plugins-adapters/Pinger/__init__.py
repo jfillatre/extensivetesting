@@ -21,10 +21,15 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from icmp import *
-from tcp import *
-from url import *
-
+try:
+	from icmp import *
+	from tcp import *
+	from url import *
+except ImportError: # python3 support
+	from .icmp import *
+	from .tcp import *
+	from .url import *
+	
 __DESCRIPTION__ = """This adapter enable to check the status of a network element or an url with severals methods like:
 - ping request
 - tcp syn

@@ -32,8 +32,12 @@ import sys
 
 AdapterEthernet = sys.modules['SutAdapters.%s.Ethernet' % TestAdapterLib.getVersion()]
 
-import codec
-import templates
+try:
+	import codec
+	import templates
+except ImportError: # python3 support
+	from . import codec
+	from . import templates
 
 __NAME__="""ARP"""
 

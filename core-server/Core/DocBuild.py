@@ -41,6 +41,25 @@ import ast
 import DocInspect
 from Libs import Settings
 
+import traceback
+try:
+    import cStringIO
+except ImportError: # support python 3
+    import io as cStringIO
+
+def getBackTrace():
+    """
+    Returns the current backtrace.
+
+    @return:
+    @rtype:
+    """
+    backtrace = cStringIO.StringIO()
+    traceback.print_exc(None, backtrace)
+    ret = backtrace.getvalue()
+    backtrace.close()
+    return ret
+    
 def getPublicDecorator(cls):
     """
     find decorators
@@ -76,12 +95,15 @@ def findDecorators(module):
             helper.append( (c, funcs) )
     return helper
     
+latestsublibRead = ''
 def toInspect(help_mod, pkg):
     """
     Inspect module
     """
+    global latestsublibRead
     toInspect = []
     for m in help_mod:
+        latestsublibRead = m
         try:
             curMod =  getattr(pkg, m)
         except Exception as e:
@@ -219,6 +241,8 @@ def generateSutAdapters():
     ret = []
     # list of libraries
     for libname in pkg.__all__:
+        if libname == "__pycache__": continue
+        
         sub_mods =  getattr(pkg, libname)
 
         default_libs = False
@@ -260,6 +284,8 @@ def generateSutLibraries():
     ret = []
     # list of libraries
     for libname in pkg.__all__:
+        if libname == "__pycache__": continue
+    
         sub_mods =  getattr(pkg, libname)
 
         default_libs = False
@@ -345,6 +371,13 @@ if __name__ == "__main__":
                 DocInspect.print_error( 'Test Interop: %s' % str(e) )
                 return_code = 1
                 
+            # set the generic version if exists to avoid error in generation
+            pkg_framework = __import__("TestExecutorLib")
+            pkg_lib =  getattr(pkg_framework, 'TestLibraryLib')
+            pkg_adp =  getattr(pkg_framework, 'TestAdapterLib')
+            pkg_lib.setVersionGeneric( Settings.get("Default", "generic-libraries") ) 
+            pkg_adp.setVersionGeneric( Settings.get("Default", "generic-adapters") )   
+    
             # construct sutadapters documentations
             if eval(sut_pkg_installed):
                 try:
@@ -352,6 +385,7 @@ if __name__ == "__main__":
                     ret.extend( docSut )
                 except Exception as e:
                     err_msg = 'Sut Adapters [%s]: %s' % (latestlibRead, e) 
+                    err_msg += '\n\n%s' % getBackTrace()
                     DocInspect.print_error( err_msg )
                     return_code = 1
 
@@ -361,7 +395,9 @@ if __name__ == "__main__":
                     docSutLib = generateSutLibraries()
                     ret.extend( docSutLib )
                 except Exception as e:
-                    DocInspect.print_error( 'Sut Libraries [%s]: %s' % (latestlibRead2, e) )
+                    err_msg = 'Sut Libraries [%s]: %s' % (latestlibRead2, e) 
+                    err_msg += '\n\n%s' % getBackTrace()
+                    DocInspect.print_error( err_msg )
                     return_code = 1
 
             # save to cache

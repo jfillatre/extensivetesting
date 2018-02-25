@@ -34,16 +34,26 @@ def doc_public(wrapped, instance, args, kwargs):
 __DESCRIPTION__ = """The library provides some important functionalities to create adapters."""
 
 
-import TestLoggerXml as TLX
-import TestTemplatesLib
-import TestSettings
-import TestExecutorLib
-
+try:
+    import TestLoggerXml as TLX
+    import TestTemplatesLib
+    import TestSettings
+    import TestExecutorLib
+except ImportError: # python3 support
+    from . import TestLoggerXml as TLX
+    from . import TestTemplatesLib
+    from . import TestSettings
+    from . import TestExecutorLib
+    
 import Libs.PyXmlDict.Xml2Dict as Xml2Dict
 import Libs.PyXmlDict.Dict2Xml as Dict2Xml
 import Libs.Scheduler as Scheduler
 
-import Queue
+try:
+    import Queue
+except ImportError: # support python 3
+    import queue as Queue
+    
 import threading
 import time
 import copy
@@ -713,8 +723,10 @@ class Adapter(threading.Thread):
 
             expctd = TestTemplatesLib.tpl2str( expected = towatch[i].get() )
             if self.__showEvts:
-                TLX.instance().log_match_started( fromComponent = componentName, dataMsg = expctd, tcid = self.testcaseId, font = 'italic', 
-                                            expire=timeout , index=i, fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo() )
+                TLX.instance().log_match_started( fromComponent = componentName, dataMsg = expctd, 
+                                                  tcid = self.testcaseId, font = 'italic', 
+                                                  expire=timeout , index=i, fromlevel=self.getFromLevel(), 
+                                                  tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo() )
 
         # initialize timers
         timeoutBool = False
@@ -732,7 +744,9 @@ class Adapter(threading.Thread):
             if (time.time() - startTime) >= timeout_float:
                 timeoutBool = True
                 if self.__showEvts:
-                    TLX.instance().log_match_exceeded( fromComponent = componentName, tcid = self.testcaseId, font = 'italic', fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo() )
+                    TLX.instance().log_match_exceeded( fromComponent = componentName, tcid = self.testcaseId, 
+                                                       font = 'italic', fromlevel=self.getFromLevel(), 
+                                                       tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo() )
             else:
                 if not self.queue.empty():      
                     evt = self.queue.get(False)
@@ -746,10 +760,16 @@ class Adapter(threading.Thread):
                                 if ret:
                                     allresults.append( (i, False, evt))
                                     if self.__showEvts:
-                                        TLX.instance().log_match_stopped( fromComponent = componentName, dataMsg = (tmpDat,tpl), tcid = self.testcaseId, font = 'italic', index=i,  fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
+                                        TLX.instance().log_match_stopped( fromComponent = componentName, dataMsg = (tmpDat,tpl), 
+                                                                          tcid = self.testcaseId, font = 'italic', 
+                                                                          index=i,  fromlevel=self.getFromLevel(), 
+                                                                          tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
                                 else:
                                     if self.__showEvts:
-                                        TLX.instance().log_match_info( fromComponent = componentName, dataMsg = (tmpDat,tpl) , tcid = self.testcaseId, font = 'italic', index=i, fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo() )
+                                        TLX.instance().log_match_info( fromComponent = componentName, dataMsg = (tmpDat,tpl) , 
+                                                                       tcid = self.testcaseId, font = 'italic', index=i, 
+                                                                       fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
+                                                                       testInfo=self.__testcase.getTestInfo() )
 
                             # remove matched template 
                             for i in xrange(len(allresults)):
@@ -804,7 +824,9 @@ class Adapter(threading.Thread):
         @type typeMsg:
         """
         try:
-            TLX.instance().log_rcv(shortMsg, dataMsg, typeMsg, self.name__, self.testcaseId, fromlevel=LEVEL_SUT, tolevel=self.getFromLevel(), testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_rcv(shortMsg, dataMsg, typeMsg, self.name__, 
+                                   self.testcaseId, fromlevel=LEVEL_SUT, tolevel=self.getFromLevel(), 
+                                   testInfo=self.__testcase.getTestInfo())
         except Exception as e:
             self.error( 'ERR_ADP_006: internal recv from: %s' % str(e) )
 
@@ -822,7 +844,9 @@ class Adapter(threading.Thread):
         @type typeMsg:
         """
         try:
-            TLX.instance().log_snd(shortMsg, dataMsg, typeMsg, self.name__, self.testcaseId, fromlevel=self.getFromLevel(), tolevel=LEVEL_SUT, testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_snd(shortMsg, dataMsg, typeMsg, self.name__, 
+                                   self.testcaseId, fromlevel=self.getFromLevel(), 
+                                   tolevel=LEVEL_SUT, testInfo=self.__testcase.getTestInfo())
         except Exception as e:
             self.error( 'ERR_ADP_005: internal send to: %s' % str(e) )
     @doc_public
@@ -885,22 +909,28 @@ class Adapter(threading.Thread):
         @type raw: boolean
         """ 
             
-        if not isinstance(bold, bool): raise Exception("adp>info: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
-        if not isinstance(italic, bool): raise Exception("adp>info: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
-        if not isinstance(multiline, bool): raise Exception("adp>info: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
-        if not isinstance(raw, bool): raise Exception("adp>info: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
+        if not isinstance(bold, bool): 
+            raise Exception("adp>info: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
+        if not isinstance(italic, bool): 
+            raise Exception("adp>info: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
+        if not isinstance(multiline, bool): 
+            raise Exception("adp>info: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
+        if not isinstance(raw, bool): 
+            raise Exception("adp>info: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
         
         typeMsg = ''
         if raw: typeMsg = 'raw'
 
         try:
-            TLX.instance().log_testcase_info(message=txt,component=self.name__, tcid = self.testcaseId, bold=bold, italic=italic, 
-                                            multiline=multiline,  typeMsg=typeMsg, fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
-                                            testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_testcase_info(message=txt,component=self.name__, tcid = self.testcaseId, 
+                                             bold=bold, italic=italic, multiline=multiline,  typeMsg=typeMsg, 
+                                             fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
+                                             testInfo=self.__testcase.getTestInfo())
         except UnicodeEncodeError:
-            TLX.instance().log_testcase_info(message=txt.encode('utf8'),component=self.name__, tcid = self.testcaseId, bold=bold, 
-                                                italic=italic, multiline=multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), 
-                                                tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_testcase_info(message=txt.encode('utf8'),component=self.name__, 
+                                             tcid = self.testcaseId, bold=bold, italic=italic, 
+                                             multiline=multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), 
+                                             tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
     @doc_public                                        
     def error (self, txt, bold = False, italic=False, multiline=False, raw=False):
         """
@@ -920,22 +950,29 @@ class Adapter(threading.Thread):
         @type raw: boolean
         """ 
             
-        if not isinstance(bold, bool): raise Exception("adp>error: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
-        if not isinstance(italic, bool): raise Exception("adp>error: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
-        if not isinstance(multiline, bool): raise Exception("adp>error: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
-        if not isinstance(raw, bool): raise Exception("adp>error: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
+        if not isinstance(bold, bool): 
+            raise Exception("adp>error: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
+        if not isinstance(italic, bool): 
+            raise Exception("adp>error: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
+        if not isinstance(multiline, bool): 
+            raise Exception("adp>error: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
+        if not isinstance(raw, bool): 
+            raise Exception("adp>error: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
         
         typeMsg = ''
         if raw: typeMsg = 'raw'
         self.setFailed(internal=True)
 
         try:
-            TLX.instance().log_testcase_error(message=txt,component=self.name__, tcid = self.testcaseId, bold=bold, italic=italic,
-                                                multiline=multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
-                                                testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_testcase_error(message=txt,component=self.name__, tcid = self.testcaseId, 
+                                              bold=bold, italic=italic, multiline=multiline, 
+                                              typeMsg=typeMsg, fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
+                                              testInfo=self.__testcase.getTestInfo())
         except UnicodeEncodeError:
-            TLX.instance().log_testcase_error(message=txt.encode('utf8'),component=self.name__, tcid = self.testcaseId, bold=bold, 
-                                              italic=italic, multiline= multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), 
+            TLX.instance().log_testcase_error(message=txt.encode('utf8'),component=self.name__, 
+                                              tcid = self.testcaseId, bold=bold, 
+                                              italic=italic, multiline= multiline, typeMsg=typeMsg, 
+                                              fromlevel=self.getFromLevel(), 
                                               tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
                                        
     def trace (self, txt, bold = False, italic=False, multiline=False, raw=False):
@@ -956,17 +993,22 @@ class Adapter(threading.Thread):
         @type raw: boolean
         """ 
             
-        if not isinstance(bold, bool): raise Exception("adp>trace: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
-        if not isinstance(italic, bool): raise Exception("adp>trace: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
-        if not isinstance(multiline, bool): raise Exception("adp>trace: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
-        if not isinstance(raw, bool): raise Exception("adp>trace: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
+        if not isinstance(bold, bool): 
+            raise Exception("adp>trace: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
+        if not isinstance(italic, bool): 
+            raise Exception("adp>trace: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
+        if not isinstance(multiline, bool): 
+            raise Exception("adp>trace: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
+        if not isinstance(raw, bool): 
+            raise Exception("adp>trace: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
         
         typeMsg = ''
         if raw: typeMsg = 'raw'
         try:
-            TLX.instance().log_testcase_trace(message=txt,component=self.name__, tcid = self.testcaseId, bold=bold, italic=italic, 
-                                                multiline=multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), 
-                                                tolevel=LEVEL_USER, testInfo=self.__testcase.getTestInfo())
+            TLX.instance().log_testcase_trace(message=txt,component=self.name__, tcid = self.testcaseId, 
+                                              bold=bold, italic=italic, multiline=multiline, typeMsg=typeMsg, 
+                                              fromlevel=self.getFromLevel(), tolevel=LEVEL_USER, 
+                                              testInfo=self.__testcase.getTestInfo())
         except UnicodeEncodeError:
             TLX.instance().log_testcase_trace(message=txt.encode('utf8'),component=self.name__, tcid = self.testcaseId, bold=bold, 
                                                 italic=italic, multiline= multiline, typeMsg=typeMsg, fromlevel=self.getFromLevel(), 
@@ -990,10 +1032,14 @@ class Adapter(threading.Thread):
         @type raw: boolean
         """ 
             
-        if not isinstance(bold, bool): raise Exception("adp>warning: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
-        if not isinstance(italic, bool): raise Exception("adp>warning: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
-        if not isinstance(multiline, bool): raise Exception("adp>warning: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
-        if not isinstance(raw, bool): raise Exception("adp>warning: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
+        if not isinstance(bold, bool): 
+            raise Exception("adp>warning: bad value for the argument: bold=%s (%s)" % (bold, type(bold)) )
+        if not isinstance(italic, bool): 
+            raise Exception("adp>warning: bad value for the argument: italic=%s (%s)" % (italic, type(italic)) )
+        if not isinstance(multiline, bool): 
+            raise Exception("adp>warning: bad value for the argument: multiline=%s (%s)" % (multiline, type(multiline)) )
+        if not isinstance(raw, bool):
+            raise Exception("adp>warning: bad value for the argument: raw=%s (%s)" % (raw, type(raw)) )
         
         typeMsg = ''
         if raw: typeMsg = 'raw'

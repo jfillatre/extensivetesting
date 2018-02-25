@@ -183,7 +183,7 @@ class RestNetworkHandler(QObject, Logger.ClassLogger):
                     else:
                         auth = json.loads( unicode(rsp).strip() )
                 except Exception as e:
-                    print(e)
+                    self.error("decode json error %s" % e)
                     RCI.instance().onGenericError( title=self.tr("API Decode Error"), 
                                                     err="Error Code: %s\n\nError details:\n%s" % (httpCode,rsp) )
                 else:

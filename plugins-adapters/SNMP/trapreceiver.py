@@ -40,7 +40,10 @@ from pysnmp.proto import rfc1902
 AdapterIP = sys.modules['SutAdapters.%s.IPLITE' % TestAdapterLib.getVersion()]
 AdapterUDP = sys.modules['SutAdapters.%s.UDP' % TestAdapterLib.getVersion()]
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""TRAPRECEIVER"""
 

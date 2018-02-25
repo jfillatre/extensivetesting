@@ -21,12 +21,21 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from basic import Basic
-from digest import Digest
-from wsse import Wsse
-from hmac import Hmac
-from oauth import Oauth
-from certificate import Certificate
-from jwt import JWT
+try:
+	from basic import Basic
+	from digest import Digest
+	from wsse import Wsse
+	from hmac import Hmac
+	from oauth import Oauth
+	from certificate import Certificate
+	from jwt import JWT
+except ImportError: # support python 3
+	from .basic import Basic
+	from .digest import Digest
+	from .wsse import Wsse
+	from .hmac import Hmac
+	from .oauth import Oauth
+	from .certificate import Certificate
+	from .jwt import JWT
 
 __DESCRIPTION__ = """Security implementation"""

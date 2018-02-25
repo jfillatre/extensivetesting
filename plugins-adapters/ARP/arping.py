@@ -32,7 +32,10 @@ import sys
 
 AdapterEthernet = sys.modules['SutAdapters.%s.Ethernet' % TestAdapterLib.getVersion()]
 
-import sniffer
+try:
+	import sniffer
+except ImportError: # python3 support
+	from . import sniffer
 
 __NAME__="""Arping"""
 

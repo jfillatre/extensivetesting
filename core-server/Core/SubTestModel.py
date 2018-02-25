@@ -45,8 +45,9 @@ except ImportError: # python3 support
 if sys.version_info > (3,):
     unicode = str
     
-def createSubTest(dataTest, descriptions, trPath, defaultLibrary='', defaultAdapter='', isTestUnit=True, 
-                    isTestAbstract=False, isTestPlan=False, isTestGlobal=False):
+def createSubTest(dataTest, descriptions, trPath, defaultLibrary='', 
+                  defaultAdapter='', isTestUnit=True, 
+                  isTestAbstract=False, isTestPlan=False, isTestGlobal=False):
     """
     """
 
@@ -79,13 +80,13 @@ def createSubTest(dataTest, descriptions, trPath, defaultLibrary='', defaultAdap
     # import static arguments
     te.append( TestModel.getStaticArgs() )
 
-    te.append( """test_result_path = '%s'\n""" % trPath )
+    # te.append( """test_result_path = '%s'\n""" % trPath )
 
-    te.append("""
-result_path = '%s/%s' % (tests_result_path, test_result_path)
-sys.path.insert(0, root )
-sys.stdout = sys.stderr = open( '%s/test.out' % result_path ,'a', 0) 
-""")
+    # te.append("""
+# result_path = '%s/%s' % (tests_result_path, test_result_path)
+# sys.path.insert(0, root )
+# sys.stdout = sys.stderr = open( '%s/test.out' % result_path ,'a', 0) 
+# """)
 
     # import test executor libraries
     te.append( TestModel.IMPORT_TE_LIBS )
@@ -192,23 +193,27 @@ try:
 
 	# !! default local libraries adapters injection
 	try:
-		from SutLibraries import %s as SutLibraries""" % SutLibraries )
+		from SutLibraries import %s as SutLibraries
+		_SutLibraries = SutLibraries
+		SutLibraries.Extra = SutLibraries""" % SutLibraries )
     te.append("""
 	except Exception as e:
 		sys.stderr.write( '%s\\n' % str(e) )""")
     te.append("""
-		raise Exception('Default SUT libraries %s is not applicable'""" % SutLibraries )
+		raise Exception('SUT libraries %s is not applicable (more details)\\n\\n%%s' %% str(e)""" % SutLibraries )
     te.append(""")
 """)
     te.append("""
 	# !! default local adapters injection
 	try:
-		from SutAdapters import %s as SutAdapters""" % SutAdapters )
+		from SutAdapters import %s as SutAdapters
+		_SutAdapters = SutAdapters
+		SutAdapters.Extra = SutAdapters""" % SutAdapters )
     te.append("""
 	except Exception as e:
 		sys.stderr.write( '%s\\n' % str(e) )""")	
     te.append("""
-		raise Exception('Default SUT adapter %s is not applicable'""" % SutAdapters )
+		raise Exception('SUT adapters %s is not applicable (more details)\\n\\n%%s' %% str(e)""" % SutAdapters )
     te.append(""")	
 """)
     te.append("""
@@ -223,7 +228,9 @@ try:
     if SutLibrariesGeneric:
         te.append("""
 	try:
+		SutLibraries = SutLibrariesGeneric
 		SutLibraries.Generic = SutLibrariesGeneric
+		SutLibraries.Extra = _SutLibraries
 	except Exception as e:
 		pass
 """ )
@@ -231,7 +238,9 @@ try:
     if SutAdaptersGeneric:
         te.append("""
 	try:
+		SutAdapters = SutAdaptersGeneric
 		SutAdapters.Generic = SutAdaptersGeneric
+		SutAdapters.Extra = _SutAdapters
 	except Exception as e:
 		pass
 """ )

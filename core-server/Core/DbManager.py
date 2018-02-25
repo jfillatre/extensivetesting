@@ -79,10 +79,12 @@ class DbManager(Logger.ClassLogger):
                                      unix_socket=Settings.get( 'MySql', 'sock') )
             
             cursor = conn.cursor()
-            if debugCaller:
-                self.trace( "SQL QUERY: %s - %s" % (caller(), query) )
-            else:
-                self.trace( "SQL QUERY: %s" % (query) )
+            
+            if Settings.get( 'Trace', 'debug-level') == 'VERBOSE':
+                if debugCaller:
+                    self.trace( "SQL QUERY: %s - %s" % (caller(), query) )
+                else:
+                    self.trace( "SQL QUERY: %s" % (query) )
                 
             cursor.execute ( query )
             if insertData:

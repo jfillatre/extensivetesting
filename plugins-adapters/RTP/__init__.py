@@ -21,8 +21,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-
+try:
+	from client import *
+except ImportError: # python3 support
+	from .client import *
+	
 __DESCRIPTION__ = """This adapter enables to send/receive rtp.
 
 The real-time transport protocol (RTP) provides end-to-end network transport functions suitable for applications transmitting real-time data, such as audio, video or more.

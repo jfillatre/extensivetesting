@@ -21,8 +21,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from templates import *
-
+try:
+	from templates import *
+except ImportError: # python3 support
+	from .templates import *
+	
 IPv4    = 4
 IPv6    = 6
 

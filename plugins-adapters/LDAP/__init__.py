@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from client import *
-
+try:
+	from client import *
+except ImportError: # python3 support
+	from .client import *
+	
 __DESCRIPTION__ = "This adapter enable to interact with a ldap directory."

@@ -21,6 +21,9 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-from dummy import *
+try:
+	from dummy import *
+except ImportError: # python3 support
+	from .dummy import *
 
 __DESCRIPTION__ = "Dummy"

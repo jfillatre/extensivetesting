@@ -43,7 +43,7 @@ import re
 r = re.compile( u"[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF\u0100-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]")
 def removeInvalidXML(string):
   def replacer(m):
-    return ""
+    return b""
   return re.sub(r,replacer,string)
   
 def bytes2str(val):
@@ -137,32 +137,55 @@ class DataModel(Logger.ClassLogger):
             if sys.version_info > (3,):
                 self.testresult = bytes(self.testresult, "utf8")
                 self.testheader = bytes(self.testheader, "utf8")
-                
-            xmlDataList = [ b'<?xml version="1.0" encoding="utf-8" ?>' ]
-            xmlDataList.append( b'<file>' )
+        except Exception as e:
+            self.error( "TestResult > To Xml prepare: %s" % str(e) ) 
+            return None
+            
+        xmlDataList = [ b'<?xml version="1.0" encoding="utf-8" ?>' ]
+        xmlDataList.append( b'<file>' )
 
+        try:
             xmlDataList.append( self.codecD2X.parseDict( dico = self.properties ) )
-
+        except Exception as e:
+            self.error( "TestResult > To Xml test prop: %s" % str(e) ) 
+            return None
+            
+        try:
             tr = zlib.compress(self.testresult)
             tr64 = base64.b64encode(tr)
             if sys.version_info > (3,):
                 tr64 = tr64.decode("utf8")
-            xmlDataList.append( b'<testresult><![CDATA[%s]]></testresult>' % tr64 )
-
+                xmlDataList.append( b'<testresult><![CDATA[%s]]></testresult>' % bytes(tr64, "utf8") )
+            else:
+                xmlDataList.append( b'<testresult><![CDATA[%s]]></testresult>' % tr64 )
+        except Exception as e:
+            self.error( "TestResult > To Xml test result: %s" % str(e) ) 
+            return None
+        
+        try:
             hdr = zlib.compress(self.testheader)
             hdr64 = base64.b64encode(hdr)
             if sys.version_info > (3,):
                 hdr64 = hdr64.decode("utf8")
-            xmlDataList.append( b'<testheader><![CDATA[%s]]></testheader>' % hdr64 )
+                xmlDataList.append( b'<testheader><![CDATA[%s]]></testheader>' % bytes(hdr64, "utf8" ) )
+            else:
+                xmlDataList.append( b'<testheader><![CDATA[%s]]></testheader>' % hdr64 )
+        except Exception as e:
+            self.error( "TestResult > To Xml test header: %s" % str(e) ) 
+            return None
+        
+        xmlDataList.append(b'</file>')
+        ret = b'\n'.join(xmlDataList)
             
-            xmlDataList.append(b'</file>')
-            ret = b'\n'.join(xmlDataList)
-            
+        if sys.version_info > (3,):
+            ret = ret.decode("utf8")
+
+        try:
             # remove all invalid xml data
             ret = removeInvalidXML(ret)
         except Exception as e:
-            self.error( "TestResult > To Xml %s" % str(e) ) 
-            ret = None
+            self.error( "TestResult > To Xml invalid: %s" % str(e) ) 
+            return None
         return ret
 
     def load (self, absPath = None, rawData = None):
@@ -178,6 +201,7 @@ class DataModel(Logger.ClassLogger):
         self.properties = {}
         self.testresult = ''
         
+        # open the file
         if rawData is None:
             try:
                 f = open(absPath, 'rb')
@@ -188,52 +212,67 @@ class DataModel(Logger.ClassLogger):
                 return False
         else:
             read_data = rawData
+            
+        # uncompress the file
         try:
             decompressed_data = zlib.decompress(read_data)
         except Exception as e:
             self.error( "uncompress testresult error: %s" % e )
             return False
+            
+        # convert xml to python objects    
         try:
-            if sys.version_info > (3,): # python3 support
-                ret = self.codecX2D.parseXml( xml = bytes2str(decompressed_data), huge_tree=True  )
-            else:
-                ret = self.codecX2D.parseXml( xml = decompressed_data, huge_tree=True  )
-
+            # if sys.version_info > (3,): # python3 support
+                # ret = self.codecX2D.parseXml( xml = decompressed_data, huge_tree=True  )
+            # else:
+            
+            ret = self.codecX2D.parseXml( xml = decompressed_data, huge_tree=True  )
             del decompressed_data
             del read_data
-            
-            if sys.version_info > (3,): # python3 support
-                tr_decoded = base64.b64decode( bytes(ret['file']['testresult'], 'utf8') ) 
-            else:
-                tr_decoded = base64.b64decode( ret['file']['testresult'] ) 
-            
+        except Exception as e:
+            self.error( "parse xml error: %s" % str(e) )
+            return False
+
+        # decode testresult key
+        try:
+            tr_decoded = base64.b64decode( ret['file']['testresult'] ) 
             tr_decompressed = zlib.decompress(tr_decoded)
+            
             if sys.version_info > (3,): # python3 support
                 self.testresult = bytes2str(tr_decompressed)
             else:
                 self.testresult = tr_decompressed
                 
             del tr_decoded
+        except Exception as e:
+            self.error( "read testresult error: %s" % str(e) )
+            return False
             
-            # new in v11.2
+        # decode the testheader key
+        try:
             if 'testheader' not in ret['file']: # for backward compatibility
                 ret['file']['testheader'] = ''
             else:
-                if sys.version_info > (3,): # python3 support
-                    hdr_decoded = base64.b64decode( bytes(ret['file']['testheader'], 'utf8') ) 
-                else:
-                    hdr_decoded = base64.b64decode( ret['file']['testheader'] ) 
-                
+                hdr_decoded = base64.b64decode( ret['file']['testheader'] ) 
                 hdr_decompressed = zlib.decompress(hdr_decoded)
+                
                 if sys.version_info > (3,): # python3 support
                     self.testheader = bytes2str(hdr_decompressed)
                 else:
                     self.testheader = hdr_decompressed
-            # end of new
-            
+        except Exception as e:
+            self.error( "read test result header error: %s" % str(e) )
+            return False
+      
+        # finally extract properties key
+        try:
             properties = ret['file']['properties']
             self.properties = { 'properties':  properties}
         except Exception as e:
-            self.error( "[parse] %s" % str(e) )
+            self.error( "prepare test result properties error: %s" % str(e) )
             return False
+            
+        # self.trace("%s" % self.properties)
+        # self.trace("%s" % self.testheader)
+        # self.trace("%s" % self.testresult)
         return True

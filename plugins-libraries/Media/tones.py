@@ -23,7 +23,11 @@
 
 from TestExecutorLib.TestExecutorLib import doc_public
 
-from sample import *
+try:
+	from sample import *
+except ImportError: # python3 support
+	from .sample import *
+	
 import math
 
 keypad =   [ 

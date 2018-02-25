@@ -24,11 +24,12 @@
 import TestExecutorLib.TestLibraryLib as TestLibraryLib
 
 Generic = None
-TestLibraryLib.setVersion("v810")
+Default = None
+TestLibraryLib.setVersion("base_v900")
 
-__RN__ = """Date: 11/02/2018
+__RN__ = """Date: xx/xx/2018
 What's new
-	1. (medium) Nmap libraries moved to adapters
+	1. (major) split between base and extra libraries
 Issues fixed
 	1. none
 """
@@ -38,19 +39,31 @@ __DESCRIPTION__ = """Libraries for your SUT adapters and tests.
 %s
 """ % __RN__
 
-import Media
-import Codecs
-import Ciphers
-import Hashing
-import Security
-import Security as Authentication # kept for backward compatibility
-import Time
-import Identifiers
-import Dummy
-import Units
-import Compression
-import Date
-
+try:
+	import Media
+	import Codecs
+	import Ciphers
+	import Hashing
+	import Security
+	import Security as Authentication # kept for backward compatibility
+	import Time
+	import Identifiers
+	import Units
+	import Compression
+	import Date
+except ImportError: # python3 support
+	from . import Media
+	from . import Codecs
+	from . import Ciphers
+	from . import Hashing
+	from . import Security
+	from . import Security as Authentication # kept for backward compatibility
+	from . import Time
+	from . import Identifiers
+	from . import Units
+	from . import Compression
+	from . import Date
+	
 __HELPER__ =	[ ]
 __HELPER__.append("Media")
 __HELPER__.append("Codecs")
@@ -59,7 +72,6 @@ __HELPER__.append("Hashing")
 __HELPER__.append("Security")
 __HELPER__.append("Time")
 __HELPER__.append("Identifiers")
-__HELPER__.append("Dummy")
 __HELPER__.append("Units")
 __HELPER__.append("Compression")
 __HELPER__.append("Date")

@@ -39,7 +39,10 @@ import stat
 import re
 import os
 
-import templates
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 AdapterSSH = sys.modules['SutAdapters.%s.SSH' % TestAdapter.getVersion()]
 
@@ -360,7 +363,7 @@ class Client(TestAdapter.Adapter):
 		@param path: path folder
 		@type path: string
 		
-		@param mode: folder mode in octal (default=511 (0777))
+		@param mode: folder mode in octal (default=511 (0o777))
 		@type mode: integer
 		"""
 		if not self.__logged:
@@ -1116,7 +1119,7 @@ class Client(TestAdapter.Adapter):
 						destFolder = "%s/%s" % (self.getDataStoragePath(), f.filename)
 					else:
 						destFolder = "%s/%s" % (toPath, f.filename)
-					os.mkdir( destFolder, 0755 )
+					os.mkdir( destFolder, 0o755 )
 				except OSError as e:
 					if e.errno == errno.EEXIST and not overwrite:
 						raise Exception("os error folder: %s" % e)

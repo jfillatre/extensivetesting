@@ -39,9 +39,16 @@ import threading
 import socket
 import select
 import time
-import Queue
-import templates
 
+try:
+	import Queue
+except ImportError: # python3 support
+	import queue as Queue
+
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 __NAME__="""TCP"""
 

@@ -29,7 +29,11 @@ import TestExecutorLib.TestLibraryLib as TestLibraryLib
 import sys
 
 import struct
-import templates
+
+try:
+	import templates
+except ImportError: # python3 support
+	from . import templates
 
 OP_REQUEST	= "0x0001"
 OP_REPLY		= "0x0002"

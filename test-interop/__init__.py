@@ -23,15 +23,25 @@
 
 import sys
 
-from Jira import Jira
-from QualityCenter import QualityCenter
-from Git import Git
-from ExtensiveTesting import ExtensiveTesting
-from VSphere import VSphere
-from Nexus import Nexus
-from Email import Email
+try:
+    from Jira import Jira
+    from QualityCenter import QualityCenter
+    from Git import Git
+    from ExtensiveTesting import ExtensiveTesting
+    from VSphere import VSphere
+    from Nexus import Nexus
+    from Email import Email
 
-if sys.version_info >= (2,7): 
-    from Jenkins import Jenkins
-
+    if sys.version_info >= (2,7): 
+        from Jenkins import Jenkins
+except ImportError: # python3 support
+    from TestInteropLib.Jira import Jira
+    from TestInteropLib.QualityCenter import QualityCenter
+    from TestInteropLib.Git import Git
+    from TestInteropLib.ExtensiveTesting import ExtensiveTesting
+    # from TestInteropLib.VSphere import VSphere
+    from TestInteropLib.Nexus import Nexus
+    from TestInteropLib.Email import Email
+    from TestInteropLib.Jenkins import Jenkins
+        
 __DESCRIPTION__ = """The library enable to interact with others testing tools."""
