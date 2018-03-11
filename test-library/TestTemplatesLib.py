@@ -23,6 +23,7 @@
 
 
 import wrapt
+import sys
 
 @wrapt.decorator
 def doc_public(wrapped, instance, args, kwargs):
@@ -574,10 +575,13 @@ class TemplateMessage(object):
         tpl = self.get()
 
         # add header
-        try:
-            rawData = base64.b64encode(self.__raw__)
-        except UnicodeEncodeError:
-            rawData = base64.b64encode(self.__raw__.encode('utf8'))
+        if sys.version_info > (3,):
+            rawData = base64.b64encode( bytes(self.__raw__, "utf8") )
+        else:
+            try:
+                rawData = base64.b64encode(self.__raw__)
+            except UnicodeEncodeError:
+                rawData = base64.b64encode(self.__raw__.encode('utf8'))
         tpl.append( (self.type(), {'len':len(self.__raw__), 'raw': rawData, 'time':self.__time__}) )
 
         return tpl

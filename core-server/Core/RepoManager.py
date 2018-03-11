@@ -387,6 +387,10 @@ class RepoManager(Logger.ClassLogger):
             statistics = { 'disk-usage': self.diskUsage(p=path, asDict=True) }
             for entry in reversed( list( sorted(scandir.scandir(path), key=lambda m:m.name) ) ):
                 if entry.is_dir(follow_symlinks=False) and not entry.name.startswith(".") :
+                    
+                    # ignore python folder
+                    if entry.name  == "__pycache__": continue
+                    
                     nbFolders += 1
                     
                     if sys.version_info > (3,):

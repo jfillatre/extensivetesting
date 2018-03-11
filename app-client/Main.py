@@ -38,7 +38,10 @@ __AUTHOR__ = 'Denis Machard'
 # email of the main developer
 __EMAIL__ = 'd.machard@gmail.com'
 # list of contributors
-__CONTRIBUTORS__ = [ "", "Emmanuel Monsoro (logo, graphical abstract engine)" ]
+__CONTRIBUTORS__ = [ 
+                     " - Emmanuel Monsoro (logo, graphical abstract engine)", 
+                     " - Denys Bortovets (build mac version)" 
+                   ]
 # list of contributors
 __TESTERS__ = [ "Emmanuel Monsoro", "Thibault Lecoq"  ]
 # project start in year
@@ -46,7 +49,7 @@ __BEGIN__="2010"
 # year of the latest build
 __END__="2018"
 # date and time of the buid
-__BUILDTIME__="10/02/2018 10:04:08"
+__BUILDTIME__="11/03/2018 09:28:05"
 # Redirect stdout and stderr to log file only on production
 REDIRECT_STD=True
 # disable warning from qt framework on production 
@@ -128,7 +131,7 @@ if not os.path.exists(settingsFile):
 # Detect the operating system 
 # For Unix systems, this is the lowercased OS name as returned
 # by uname -s with the first part of the version as returned by uname -r
-if sys.platform in [ "win32", "linux2", "linux" ]:
+if sys.platform in [ "win32", "linux2", "linux", "darwin" ]:
     try:
         from PyQt4.QtGui import (QMainWindow, QApplication, QMessageBox, QTabWidget, QIcon, QToolButton, 
                                 QAction, qApp, QDesktopServices, QFileDialog, QSystemTrayIcon, QDialog, 
@@ -1522,7 +1525,7 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
             if sys.platform == "win32":
                subprocess.Popen (['cmd.exe', '/c', appPath ], shell=True)
             
-            if sys.platform == "linux2":
+            if sys.platform in [ "linux2", "darwin" ] :
                 subprocess.Popen ([appPath ], shell=True)
             
         else:
@@ -3120,7 +3123,8 @@ class MainApplication(QMainWindow, Logger.ClassLogger):
         about.append( "%s: <a href='mailto:%s'>%s</a>" %(self.tr("Contact"), __EMAIL__,__EMAIL__) )
         about.append( "%s: <a href='%s'>%s</a>" % (self.tr("Home page"), url, url) )
         about.append( "" )
-        about.append( "%s: <i>%s</i>" % (self.tr("Contributors"), ' '.join(__CONTRIBUTORS__)))
+        about.append( "%s:<br /><i>%s</i>" % (self.tr("Contributors"), '<br />'.join(__CONTRIBUTORS__)))
+        about.append( "" )
         about.append( "%s: <i>%s</i>" % (self.tr("Testers"), ', '.join(__TESTERS__)))
 
         about.append( "<hr />" )
@@ -3416,7 +3420,7 @@ if __name__ == '__main__':
     # Construct the main app
     if sys.platform == "win32":
         app = QApplication(sys.argv)
-    if sys.platform in [ "linux", "linux2" ] :
+    if sys.platform in [ "linux", "linux2", "darwin" ] :
         app = QApplication(sys.argv)
 
         
@@ -3491,7 +3495,7 @@ if __name__ == '__main__':
     # no more display the splash
     if sys.platform == "win32":
         splash.finish(window)
-    if sys.platform in [ "linux", "linux2" ]:
+    if sys.platform in [ "linux", "linux2", "darwin" ]:
         splash.finish(window)
 
     # performance measurement only  for debug mode

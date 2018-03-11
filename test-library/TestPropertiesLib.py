@@ -23,6 +23,7 @@
 
 import wrapt
 import json
+import sys
 
 @wrapt.decorator
 def doc_public(wrapped, instance, args, kwargs):
@@ -789,7 +790,10 @@ class Descriptions:
         try:
             for descr in self.__descriptions:
                 if descr['key'] == name.lower():
-                    return descr['value'].encode("utf-8")
+                    if sys.version_info > (3,):
+                        return descr['value']
+                    else:
+                        return descr['value'].encode("utf-8")
         except Exception:
             return ''
         raise TestPropertiesException('ERR_PRO_002: Description key "%s" not available' % name)

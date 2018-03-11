@@ -2020,7 +2020,7 @@ class TestLoggerXml:
         @param italic:
         @type italic:
         """
-        self.to_notif( {
+        evt = {
                     'event': 'testcase', 
                     'level': 'step-started',
                     'from-component': fromComponent,
@@ -2037,7 +2037,8 @@ class TestLoggerXml:
                     'bold': bold, 
                     'italic': italic,
                     'multiline': multiline 
-        }, testInfo=testInfo )
+        }
+        self.to_notif( evt, testInfo=testInfo )
 
     def log_step_failed (self, fromComponent, dataMsg, shortMsg, tcid, font="normal", bold = False, italic=False,
                                 multiline=False, fromlevel='', tolevel='', testInfo={}):

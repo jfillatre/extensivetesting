@@ -60,6 +60,11 @@ import json
 import re
 import wrapt
 
+
+# unicode = str with python3
+if sys.version_info > (3,):
+    unicode = str
+    
 @wrapt.decorator
 def doc_public(wrapped, instance, args, kwargs):
     """
@@ -370,12 +375,7 @@ class TestSuitesManager(object):
             for d in self.__mainDescriptions:
                 if d["key"].lower() == "comments": continue
                 
-                
                 val = d["value"]
-                # try:
-                    # val = d["value"].encode("utf-8").decode("latin1")
-                # except Exception as e:
-                    # val = d["value"]
                 k = d["key"].replace(" ", "_")
                 mainDescrs.append( "%s=\"%s\"" % (k, xmlescape(val) ) ) 
             # end of new
@@ -412,7 +412,7 @@ class TestSuitesManager(object):
         else:
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_design_xml), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_design_xml), 'w')
                 f.write( self.__safestr2(datas=designs) )
                 f.close()
             except Exception as e:
@@ -460,7 +460,7 @@ class TestSuitesManager(object):
         else:
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_design), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_design), 'w')
                 f.write( self.__safestr2(datas=designs) )
                 f.close()
             except Exception as e:
@@ -551,9 +551,7 @@ class TestSuitesManager(object):
                         val_tmp = str(i['value'])
                     except Exception:
                         val_tmp = i['value'].encode('utf8')
-                    # val_tmp = str(i['value'])
-                    # will be fix in the future, utf8 be must provided from client, not string in latin1
-                    # val_tmp = val_tmp.decode("latin1")
+
                     val_tmp = val_tmp.decode("utf8")
                     
                 inputs_str.append( u'%s (%s) = %s' % ( str(i['name']), 
@@ -830,7 +828,6 @@ class TestSuitesManager(object):
                 #decode summary only for testglobal or testplan
                 class_title = "test_main"
                 if self.__tp_name is not None:
-                    #ts['data-summary'] = ts['data-summary'].decode("latin1")
                     class_title = "test_title"
                     
                 if ts['is-unit']:
@@ -1012,7 +1009,7 @@ class TestSuitesManager(object):
                 tpl_report = self.basic_report_tpl.replace("<!-- REPLACE_ME -->", self.__safestr2(datas=reports) )
                 
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_basic_report), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_basic_report), 'w')
                 f.write( tpl_report )
                 f.close()
 
@@ -1141,7 +1138,6 @@ class TestSuitesManager(object):
                 #decode summary only for testglobal or testplan
                 if self.__tp_name is not None:
                     ts['data-summary'] = ts['data-summary'].decode("utf8")
-                    # ts['data-summary'] = ts['data-summary'].decode("latin1")
                     
                 if ts['is-unit']:
                     reports.append( u'<li data-type="testunit">' )
@@ -1246,7 +1242,7 @@ class TestSuitesManager(object):
         else:
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_report), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_report), 'w')
                 f.write( self.__safestr2(datas=reports) )
                 f.close()
 
@@ -1279,7 +1275,7 @@ class TestSuitesManager(object):
         else:   
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_report_xml), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_report_xml), 'w')
                 f.write( self.__safestr2(datas=reports) )
                 f.close()
                     
@@ -1359,7 +1355,7 @@ class TestSuitesManager(object):
         else:
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename), 'w')
                 f.write( self.__safestr2(datas=result) )
                 f.close()
             except Exception as e:
@@ -1456,7 +1452,7 @@ class TestSuitesManager(object):
         else:
             try:
                 # save to file
-                f = open('%s/%s' % (self.__path, self.__filename_xml), 'w', 0)
+                f = open('%s/%s' % (self.__path, self.__filename_xml), 'w')
                 f.write( self.__safestr2(datas=verdicts) )
                 f.close()
             except Exception as e:
@@ -1468,7 +1464,10 @@ class TestSuitesManager(object):
         """
         ret = []
         for l in datas:
-            ret.append( l.encode("utf8") )
+            if sys.version_info > (3,):
+                ret.append( l )
+            else:
+                ret.append( l.encode("utf8") )
         return '\n'.join(ret)
 
     def isTestStarted(self):
@@ -1485,11 +1484,8 @@ class TestSuitesManager(object):
         self.__tp_name = name
         self.__tp_datainputs = dataInputs
         self.__tp_sutinputs = sutInputs
-        # will be fix in the future, utf8 be must provided from client, not string in latin1
-        # self.__tp_datasummary = summary.decode("latin1")
         self.__tp_datasummary = summary.decode("utf8")
         self.__tp_startedat = startedAt
-        # new 12.1
         self.__tp_dataoutputs = dataOutputs
         self.__tp_sutoutputs = sutOutputs
         
@@ -1523,16 +1519,33 @@ class TestSuitesManager(object):
         # end of new
         
         self.id__ += 1
-        # _summary = summary.decode("latin1")
-        _summary = summary.decode("utf8")
-        self.tcs[self.id__] = { 'result': UNDEFINED, 'tc': [], 'name': name, 'is-unit': isUnit,
-                                'is-abstract': isAbstract, 'data-outputs': dataOutputs, 'sut-outputs': sutOutputs,
-                                'is-enabled': isEnabled, 'is-executed': isExecuted, 'alias': nameAlias,
-                                'is-testplan': isTestPlan, 'is-tp-started': startTestPlan, 'duration': 0 ,
-                                'data-inputs': dataInputs, 'sut-inputs': sutInputs, 
-                                # will be fix in the future,utf8 be must provided from client, not string in latin1
-                                'data-summary': _summary, 'path': testPath, 'project': testProject,
-                                'started-at': startedAt, 'is-tp-from-tg': isTpFromTg, 'data-descriptions': dataDescriptions,
+        
+        if sys.version_info > (3,):
+            _summary = summary
+        else:
+            _summary = summary.decode("utf8")
+            
+        self.tcs[self.id__] = { 'result': UNDEFINED, 
+                                'tc': [], 
+                                'name': name, 
+                                'is-unit': isUnit,
+                                'is-abstract': isAbstract, 
+                                'data-outputs': dataOutputs, 
+                                'sut-outputs': sutOutputs,
+                                'is-enabled': isEnabled, 
+                                'is-executed': isExecuted, 
+                                'alias': nameAlias,
+                                'is-testplan': isTestPlan, 
+                                'is-tp-started': startTestPlan, 
+                                'duration': 0 ,
+                                'data-inputs': dataInputs,
+                                'sut-inputs': sutInputs,
+                                'data-summary': _summary, 
+                                'path': testPath, 
+                                'project': testProject,
+                                'started-at': startedAt, 
+                                'is-tp-from-tg': isTpFromTg, 
+                                'data-descriptions': dataDescriptions,
                                 "errors": [] }
         return self.id__                        
 
@@ -2564,9 +2577,6 @@ class Step(object):
         @param summary: summary
         @type summary: string
         """
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # self.summary_ = summary.decode("latin1")
         self.summary_ = summary.decode("utf8")
         
     @doc_public    
@@ -2577,9 +2587,6 @@ class Step(object):
         @param description: description
         @type description: string
         """
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # self.action_ = description.decode("latin1")
         self.action_ = description.decode("utf8")
         
     @doc_public
@@ -2590,9 +2597,6 @@ class Step(object):
         @param expected: expected
         @type expected: string
         """
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # self.expected_ = expected.decode("latin1")
         self.expected_ = expected.decode("utf8")
         
     @doc_public
@@ -2640,19 +2644,19 @@ class Step(object):
         """
         Return the summary
         """
-        # will be fix on the future
-        # utf8 be must provided from client, not string in latin1
-        # return self.summary_.decode("latin1")
-        return self.summary_.decode("utf8")
+        if sys.version_info > (3,):
+            return self.summary_
+        else:
+            return self.summary_.decode("utf8")
 
     def getExpected(self):
         """
         Return expected string
         """
-        # will be fix on the future
-        # utf8 be must provided from client, not string in latin1
-        # return self.expected_.decode("latin1")
-        return self.expected_.decode("utf8")
+        if sys.version_info > (3,):
+            return self.expected_
+        else:
+            return self.expected_.decode("utf8")
         
     def getActual(self):
         """
@@ -2677,10 +2681,11 @@ class Step(object):
         """
         Return action string
         """
-        # will be fix on the future
-        # utf8 be must provided from client, not string in latin1
-        # ret = self.action_.decode("latin1")
-        ret = self.action_.decode("utf8")
+        if sys.version_info > (3,):
+            ret = self.action_
+        else:
+            ret = self.action_.decode("utf8")
+            
         try:
             if self.action_thumbnail is not None:
                 imgB64 = base64.b64encode(self.action_thumbnail)
@@ -2727,9 +2732,17 @@ class Step(object):
                 shortMsg = self.summary_
             else:
                 shortMsg = self.action_
-            rawTxt = "Step %s [%s]\n\n%sExpected:\t%s" % (self.id_, self.verdict, TAB, self.expected_)
+            rawTxt = "Step %s [%s]\n\n%sExpected:\t%s" % (self.id_, 
+                                                          self.verdict, 
+                                                          TAB, 
+                                                          self.expected_)
             if self.action_ is not None:
-                rawTxt = "Step %s [%s]\n\n%sAction:\t%s\n\n%sExpected:\t%s" % ( self.id_, self.verdict, TAB,  self.action_, TAB, self.expected_)       
+                rawTxt = "Step %s [%s]\n\n%sAction:\t%s\n\n%sExpected:\t%s" % ( self.id_, 
+                                                                                self.verdict, 
+                                                                                TAB,  
+                                                                                self.action_, 
+                                                                                TAB, 
+                                                                                self.expected_)       
 
             # create template
             tpl = TestTemplatesLib.TemplateMessage()
@@ -2746,9 +2759,14 @@ class Step(object):
             tpl.addLayer(tpl_layer)
 
             # log event
-            TLX.instance().log_step_started( dataMsg=tpl.getEvent(), shortMsg=shortMsg, fromComponent = "%s [Step_%s]" % (TC,  self.id_),
-                                             tcid = self.tcid_, fromlevel=LEVEL_TE, tolevel=LEVEL_USER, testInfo=self.tcparent.getTestInfo() )
-            
+            TLX.instance().log_step_started( dataMsg=tpl.getEvent(), 
+                                             shortMsg=shortMsg, 
+                                             fromComponent = "%s [Step_%s]" % (TC,  self.id_),
+                                             tcid = self.tcid_, 
+                                             fromlevel=LEVEL_TE, 
+                                             tolevel=LEVEL_USER, 
+                                             testInfo=self.tcparent.getTestInfo() )
+
             self.saveStep()
             
     def saveStep(self):
@@ -2791,9 +2809,6 @@ class Step(object):
                 raise StepException("ERR_STP_006: bad end chart provided")
         self.actual_chart = chart
 
-        # will be fix on the future
-        # utf8 be must provided from client, not string in latin1
-        # self.actual_.append( actual.decode("latin1") )
         self.actual_.append( actual.decode("utf8") )
         self.actual_raw += actual.decode('utf8') + '\n'
 
@@ -2868,14 +2883,14 @@ class Step(object):
             if not chart.endswith("<!-- END_CHART_REPORT -->"):
                 raise StepException("ERR_STP_006: bad end chart provided")
         self.actual_chart = chart
-        
 
-        # will be fix on the future
-        # utf8 be must provided from client, not string in latin1
-        # self.actual_.append( str(actual).decode("latin1") )
-        self.actual_.append( str(actual).decode("utf8") )
-        self.actual_raw += str(actual).decode('utf8') + '\n'
-            
+        if sys.version_info > (3,):
+            self.actual_.append( "%s" % actual )
+            self.actual_raw += "%s" % actual + '\n'
+        else:
+            self.actual_.append( str(actual).decode("utf8") )
+            self.actual_raw += str(actual).decode('utf8') + '\n'
+                
         if self.verdict == FAIL :
             pass # don't change the verdict if the step is already fail, 
             #we can call several the setPassed function
@@ -2913,8 +2928,13 @@ class Step(object):
         tpl.addLayer(tpl_layer)
 
         # log event
-        TLX.instance().log_step_passed( dataMsg=tpl.getEvent(), shortMsg=shortMsg, fromComponent =  "%s [Step_%s]" % (TC,  self.id_),
-                                        tcid = self.tcid_, fromlevel=LEVEL_TE, tolevel=LEVEL_USER, testInfo=self.tcparent.getTestInfo())
+        TLX.instance().log_step_passed( dataMsg=tpl.getEvent(), 
+                                        shortMsg=shortMsg, 
+                                        fromComponent =  "%s [Step_%s]" % (TC,  self.id_),
+                                        tcid = self.tcid_, 
+                                        fromlevel=LEVEL_TE, 
+                                        tolevel=LEVEL_USER, 
+                                        testInfo=self.tcparent.getTestInfo())
         self.saveStep()
         
 class StepManager(object):
@@ -3462,10 +3482,10 @@ class TestCase(object):
         """
         Return the purpose
         """
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # return self.__purpose.decode("latin1")
-        return self.__purpose.decode("utf8")
+        if sys.version_info > (3,):
+            return self.__purpose
+        else:
+            return self.__purpose.decode("utf8")
         
     @doc_public    
     def setRequirement(self, requirement):
@@ -3481,10 +3501,10 @@ class TestCase(object):
         """
         Return the requirement
         """
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # return self.__requirement.decode("latin1")
-        return self.__requirement.decode("utf8")
+        if sys.version_info > (3,):
+            return self.__requirement
+        else:
+            return self.__requirement.decode("utf8")
         
     def getSuffix(self):
         """
@@ -3516,11 +3536,11 @@ class TestCase(object):
             tname = self.__name
         if self.__suffix__ != None:
             tname = "%s_%s" % (tname, self.__suffix__)
-
-        # will be fix in the future
-        # utf8 be must provided from client, not string in latin1
-        # return tname.decode("latin1")
-        return tname.decode("utf8")
+            
+        if sys.version_info > (3,):
+            return tname
+        else:
+            return tname.decode("utf8")
 
     def getSteps(self):
         """
@@ -3730,10 +3750,10 @@ class TestCase(object):
         if not internal: self.warning("setFailed: deprecated function")
         self.__TESTCASE_VERDICT = FAIL
         if len( "%s" % str(internalErr) ): 
-            # try:
-            self.__errors.append( str(internalErr).decode("utf8") )
-            # except Exception as e:
-                # self.__errors.append( str(internalErr).decode("utf8", errors="ignore") )
+            if sys.version_info > (3,):
+                self.__errors.append( str(internalErr) )
+            else:
+                self.__errors.append( str(internalErr).decode("utf8") )
                 
     def getErrors(self):
         """
@@ -3899,8 +3919,11 @@ class TestCase(object):
             self.__testMgrID  = copy.copy(getTsMgr().getId())
             try:
                 name = self.getTestname()
-                TLX.instance().log_testcase_started(id_ = self.__id, name = name, fromlevel=LEVEL_TE, 
-                                                    tolevel=LEVEL_USER, testInfo=self.__testInfo)
+                TLX.instance().log_testcase_started(id_ = self.__id, 
+                                                    name = name, 
+                                                    fromlevel=LEVEL_TE, 
+                                                    tolevel=LEVEL_USER, 
+                                                    testInfo=self.__testInfo)
 
                 # Register the testcase
                 tsMgr = getTsMgr()
@@ -3920,21 +3943,46 @@ class TestCase(object):
                 self.__prepared=False
                 body = getattr(self, 'definition', None) # new in 3.2.0
                 if callable(body):
-                    TLX.instance().log_testcase_info('BEGIN [Id=#%s]' % self.__id, TC, self.__id, color_=TLX.instance().INFO_TS, fromlevel=LEVEL_TE, 
-                                                        tolevel=LEVEL_USER, testInfo=self.__testInfo, flagEnd=False, flagBegin=True )
+                    TLX.instance().log_testcase_info('BEGIN [Id=#%s]' % self.__id, 
+                                                     TC, 
+                                                     self.__id, 
+                                                     color_=TLX.instance().INFO_TS, 
+                                                     fromlevel=LEVEL_TE, 
+                                                     tolevel=LEVEL_USER, 
+                                                     testInfo=self.__testInfo, 
+                                                     flagEnd=False, 
+                                                     flagBegin=True )
                     try:
                         # new in 6.1.0
-                        TLX.instance().log_testcase_internal(message='Designing',component=TC, tcid = self.__id, bold=False, italic=True, fromlevel=LEVEL_TE, 
-                                                                tolevel=LEVEL_USER, testInfo=self.__testInfo)
+                        TLX.instance().log_testcase_internal(message='Designing',
+                                                             component=TC, 
+                                                             tcid = self.__id, 
+                                                             bold=False, 
+                                                             italic=True, 
+                                                             fromlevel=LEVEL_TE, 
+                                                             tolevel=LEVEL_USER, 
+                                                             testInfo=self.__testInfo)
                         self.description(**kwargs)
                         # end new in 6.1.0
 
-                        TLX.instance().log_testcase_internal(message='Preparing',component=TC, tcid = self.__id, bold=False, italic=True, fromlevel=LEVEL_TE, 
-                                                                tolevel=LEVEL_USER, testInfo=self.__testInfo)
+                        TLX.instance().log_testcase_internal(message='Preparing',
+                                                             component=TC, 
+                                                             tcid = self.__id, 
+                                                             bold=False, 
+                                                             italic=True, 
+                                                             fromlevel=LEVEL_TE, 
+                                                             tolevel=LEVEL_USER, 
+                                                             testInfo=self.__testInfo)
                         self.prepare(**kwargs)
                         self.__prepared=True
-                        TLX.instance().log_testcase_internal(message='Starting',component=TC, tcid = self.__id, bold=False, italic=True, fromlevel=LEVEL_TE, 
-                                                                tolevel=LEVEL_USER, testInfo=self.__testInfo)
+                        TLX.instance().log_testcase_internal(message='Starting',
+                                                             component=TC, 
+                                                             tcid = self.__id, 
+                                                             bold=False, 
+                                                             italic=True, 
+                                                             fromlevel=LEVEL_TE, 
+                                                             tolevel=LEVEL_USER, 
+                                                             testInfo=self.__testInfo)
                         body(**kwargs)
                     except AbortException as e:
                         aborted =  'Abort reason: %s' % e
@@ -4012,8 +4060,6 @@ class TestCase(object):
                         self.error( 'ERR_TE_001: %s' % e)
                         self.setFailed(internal=True)
 
-                    #print(kwargs)
-                    # kwargs["aborted"] = aborted
                     if int( TestSettings.get('Tests_Framework', 'dispatch-events-current-tc') ):
                         TLX.instance().log_testcase_internal(message='Cleaning',component=TC, tcid = self.__id, bold=False, 
                                                             italic=True, fromlevel=LEVEL_TE, tolevel=LEVEL_USER, testInfo=self.__testInfo)
@@ -4365,7 +4411,6 @@ class TestCase(object):
         
         typeMsg = ''
         if txt:
-            # self.__logs.append( str(txt).decode("latin1") )
             self.__logs.append( str(txt).decode("utf8") )
             if raw: typeMsg = 'raw'
             try:

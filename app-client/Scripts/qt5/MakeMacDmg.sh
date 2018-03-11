@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/bin/bash
 
 # -------------------------------------------------------------------
-# Copyright (c) 2010-2018 Denis Machard
+# Copyright (c) 2018 Denys Bortovets
 # This file is part of the extensive testing project
 #
 # This library is free software; you can redistribute it and/or
@@ -21,4 +20,11 @@
 # MA 02110-1301 USA
 # -------------------------------------------------------------------
 
-__DESCRIPTION__ = """General library."""
+VERSION=18.0.0
+
+echo "Build App Client for Mac"
+python3 ../../BuildMac.py py2app
+
+
+echo "Create dmg package"
+hdiutil create ExtensiveTestingClient.dmg -srcfolder ./dist/ExtensiveTestingClient_$VERSION.app
