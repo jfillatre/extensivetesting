@@ -162,9 +162,6 @@ class InnoScript:
         print("InnoSetup returned errorlevel: %s" % errorlevel)
 
 # Init the class, create the script and compile-it
-# print("%s/%s/" % (QtHelper.dirExec(),SRC_FROM))
-# script = InnoScript( pathName= "%s/%s/" % (QtHelper.dirExec(),SRC_FROM) )
-# print("%s/%s/" % (QtHelper.dirExec(),SRC_FROM))
 script = InnoScript( pathName= SRC_FROM )
 script.create()
 script.compile()
