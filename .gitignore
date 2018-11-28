@@ -6,3 +6,4 @@
 *.log
 *.lock
 *.snapshot
+.idea/
