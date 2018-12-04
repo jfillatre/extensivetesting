@@ -32,11 +32,11 @@ import json
 CONTAINER="container"
 PRODUCER="producer"
 
-CONNECT = "connect"
-CONSUME = "consum"
-POSITION='position'
-POLL="poll"
-SEEK='seek'
+RUN = "run"
+CREATE = "create"
+GET='get'
+LIST="list"
+PRUNE='prune'
 ASSIGN='assign'
 ASSIGNMENT='assignment'
 SEEK_TO_BEGINNING="seek_to_beginning"
@@ -52,12 +52,12 @@ TOPICS="topics"
 OFFSETS_FOR_TIMES="offsets_for_times"
 PARTITIONS_FOR_TOPIC="partitions_for_topic"
 
-def kafka_connect(api=None, docker_client=None, more=None, **kargs):
+def docker_connect(api=None, docker_client=None, more=None, **kwargs):
 	"""
-	Construct a kafka template Layer
+	Construct a docker template Layer
 	"""
 	if api is CONTAINER:
-		layer_docker= TestTemplatesLib.TemplateLayer(name='DOCKER_CONTAINER')
+		layer_docker= TestTemplatesLib.TemplateLayer(name='CONTAINER')
 	else:
 		layer_docker = TestTemplatesLib.TemplateLayer(name='KAFKA_PRODUCER')
 	
@@ -66,38 +66,35 @@ def kafka_connect(api=None, docker_client=None, more=None, **kargs):
 
 	if more is not None:
 		layer_docker.addMore(more=more)
-	if kargs is not None:
-		for key,value in kargs.iteritems():
+	if kwargs is not None:
+		for key,value in kwargs.iteritems():
 				if value is not None:
 					layer_docker.addKey(name=key, data="{0}".format(value))
 	return layer_docker
 	
 
-def kafka_ops(method=None, more=None, **kargs):
+def docker_ops(method=None, more=None, **kwargs):
 	"""
-	Construct a kafka operation template Layer
+	Construct a docker operation template Layer
 	"""
 	tpl = TestTemplatesLib.TemplateLayer(name=method.upper())
 	if more is not None:
 		tpl.addMore(more=more)
-	if method is CONSUME:
-		tpl = consumed_record(tpl=tpl,msg=kargs.pop('msg'))
-	else:
-		if kargs is not None:
-			for key,value in kargs.iteritems():
-				if value is not None:
-					tpl.addKey(name=key, data="{0}".format(value))		
+	if kwargs is not None:
+		for key,value in kwargs.iteritems():
+			if value is not None:
+				tpl.addKey(name=key, data="{0}".format(value))		
 	return tpl 	
 
-def response_err(method=None,msg=None, **kargs):
+def response_err(method=None,msg=None, **kwargs):
 	"""
-		Construct a kafka error template Layer
+		Construct a docker error template Layer
 	"""
-	tpl = kafka_ops(method=method)
+	tpl = docker_ops(method=method)
 	if msg is not None:
 		tpl.addRaw( "%s" % msg)
-	if kargs is not None:
-		for key,value in kargs.iteritems():
+	if kwargs is not None:
+		for key,value in kwargs.iteritems():
 			if value is not None:
 				tpl.addKey(name=key, data="{0}".format(value))
 	return tpl

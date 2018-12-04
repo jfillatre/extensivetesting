@@ -21,15 +21,15 @@ import docker
 
 import logging
 
-__NAME__="""KAFKA"""
+__NAME__="""Docker"""
 AGENT_INITIALIZED = "AGENT_INITIALIZED"
-AGENT_TYPE_EXPECTED='kafka'
-PRODUCER="producer"
-SEND = "send"
-CONNECT = "connect"
-FLUSH="flush" 
-CLOSE="close" 
-PARTITIONS_FOR="partitions_for"
+AGENT_TYPE_EXPECTED='docker'
+CONTAINER="container"
+RUN = "run"
+CREATE = "create"
+GET="get"
+LIST="list" 
+PRUNE="prune" 
 
 
 class DockerContainer(TestAdapterLib.Adapter):
@@ -153,26 +153,26 @@ class DockerContainer(TestAdapterLib.Adapter):
 				layer.addKey(name='type', data=self.cfg['agent']['type'] )
 				tpl.addLayer(layer= layer)
 				self.logRecvEvent( shortEvt = "Agent Is Ready" , tplEvt = tpl )
-			elif data['cmd'] == "producer_{0}".format(CONNECT):
-				self.__kafka_connected = True
-				tpl = templates.kafka_ops(method=CONNECT,bootstrap_servers=self.bootstrap_servers)
-				self.logRecvEvent( shortEvt = "connected", tplEvt = self.encapsule(self.producerTpl ,tpl))
-			elif data['cmd'] == "producer_{0}".format(SEND):
+			elif data['cmd'] == "container_{0}".format(RUN):
+				self.__docker_connected = True
+				tpl = templates.docker_ops(method=RUN)
+				self.logRecvEvent( shortEvt = "connected", tplEvt = self.encapsule(self.containerTpl ,tpl))
+			elif data['cmd'] == "container_{0}".format(CREATE):
 				record_metadata = data['result']
 				self.__kafka_send = True
-				rec = { "Topic":record_metadata[0], "Partition": record_metadata[1] , "Offset":record_metadata[3] , "Timestamp": record_metadata[4] ,"Checksum": record_metadata[5], "Serialized_key_size": record_metadata[6], "Serialized_value_size": record_metadata[7]}
-				tpl = templates.kafka_ops(method=SEND, more=rec)
-				self.logRecvEvent( shortEvt = "sended", tplEvt =  self.encapsule(self.producerTpl ,tpl))
-			elif data['cmd'] =="producer_{0}".format(FLUSH) :
-				tpl = templates.kafka_ops(method=FLUSH)
-				self.logRecvEvent( shortEvt = "flushed", tplEvt =  self.encapsule(self.producerTpl ,tpl))	
-			elif data['cmd'] =="producer_{0}".format(PARTITIONS_FOR) :
+#				rec = { "Topic":record_metadata[0], "Partition": record_metadata[1] , "Offset":record_metadata[3] , "Timestamp": record_metadata[4] ,"Checksum": record_metadata[5], "Serialized_key_size": record_metadata[6], "Serialized_value_size": record_metadata[7]}
+				tpl = templates.docker_ops(method=CREATE)
+				self.logRecvEvent( shortEvt = "sended", tplEvt =  self.encapsule(self.containerTpl ,tpl))
+			elif data['cmd'] =="container_{0}".format(GET) :
+				tpl = templates.docker_ops(method=GET)
+				self.logRecvEvent( shortEvt = "flushed", tplEvt =  self.encapsule(self.containerTpl ,tpl))	
+			elif data['cmd'] =="container_{0}".format(LIST) :
 				partitions = data['result']
-				tpl = templates.kafka_ops(method=PARTITIONS_FOR, partitions=partitions)
-				self.logRecvEvent( shortEvt = "partitions_for", tplEvt =  self.encapsule(self.producerTpl ,tpl))				
-			elif data['cmd'] == "producer_{0}".format(CLOSE):
-				tpl = templates.kafka_ops(method=CLOSE)
-				self.logRecvEvent( shortEvt = "closed", tplEvt =  self.encapsule(self.producerTpl ,tpl))			
+				tpl = templates.docker_ops(method=LIST)
+				self.logRecvEvent( shortEvt = "list", tplEvt =  self.encapsule(self.containerTpl ,tpl))				
+			elif data['cmd'] == "container_{0}".format(PRUNE):
+				tpl = templates.docker_ops(method=PRUNE)
+				self.logRecvEvent( shortEvt = "removed", tplEvt =  self.encapsule(self.containerTpl ,tpl))			
 		else:
 			self.warning( 'Notify received from agent: %s' % data )
 
@@ -181,8 +181,8 @@ class DockerContainer(TestAdapterLib.Adapter):
 		Function to reimplement
 		"""
 		if "cmd" in data:
-			if data['cmd'] in [ CONNECT, CLOSE, SEND, FLUSH,PARTITIONS_FOR	]:
-				tpl = self.encapsule(self.producerTpl, templates.response_err(msg=data['err-msg'], method=data['cmd'] ))
+			if data['cmd'] in [ RUN, PRUNE, CREATE, GET,LIST	]:
+				tpl = self.encapsule(self.containerTpl, templates.response_err(msg=data['err-msg'], method=data['cmd'] ))
 				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )
 				
 			else:
@@ -221,19 +221,16 @@ class DockerContainer(TestAdapterLib.Adapter):
 		self.parent.sendAliveToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData='')
 		self.TIMER_ALIVE_AGT.restart()
 		
-	@doc_public
 	def sendInitToAgent(self, data):
 		"""
 		"""
 		self.parent.sendInitToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=data)
 		
-	@doc_public
 	def sendNotifyToAgent(self, data):
 		"""
 		"""
 		self.parent.sendNotifyToAgent(adapterId=self.getAdapterId(), agentName=self.cfg['agent-name'], agentData=data)
 		
-	@doc_public
 	def sendResetToAgent(self, data):
 		"""
 		"""
@@ -259,229 +256,226 @@ class DockerContainer(TestAdapterLib.Adapter):
 		
 	def __getKafkaClientLogger(self):
 
-		logger = logging.getLogger('kafka')
+		logger = logging.getLogger('docker')
 		logger.addHandler(logging.StreamHandler(sys.stdout))
 		logger.setLevel(logging.DEBUG)
 
-
-	def run(self, image, command=None, **kwargs):
+	@doc_public	
+	def run(self, image, **kwargs):
 		"""
-		Instantiate the KafkaProducer and Fetch Kafka Cluster Metadata
-
-		@param kargs: keyword arguments from KafkaProducer class: 
-		@type kargs: keyword 
-		
-		"""
-
+		Documentation available on https://docker-py.readthedocs.io/en/stable/containers.html
+		"""	
 		# Log start connexion  event
-		self.producerTpl = templates.kafka_connect(api=PRODUCER,bootstrap_servers=bootstrap_servers, **kargs)
-		tpl = templates.kafka_ops(method=CONNECT,bootstrap_servers=bootstrap_servers, **kargs)
-		self.logSentEvent( shortEvt = "connection", tplEvt = self.encapsule(self.producerTpl,tpl))
+		self.containerTpl = templates.docker_connect(api=CONTAINER, **kwargs)
+		tpl = templates.docker_ops(method=RUN, **kwargs)
+		self.logSentEvent( shortEvt = "run", tplEvt = self.encapsule(self.containerTpl,tpl))
 
-		self.__kafka_connected = False
+		self.__docker_connected = False
 
 		# Agent mode
 		if self.cfg['agent-support']:
 			remote_cfg = {
-							'cmd': "producer_{0}".format(CONNECT),
-							'bootstrap_servers': bootstrap_servers,
-							'kargs': kargs
+							'cmd': "container_{0}".format(RUN),
+							'image': image,
+							'kwargs': kwargs
 						}
 			self.sendNotifyToAgent(data=remote_cfg)
 				
 		else:
 			try:
-				self.client.container.run(image, command=None, **kwargs)
-
-				tpl = templates.kafka_ops(method=CONNECT,bootstrap_servers=bootstrap_servers, **kargs)
-				self.logRecvEvent( shortEvt = "connected", tplEvt = self.encapsule(self.producerTpl,tpl))
+				container = self.client.containers.run(image, detach=True, **kwargs)
+				rec = {"Id": container.id, "Labels":str(container.labels), "Name":container.name, "Short_id":container.short_id, "Status":container.status, "Image":image}
+				tpl = templates.docker_ops(method=RUN, more=rec)
+				self.logRecvEvent( shortEvt = "container started", tplEvt =  self.encapsule(self.containerTpl,tpl))
+				return container
 			except (docker.errors.ContainerError, docker.errors.ImageNotFound, docker.errors.APIError) as e:
-				tpl = self.encapsule(self.producerTpl,  templates.response_err(msg=e, method=CONNECT ))
-				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )
-				
-	def create(self, image, command=None, **kwargs):
-
+				tpl = self.encapsule(self.containerTpl,  templates.response_err(msg=e, method=RUN ))
+				self.logRecvEvent( shortEvt = "docker run error", tplEvt = tpl )
+	
+	@doc_public	
+	def create(self, image, **kwargs):
 		"""
-		Publish a message to a topic.
-			@topic (str): topic where the message will be published
-			@value (optional): message value as bytes.
-			@partition (int, optional): optionally specify a partition. If not 
-			set, the partition will be selected using the configured 'partitioner'.
-			@key (optional): a key to associate with the message. Can be used to
-			determine which partition to send the message to. 
-			@timestamp_ms (int, optional): epoch milliseconds (from Jan 1 1970 UTC)
-			to use as the message timestamp. Defaults to current time.
-		"""		
-		tpl = templates.kafka_ops(method=SEND, **kargs)
-		self.logSentEvent( shortEvt = "req send", tplEvt = self.encapsule(self.producerTpl ,tpl))
+		Documentation available on https://docker-py.readthedocs.io/en/stable/containers.html
+		"""	
+		tpl = templates.docker_ops(method=CREATE, **kwargs)
+		self.logSentEvent( shortEvt = "req create", tplEvt = self.encapsule(self.containerTpl ,tpl))
 		# Timeout for record metadata retreving
-		if "timeout" in kargs:
-			timeout = kargs.pop("timeout")
-		else:
-			timeout=2
+
 		if self.cfg['agent-support']:
 			remote_cfg = {
-							'cmd': "producer_{0}".format(SEND),
-							'topic': topic,
-							'timeout': timeout,
-							'kargs': kargs
+							'cmd': "container_{0}".format(CREATE),
+							'image': image,
+							'kwargs': kwargs
 						}
 			self.sendNotifyToAgent(data=remote_cfg)
 		else:
 			try:
-				future = self.producer.send(topic,**kargs)
-				record_metadata=future.get(timeout=timeout)
+				container = self.client.containers.create(image, **kwargs)
+				rec = {"Id": container.id, "Labels":str(container.labels), "Name":container.name, "Short_id":container.short_id, "Status":container.status, "Image":image}
+				tpl = templates.docker_ops(method=CREATE, more=rec)
+				self.logRecvEvent( shortEvt = "container created", tplEvt =  self.encapsule(self.containerTpl,tpl))
+			except (docker.errors.ImageNotFound, docker.errors.APIError) as e:
+				tpl = self.encapsule(self.containerTpl,  templates.response_err(msg=e, method=RUN ))
+				self.logRecvEvent( shortEvt = "docker create error", tplEvt = tpl )
 
-				rec = { "Topic":record_metadata[0], "Partition": record_metadata[1] , "Offset":record_metadata[3] , "Timestamp": record_metadata[4] ,"Checksum": record_metadata[5], "Serialized_key_size": record_metadata[6], "Serialized_value_size": record_metadata[7]}
-				tpl = templates.kafka_ops(method=SEND, more=rec)
-				self.logRecvEvent( shortEvt = "resp send", tplEvt =  self.encapsule(self.producerTpl,tpl))
-			except KafkaError  as e:
-				tpl = self.encapsule(self.producerTpl,  templates.response_err(msg=e, method=SEND ))
-				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )
-
-		
+	@doc_public	
 	def get(self, id_or_name):
 		"""
-		All fonction documentation available on http://kafka-python.readthedocs.io.
-		"""		
-		tpl = templates.kafka_ops(method=PARTITIONS_FOR, topic=topic)
-		self.logSentEvent( shortEvt = "req partitions_for", tplEvt = self.encapsule(self.producerTpl ,tpl))
+		Documentation available on https://docker-py.readthedocs.io/en/stable/containers.html
+		"""			
+		tpl = templates.docker_ops(method=GET, id_or_name=id_or_name)
+		self.logSentEvent( shortEvt = "req get", tplEvt = self.encapsule(self.containerTpl ,tpl))
 
 		if self.cfg['agent-support']:
 			remote_cfg = {
-							'cmd': "producer_{0}".format(PARTITIONS_FOR),
-							'topic': topic
+							'cmd': "container_{0}".format(GET),
+							'kwargs': kwargs
 						}
 			self.sendNotifyToAgent(data=remote_cfg)
 		else:
 			try:
-				partitions = self.producer.partitions_for(topic)	
-				tpl = templates.kafka_ops(method=PARTITIONS_FOR,topic=topic, partitions=partitions)
-				self.logRecvEvent( shortEvt = "resp partitions_for", tplEvt =  self.encapsule(self.producerTpl,tpl))	
-			except KafkaError  as e:
-				tpl = self.encapsule(self.producerTpl,  templates.response_err(msg=e, method=PARTITIONS_FOR ))
-				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )				
+				container = self.client.containers.get(id_or_name)
+				rec = {"Id": container.id, "Labels":str(container.labels), "Name":container.name, "Short_id":container.short_id, "Status":container.status}
+				tpl = templates.docker_ops(method=GET, more=rec)
+				self.logRecvEvent( shortEvt = "container found", tplEvt =  self.encapsule(self.containerTpl,tpl))
+			except (docker.errors.NotFound, docker.errors.APIError) as e:
+				tpl = self.encapsule(self.containerTpl,  templates.response_err(msg=e, method=GET ))
+				self.logRecvEvent( shortEvt = "docker get error", tplEvt = tpl )				
 
+	@doc_public	
 	def list(self, **kwargs):
 		"""
-		All fonction documentation available on http://kafka-python.readthedocs.io.
+		Documentation available on https://docker-py.readthedocs.io/en/stable/containers.html
 		"""		
-		tpl = templates.kafka_ops(method=FLUSH, timeout=timeout)
-		self.logSentEvent( shortEvt = "req flush", tplEvt = self.encapsule(self.producerTpl,tpl))	
+		tpl = templates.docker_ops(method=LIST)
+		self.logSentEvent( shortEvt = "container list", tplEvt = self.encapsule(self.containerTpl,tpl))	
 
 		if self.cfg['agent-support']:
 			remote_cfg = {
-							'cmd': "producer_{0}".format(FLUSH),
-							'timeout': timeout
+							'cmd': "container_{0}".format(LIST),
+							'kwargs': kwargs
 						}
 			self.sendNotifyToAgent(data=remote_cfg)
 		else:
 			try:
-				self.producer.flush(timeout)	
-				tpl = templates.kafka_ops(method=FLUSH)
-				self.logRecvEvent( shortEvt = "resp flush", tplEvt =  self.encapsule(self.producerTpl,tpl))	
-			except KafkaError  as e:
-				tpl = self.encapsule(self.producerTpl,  templates.response_err(msg=e, method=FLUSH ))
-				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )
+				containers = self.client.containers.list(**kwargs)
+				rec = {}
+				for container in containers:
+#					rec.append(  {"Id": container.id, "Labels":str(container.labels), "Name":container.name, "Short_id":container.short_id, "Status":container.status})
+					rec[container.short_id] = str({"Id": container.id, "Labels":container.labels, "Name":container.name, "Short_id":container.short_id, "Status":container.status})
+				tpl = templates.docker_ops(method=LIST, more=rec)
+				self.logRecvEvent( shortEvt = "resp list", tplEvt =  self.encapsule(self.containerTpl,tpl))	
+				return containers
+			except (docker.errors.APIError) as e:
+				tpl = self.encapsule(self.containerTpl,  templates.response_err(msg=e, method=LIST ))
+				self.logRecvEvent( shortEvt = "docker list error", tplEvt = tpl )
 
+	@doc_public	
 	def prune(self, filters=None):
 		"""
-		All fonction documentation available on http://kafka-python.readthedocs.io.
+		Documentation available on https://docker-py.readthedocs.io/en/stable/containers.html
 		"""		
-		tpl = templates.kafka_ops(method=CLOSE, timeout=timeout)
-		self.logSentEvent( shortEvt = "req close", tplEvt = self.encapsule(self.producerTpl,tpl))	
+		tpl = templates.docker_ops(method=PRUNE)
+		self.logSentEvent( shortEvt = "req prune", tplEvt = self.encapsule(self.containerTpl,tpl))	
 
 		if self.cfg['agent-support']:
 			remote_cfg = {
-							'cmd': "producer_{0}".format(CLOSE),
-							'timeout': timeout
+							'cmd': "container_{0}".format(PRUNE),
+							'filter': filter
 						}
 			self.sendNotifyToAgent(data=remote_cfg)
 		else:
 			try:
-				self.producer.close(timeout=timeout)
-				tpl = templates.kafka_ops(method=CLOSE,timeout=timeout)
-				self.logRecvEvent( shortEvt = "closed", tplEvt =  self.encapsule(self.producerTpl,tpl))	
-			except KafkaError  as e:
-				tpl = self.encapsule(self.producerTpl,  templates.response_err(msg=e, method=CLOSE ))
-				self.logRecvEvent( shortEvt = "response error", tplEvt = tpl )				
+				containers = self.client.containers.prune(filters=filters)
+				tpl = templates.docker_ops(method=PRUNE,more=containers)
+				self.logRecvEvent( shortEvt = "removed", tplEvt =  self.encapsule(self.containerTpl,tpl))	
+			except (docker.errors.APIError) as e:
+				tpl = self.encapsule(self.containerTpl,  templates.response_err(msg=e, method=PRUNE ))
+				self.logRecvEvent( shortEvt = "docker prune error", tplEvt = tpl )				
 	
-	def isSend(self, timeout=2, record=None):
+	@doc_public
+	def isRunning(self, timeout=2, container=None):
 		"""
-		Wait to receive response from "send" request and match returned RecordMetadata  until the end of the timeout.
+		Wait to receive response from "run" request and match returned container datas  until the end of the timeout.
 		@param timeout: time max to wait to receive event in second (default=2s)
 		@type timeout: float		
-		@param offset: Optional RecordMetadata that we expect to be assigned to consumer 
-		@type offset:  RecordMetadata
 		"""
 		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
 		
-		if record == None:
-			record = { "Topic":TestOperatorsLib.Any(), "Partition": TestOperatorsLib.Any(), "Offset":TestOperatorsLib.Any() , "Timestamp":TestOperatorsLib.Any() ,"Checksum": TestOperatorsLib.Any(), "Serialized_key_size":TestOperatorsLib.Any(), "Serialized_value_size": TestOperatorsLib.Any()}
-		expected = templates.kafka_ops(method=SEND, more=record)
+		if container == None:
+			container =  {"Id": TestOperatorsLib.Any(), 
+													"Labels": TestOperatorsLib.Any(), 
+													"Name": TestOperatorsLib.Any(), 
+													"Short_id": TestOperatorsLib.Any(), 
+													"Status": TestOperatorsLib.Any(), 
+													"Image": TestOperatorsLib.Any()}
+		expected = templates.docker_ops(method=RUN, more=container)
 		# try to match the template 
-		evt = self.received( expected=self.encapsule( self.producerTpl ,expected ), timeout=timeout )
+		evt = self.received( expected=self.encapsule( self.containerTpl ,expected ), timeout=timeout )
 		return evt
-			
-	def isConnect(self, timeout=2):
+
+	@doc_public
+	def isCreate(self, timeout=2, container=None):
 		"""
-		Wait to receive response from "connect" request until the end of the timeout
-		@param timeout: time max to wait to receive event in second (default=2s)
-		@type timeout: float		
 		"""
 		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
 		
-		# construct the expected template
-		expected = templates.kafka_ops(method=CONNECT, bootstrap_servers=self.bootstrap_servers)
+		if container == None:
+			container =  {"Id": TestOperatorsLib.Any(), 
+													"Labels": TestOperatorsLib.Any(), 
+													"Name": TestOperatorsLib.Any(), 
+													"Short_id": TestOperatorsLib.Any(), 
+													"Status": TestOperatorsLib.Any(), 
+													"Image": TestOperatorsLib.Any()}
+		expected = templates.docker_ops(method=CREATE, more=container)
 		# try to match the template 
-		evt = self.received( expected=self.encapsule( self.producerTpl ,expected), timeout=timeout )
+		evt = self.received( expected=self.encapsule( self.containerTpl ,expected), timeout=timeout )
 		return evt	
-			
-	def isFlush(self, timeout=2):
+
+	@doc_public
+	def isGet(self, timeout=2, container=None):
 		"""
-		Wait to receive response from "flush" request until the end of the timeout
-		@param timeout: time max to wait to receive event in second (default=2s)
-		@type timeout: float		
+		"""
+		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
+			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
+
+		if container == None:
+			container =  {"Id": TestOperatorsLib.Any(), 
+													"Labels": TestOperatorsLib.Any(), 
+													"Name": TestOperatorsLib.Any(), 
+													"Short_id": TestOperatorsLib.Any(), 
+													"Status": TestOperatorsLib.Any()}
+		
+		# construct the expected template
+		expected = templates.docker_ops(method=GET, more=container)
+		# try to match the template 
+		evt = self.received( expected=self.encapsule( self.containerTpl ,expected), timeout=timeout )
+		return evt		
+
+	@doc_public
+	def isList(self, timeout=2):
+		"""
 		"""
 		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
 		
 		# construct the expected template
-		expected = templates.kafka_ops(method=FLUSH)
+		expected = templates.docker_ops(method=LIST)
 		# try to match the template 
-		evt = self.received( expected=self.encapsule( self.producerTpl ,expected), timeout=timeout )
+		evt = self.received( expected=self.encapsule( self.containerTpl ,expected), timeout=timeout )
 		return evt		
-			
-	def isClose(self, timeout=2):
+
+	@doc_public	
+	def isPrune(self, timeout=2,response=None):
 		"""
-		Wait to receive response from "close" request until the end of the timeout
-		@param timeout: time max to wait to receive event in second (default=2s)
-		@type timeout: float		
 		"""
 		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
 			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
-		
-		# construct the expected template
-		expected = templates.kafka_ops(method=CLOSE)
+		if response == None:
+			response= { "SpaceReclaimed":TestOperatorsLib.Any()}
+		expected = templates.docker_ops(method=PRUNE,more=response)
 		# try to match the template 
-		evt = self.received( expected=self.encapsule( self.producerTpl ,expected), timeout=timeout )
-		return evt		
-		
-	def isPartitions_for(self, timeout=2,partitions=None):
-		"""
-		Wait to receive response from "partitions_for" request and match returned Topics until the end of the timeout.
-		@param timeout: time max to wait to receive event in second (default=2s)
-		@type timeout: float		
-		@param offset: Optional list that we expect to be view by producer 
-		@type offset: list of of Topics
-		"""
-		if not ( isinstance(timeout, int) or isinstance(timeout, float) ) or isinstance(timeout,bool): 
-			raise TestAdapterLib.ValueException(TestAdapterLib.caller(), "timeout argument is not a float or integer (%s)" % type(timeout) )
-		if partitions == None:
-			partitions= { "partitions":TestOperatorsLib.Any()}
-		expected = templates.kafka_ops(method=PARTITIONS_FOR,more=partitions)
-		# try to match the template 
-		evt = self.received( expected=self.encapsule( self.producerTpl ,expected), timeout=timeout )
+		evt = self.received( expected=self.encapsule( self.containerTpl ,expected), timeout=timeout )
 		return evt		
